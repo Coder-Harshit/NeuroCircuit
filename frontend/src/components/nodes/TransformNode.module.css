@@ -1,0 +1,23 @@
+/* TransformNode.module.css */
+.transformNode {
+  background: #ffffff;
+  border: 1px solid #1a192b;
+  border-radius: 5px;
+  width: 180px;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.header {
+  background: #5a5a5a;
+  color: white;
+  padding: 5px 10px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  font-weight: bold;
+}
+
+.body {
+  padding: 10px;
+  text-align: center;
+}
