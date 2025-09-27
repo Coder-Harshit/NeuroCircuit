@@ -1,20 +1,11 @@
 import { Handle, Position } from '@xyflow/react';
 import type { ChangeEvent } from 'react';
+import type { InputNodeProps } from '../../types';
 
-type InputNodeProps = {
-    data: {
-        label: string;
-        filePath: string;
-        onChange: (id: string, filePath: string) => void;
-    }
-    id: string;
-}
-
-// The 'data' prop is passed from your node definition.
 function InputNode({ id, data }: InputNodeProps ) {
-    function handleChange(event: ChangeEvent<HTMLInputElement>): void {
-        data.onChange(id,event.target.value);
-    }
+    const handleChange = (event: ChangeEvent<HTMLInputElement>)=> {
+        data.onChange(id,{filePath: event.target.value});
+    };
 
   return (
     <div className="bg-white border border-slate-300 rounded-md w-[250px] shadow-md">

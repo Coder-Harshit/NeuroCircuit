@@ -1,8 +1,14 @@
 import { Handle, Position } from '@xyflow/react';
+import type { ChangeEvent } from 'react';
+import type { TransformNodeProps } from '../../types';
 
-function TransformNode({ data }: { data: { label: string } }) {
+function TransformNode({ id, data }: TransformNodeProps) {
+  
+  const handleChange = (evt: ChangeEvent<HTMLSelectElement>)=>{
+    data.onChange(id, {method: evt.target.value});
+  };
+  
   return (
-    // Use the class name from our CSS module
     <div className="
       bg-white
       border
@@ -24,15 +30,23 @@ function TransformNode({ data }: { data: { label: string } }) {
         {data.label}
       </div>
 
-      {/* A body for any future content or controls */}
-      <div className="
-        p-4
-        text-center
-      ">
-        Transform Data
+       <div className="p-4">
+        <label htmlFor="method" className="block text-sm font-medium text-slate-600 mb-1">
+          Method
+        </label>
+        <select
+          id="method"
+          name="method"
+          value={data.method}
+          onChange={handleChange}
+          className="nodrag w-full p-1 border border-slate-400 rounded-sm"
+        >
+          <option value="normalize">Normalize</option>
+          <option value="standardize">Standardize</option>
+          <option value="pca">PCA</option>
+        </select>
       </div>
 
-      {/* Handles with unique IDs */}
       <Handle id="a" type="source" position={Position.Right} />
       <Handle id="b" type="target" position={Position.Left} />
     </div>

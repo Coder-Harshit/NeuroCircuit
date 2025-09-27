@@ -1,27 +1,30 @@
 import { useCallback, useEffect } from 'react';
-import { Background, ReactFlow, useNodesState, useEdgesState, addEdge, type Connection, type Node, type Edge } from '@xyflow/react'
+import { Background, ReactFlow, useNodesState, useEdgesState, addEdge, type Connection, type Edge } from '@xyflow/react'
 
 import InputNode from './components/nodes/InputNode';
 import TransformNode from './components/nodes/TransformNode';
+import NoteNode from './components/nodes/NoteNode';
 
 import './App.css'
 import '@xyflow/react/dist/style.css';
+import type { AppNode } from './types';
 
 const nodeTypes = {
   inputNode: InputNode,
-  transformNode: TransformNode
-}
+  transformNode: TransformNode,
+  noteNode: NoteNode,
+};
 
 const initialEdges = [{ id: 'n1-n2', source: 'n1', target: 'n2' }];
 
 const createInitialNodes = (
-  onNodeDataChange: (id: string, newFilePath: string) => void
-): Node[] => [
+  onNodeDataChange: (id: string, newData: object) => void
+): AppNode[] => [
     {
       id: 'n1',
       type: 'inputNode',
       position: { x: 0, y: 0 },
-      data: {
+      data: { 
         label: 'Load CSV',
         filePath: '',
         onChange: onNodeDataChange,
@@ -33,12 +36,23 @@ const createInitialNodes = (
       position: { x: 250, y: 100 },
       data: {
         label: 'Preprocess',
+        method: 'normalize',
+        onChange: onNodeDataChange,
+      },
+    },
+    {
+      id: 'n3',
+      type: 'noteNode',
+      position: { x: 550, y: 150 },
+      data: {
+        label: 'Comment Here',
+        onChange: onNodeDataChange,
       },
     },
   ];
 
 function App() {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
 
   const onConnect = useCallback(
@@ -47,7 +61,7 @@ function App() {
   )
 
   const onNodeDataChange = useCallback(
-    (nodeId: string, newfilePath: string) => {
+    (nodeId: string, newData: object) => {
       setNodes((currentNodes) =>
         currentNodes.map((node) => {
           if (node.id === nodeId) {
@@ -55,7 +69,7 @@ function App() {
               ...node,
               data: {
                 ...node.data,
-                filePath: newfilePath,
+                ...newData
               },
             };
           }
@@ -67,7 +81,6 @@ function App() {
   );
 
 
-  // 👇 only set once when app mounts
   useEffect(() => {
     setNodes(createInitialNodes(onNodeDataChange));
   }, [onNodeDataChange, setNodes]);
