@@ -155,7 +155,7 @@ function App() {
     const graphData = {
       nodes:
         nodes
-          .filter(({type}) => type!=='noteNode') //Note Nodes (CommentNodes) are useless to backend
+          .filter(({ type }) => type !== 'noteNode') //Note Nodes (CommentNodes) are useless to backend
           .map(({ id, type, position, data }) => ({
             id,
             type,
@@ -174,16 +174,7 @@ function App() {
 
   return (
     <div className='flex flex-col h-screen w-screen'>
-      <header className="p-2 border-b-2 border-slate-200 bg-slate-50">
-        <button
-          onClick={handleRunClick}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-4 rounded"
-        >
-          Run
-        </button>
-      </header>
-
-      <div className='flex flex-grow'>
+      <div className='flex flex-grow h-full w-full relative'>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -200,6 +191,14 @@ function App() {
         >
           <Background color='#bbb' />
         </ReactFlow>
+
+        <button
+          onClick={handleRunClick}
+          className="absolute top-4 right-4 z-10 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Run
+        </button>
+
       </div>
 
       {menu && (
