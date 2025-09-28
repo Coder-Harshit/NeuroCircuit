@@ -1,6 +1,6 @@
 import { Handle, Position } from '@xyflow/react';
 import type { ChangeEvent } from 'react';
-import type { InputNodeProps } from '../../types';
+import type { InputNodeProps } from '../../nodeTypes';
 
 function InputNode({ id, data }: InputNodeProps ) {
     const handleChange = (event: ChangeEvent<HTMLInputElement>)=> {
@@ -19,7 +19,8 @@ function InputNode({ id, data }: InputNodeProps ) {
         <input
           id="filePath"
           name="filePath"
-          value={data.filePath ?? ''}
+          // value={data.filePath ?? ''}
+          value={data.filePath}
           onChange={handleChange}
           className="nodrag w-full p-1 border border-slate-400 rounded-sm"
         />

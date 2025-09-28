@@ -1,6 +1,6 @@
 import { Handle, Position } from '@xyflow/react';
 import type { ChangeEvent } from 'react';
-import type { TransformNodeProps } from '../../types';
+import type { TransformNodeProps } from '../../nodeTypes';
 
 function TransformNode({ id, data }: TransformNodeProps) {
   

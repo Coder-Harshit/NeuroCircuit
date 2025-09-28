@@ -1,13 +1,18 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Background, ReactFlow, useNodesState, useEdgesState, addEdge, type Connection, type Edge } from '@xyflow/react'
 
 import InputNode from './components/nodes/InputNode';
 import TransformNode from './components/nodes/TransformNode';
 import NoteNode from './components/nodes/NoteNode';
 
+import type { AppNode, AppNodeData } from './nodeTypes';
+
+import ContextMenu from './components/ui/ContextMenu';
+
+import { v4 as uuidv4 } from 'uuid';
+
 import './App.css'
 import '@xyflow/react/dist/style.css';
-import type { AppNode } from './types';
 
 const nodeTypes = {
   inputNode: InputNode,
@@ -24,7 +29,7 @@ const createInitialNodes = (
       id: 'n1',
       type: 'inputNode',
       position: { x: 0, y: 0 },
-      data: { 
+      data: {
         label: 'Load CSV',
         filePath: '',
         onChange: onNodeDataChange,
@@ -55,6 +60,11 @@ function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
 
+  // state will be null when the menu is closed, or an object with its position when it's open.
+  const [menu, setMenu] = useState<{ id: string, top: number, left: number } | null>(null);
+
+  // // when we would be storing the nodes within the local storage we would be needing to save this counter value also ... 
+
   const onConnect = useCallback(
     (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
     [setEdges]
@@ -80,10 +90,65 @@ function App() {
     [setNodes]
   );
 
-
   useEffect(() => {
     setNodes(createInitialNodes(onNodeDataChange));
   }, [onNodeDataChange, setNodes]);
+
+  const paneContextMenu = useCallback(
+    (evt: MouseEvent | React.MouseEvent) => {
+      evt.preventDefault();
+      setMenu({
+        id: 'add-node-menu',
+        top: evt.clientY,
+        left: evt.clientX
+      });
+    },
+    [setMenu]
+  )
+
+  const paneClick = useCallback(
+    () => {
+      setMenu(null);
+    },
+    [setMenu]
+  )
+
+  const addNode = useCallback(
+    (nodeType: string) => {
+      if (!menu) return;
+
+      const newId = uuidv4();
+
+      let nodeData: AppNodeData;
+
+      switch (nodeType) {
+        case 'inputNode':
+          nodeData = { label: 'New Input', filePath: '', onChange: onNodeDataChange };
+          break;
+        case 'transformNode':
+          nodeData = { label: 'New Transform', method: 'normalize', onChange: onNodeDataChange };
+          break;
+        case 'noteNode':
+          nodeData = { label: 'New Note', onChange: onNodeDataChange };
+          break;
+        default:
+          throw new Error("Unknown node type selected");
+      }
+
+      const newNode: AppNode = {
+        id: newId,
+        type: nodeType,
+        position: {
+          x: menu.left,
+          y: menu.top,
+        },
+        data: nodeData,
+      };
+      setNodes((currentNodes) => [...currentNodes, newNode]);
+      setMenu(null);
+    },
+    [menu, onNodeDataChange, setNodes]
+  );
 
   return (
     <div style={{ height: '100vh', width: '100vw' }}>
@@ -98,9 +163,41 @@ function App() {
         onConnect={onConnect}
         nodeTypes={nodeTypes}
         fitView
+        onPaneContextMenu={paneContextMenu}
+        onPaneClick={paneClick}
       >
         <Background color='#bbb' />
       </ReactFlow>
+
+      {menu && (
+        <ContextMenu
+          top={menu.top}
+          left={menu.left}
+          actions={[
+            {
+              label: 'Input Node',
+              onSelect: () => {
+                addNode('inputNode')
+                setMenu(null)
+              }
+            },
+            {
+              label: 'Transform Node',
+              onSelect: () => {
+                addNode('transformNode')
+                setMenu(null)
+              }
+            },
+            {
+              label: 'Note Node',
+              onSelect: () => {
+                addNode('noteNode')
+                setMenu(null)
+              }
+            },
+          ]}
+        />
+      )}
     </div>
   )
 }

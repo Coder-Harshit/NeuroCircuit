@@ -1,5 +1,5 @@
 import type { ChangeEvent } from 'react';
-import type { NoteNodeProps } from '../../types';
+import type { NoteNodeProps } from '../../nodeTypes';
 
 function NoteNode({ id, data }: NoteNodeProps ) {
     const handleChange = (event: ChangeEvent<HTMLTextAreaElement>)=> {
