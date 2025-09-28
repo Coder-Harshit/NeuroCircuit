@@ -1,0 +1,1 @@
+1. build the Topological Sort (TS) functionality manually and check if any specific optimisations are possible and relevant.
