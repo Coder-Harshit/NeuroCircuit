@@ -1,8 +1,11 @@
-from typing import Dict, Set, Tuple, Union
+from typing import Any, Dict, Set, Tuple
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from processors.node_degree import NODE_INDEGREE
+from processors.node_map import NODE_PROCESSING_FUNCTIONS
 from classes import GraphPayload
 import graphlib
+
 
 app = FastAPI()
 
@@ -24,8 +27,10 @@ def read_root():
     return {"message": "Hello from the AI Graph Executor Backend!"}
 
 @app.post('/execute')
-def execute_graph(graph: GraphPayload) -> Dict[str, Union[str, Tuple[str, ...] ]]:
-    print(graph.edges)
+def execute_graph(graph: GraphPayload) -> Dict[str,str]:
+    nmap = {node.id: node for node in graph.nodes} # HASHMAP for quickly finding nodes
+
+
     # We would need to perform topological sort as the nodes could be in random order, i.e. to make sure dependencies are finished first and then only main task is executed
 
     # dep_list => DEPENDENCY LIST (opposite of ADJ. LIST)
@@ -36,8 +41,6 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Union[str, Tuple[str, ...] ]
         # going from tgt to source becuase we actually want to generate the dependency list
         dep_list[edg.target].add(edg.source)
     
-    print(f"Constructed Adjacency List: {dep_list}")
-
 
     # PERFORM topological sort
     try:
@@ -46,15 +49,38 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Union[str, Tuple[str, ...] ]
         # Tuple used for immutability &
         # elipse used to denote tuple of arbitary length
         exec_order: Tuple[str, ...] = tuple(ts.static_order()) 
-        print(f"Correct execution order: {exec_order}")
         
+        # to hold the results of interim processing
+        results: Dict[str, Any] = {}
         for node_id in exec_order:
             print(f"Executing node: {node_id}")
 
+            node = nmap[node_id]
+            processing_fun = NODE_PROCESSING_FUNCTIONS.get(node.type)
+            
+            if processing_fun:
+                # Find the parent nodes from our dependency list
+                parent_node_ids = dep_list[node_id]
+                # Get their results from the results dictionary
+                parent_results = [results[parent_id] for parent_id in parent_node_ids]
+                print(parent_node_ids)
+                print(parent_results)
+                if (len(parent_results)!=NODE_INDEGREE[node.type]):
+                    # Incorrect connections made (node connected with more nodes than what it should have been)
+                    print(f"  -> Error: Expected{NODE_INDEGREE[node.type]} inputs, Got {len(parent_results)} inputs")
+                    break
+
+                result = processing_fun(node.data, parent_results)
+                results[node_id] = result
+                print(f"  -> Output of {node_id}:\n{result}\n")
+            else:
+                print(f"  -> No processing function found for type: {node.type}")
+
+
         return {
             "status": "success",
-            "message": "Graph sorted successfully!",
-            "execution_order": exec_order
+            "message": "Graph executed!",
+            "results": "Check server console for detailed output."
         }
     except graphlib.CycleError:
         return {
