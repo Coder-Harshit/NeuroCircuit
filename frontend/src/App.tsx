@@ -5,7 +5,7 @@ import InputNode from './components/nodes/InputNode';
 import TransformNode from './components/nodes/TransformNode';
 import NoteNode from './components/nodes/NoteNode';
 
-import type { AppNode, AppNodeData } from './nodeTypes';
+import type { AppNode, AppNodeData, InputNodeData, TransformNodeData } from './nodeTypes';
 
 import ContextMenu from './components/ui/ContextMenu';
 
@@ -150,24 +150,57 @@ function App() {
     [menu, onNodeDataChange, setNodes]
   );
 
+  const handleRunClick = useCallback(() => {
+    // extract just the data needed for backend
+    const graphData = {
+      nodes:
+        nodes
+          .filter(({type}) => type!=='noteNode') //Note Nodes (CommentNodes) are useless to backend
+          .map(({ id, type, position, data }) => ({
+            id,
+            type,
+            position,
+            data: {
+              label: data.label,
+              filePath: (data as InputNodeData).filePath,
+              method: (data as TransformNodeData).method,
+            },
+          })),
+      edges: edges,
+    };
+
+    console.log("Graph Ready for Backend:", JSON.stringify(graphData, null, 2));
+  }, [nodes, edges]);
+
   return (
-    <div style={{ height: '100vh', width: '100vw' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        panOnDrag={false}
-        panOnScroll={true}
-        selectionOnDrag={true}
-        onConnect={onConnect}
-        nodeTypes={nodeTypes}
-        fitView
-        onPaneContextMenu={paneContextMenu}
-        onPaneClick={paneClick}
-      >
-        <Background color='#bbb' />
-      </ReactFlow>
+    <div className='flex flex-col h-screen w-screen'>
+      <header className="p-2 border-b-2 border-slate-200 bg-slate-50">
+        <button
+          onClick={handleRunClick}
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-4 rounded"
+        >
+          Run
+        </button>
+      </header>
+
+      <div className='flex flex-grow'>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          panOnDrag={false}
+          panOnScroll={true}
+          selectionOnDrag={true}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          fitView
+          onPaneContextMenu={paneContextMenu}
+          onPaneClick={paneClick}
+        >
+          <Background color='#bbb' />
+        </ReactFlow>
+      </div>
 
       {menu && (
         <ContextMenu
