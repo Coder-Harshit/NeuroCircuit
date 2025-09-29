@@ -37,9 +37,19 @@ export type NoteNodeProps = {
 };
 
 
+// DISPLAY NODE
+export type DisplayNodeData = {
+  label: string;
+  result?: string; // JSON String
+};
 
-// A union type that says "NodeData can be EITHER "InputNodeData" OR TransformNodeData" OR "NoteNodeData"
-export type AppNodeData = InputNodeData | TransformNodeData | NoteNodeData;
+export type DisplayNodeProps = {
+    data: DisplayNodeData;
+    id: string;
+};
+
+
+export type AppNodeData = InputNodeData | TransformNodeData | NoteNodeData | DisplayNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;
