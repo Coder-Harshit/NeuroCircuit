@@ -1,0 +1,12 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:80"         # Map our local port 5173 to the container's port 80
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"       # Map our local port 8000 to the container's port 8000
