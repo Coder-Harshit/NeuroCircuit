@@ -1,3 +1,5 @@
+import subprocess
+import sys
 from typing import Any, Dict, Set, Tuple
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -101,6 +103,33 @@ def list_node_statuses():
     Provides the status of all available nodes and their dependencies.
     """
     return get_node_status()
+
+@app.post('/packages/install')
+def install_pkg(payload: Dict[str,str]):
+    """
+    Receives a package name and attempts to install it using uv pip
+    """
+    pkg_name = payload.get("packageName")
+    if not pkg_name:
+        return {
+            "status": "error",
+            "message": "No package name provided",
+        }
+    # else Try to install that pkg
+    try:
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", pkg_name]
+        )
+        return {
+            "status": "success",
+            "message": f"Package {pkg_name} installed successfully"
+        }
+    
+    except subprocess.CalledProcessError as err:
+        return {
+            "status": "error",
+            "message": f"Failed to install package: {err}"
+        }
 
 
 if __name__ == "__main__":
