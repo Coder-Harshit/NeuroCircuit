@@ -1,7 +1,7 @@
 from typing import Any, List
 import pandas as pd
 
-from classes import NodeData
+from app.classes import NodeData
 
 def process_input_node(data: NodeData, inputs: List[Any]) -> pd.DataFrame:
     """Loads data from a CSV file specified in the node's data."""

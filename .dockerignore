@@ -1,0 +1,9 @@
+# Ignore for both frontend and backend
+node_modules
+.venv
+__pycache__
+*.log
+*.csv
+
+# Ignore OS-specific files
+.DS_Store
