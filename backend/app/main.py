@@ -6,6 +6,8 @@ from app.processors.node_map import NODE_PROCESSING_FUNCTIONS
 from app.classes import GraphPayload
 import graphlib
 
+from app.package_manager import get_node_status
+
 
 app = FastAPI()
 
@@ -92,6 +94,14 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
             "status": "error",
             "message": "Graph contains a cycle and cannot be executed."
         }
+
+@app.get('/nodes/status')
+def list_node_statuses():
+    """
+    Provides the status of all available nodes and their dependencies.
+    """
+    return get_node_status()
+
 
 if __name__ == "__main__":
     pass

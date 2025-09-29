@@ -1,0 +1,6 @@
+{
+  "nodeType": "transformNode",
+  "label": "PreProcess Data",
+  "description": "Applies data transformations like normalization or standardization.",
+  "dependencies": ["pandas", "sckikit-learn"]
+}

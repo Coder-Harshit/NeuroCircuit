@@ -1,0 +1,6 @@
+{
+  "nodeType": "inputNode",
+  "label": "Load CSV",
+  "description": "Loads data from a local CSV file into a DataFrame.",
+  "dependencies": ["pandas"]
+}
