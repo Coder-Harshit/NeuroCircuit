@@ -12,3 +12,6 @@ dependencies = [
 aiml = [
     "pandas>=2.3.2",
 ]
+test = [
+    "pytest>=8.4.2",
+]

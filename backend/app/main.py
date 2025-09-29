@@ -27,7 +27,7 @@ def read_root():
     return {"message": "Hello from the AI Graph Executor Backend!"}
 
 @app.post('/execute')
-def execute_graph(graph: GraphPayload) -> Dict[ str, str | Dict[str,str]]:
+def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
     nmap = {node.id: node for node in graph.nodes} # HASHMAP for quickly finding nodes
 
 
@@ -84,7 +84,7 @@ def execute_graph(graph: GraphPayload) -> Dict[ str, str | Dict[str,str]]:
         return {
             "status": "success",
             "message": "Graph executed!",
-            "results": "Check server console for detailed output.",
+            "exec_order": exec_order,
             "output": display_outputs
         }
     except graphlib.CycleError:
