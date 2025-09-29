@@ -1,11 +1,18 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import { Background, ReactFlow, useNodesState, useEdgesState, addEdge, type Connection, type Edge } from '@xyflow/react'
 
 import InputNode from './components/nodes/InputNode';
 import TransformNode from './components/nodes/TransformNode';
 import NoteNode from './components/nodes/NoteNode';
+import DisplayNode from './components/nodes/DisplayNode';
 
-import type { AppNode, AppNodeData, InputNodeData, TransformNodeData } from './nodeTypes';
+import type {
+  AppNode,
+  AppNodeData,
+  InputNodeData,
+  TransformNodeData,
+  DisplayNodeData,
+} from './nodeTypes';
 
 import ContextMenu from './components/ui/ContextMenu';
 
@@ -18,6 +25,7 @@ const nodeTypes = {
   inputNode: InputNode,
   transformNode: TransformNode,
   noteNode: NoteNode,
+  displayNode: DisplayNode,
 };
 
 const initialEdges = [{ id: 'n1-n2', source: 'n1', target: 'n2' }];
@@ -45,15 +53,6 @@ const createInitialNodes = (
         onChange: onNodeDataChange,
       },
     },
-    {
-      id: 'n3',
-      type: 'noteNode',
-      position: { x: 550, y: 150 },
-      data: {
-        label: 'Comment Here',
-        onChange: onNodeDataChange,
-      },
-    },
   ];
 
 function App() {
@@ -62,6 +61,9 @@ function App() {
 
   // state will be null when the menu is closed, or an object with its position when it's open.
   const [menu, setMenu] = useState<{ id: string, top: number, left: number } | null>(null);
+
+  const [displayData, setDisplayData] = useState<Record<string, string>>({});
+
 
   // // when we would be storing the nodes within the local storage we would be needing to save this counter value also ... 
 
@@ -131,6 +133,9 @@ function App() {
         case 'noteNode':
           nodeData = { label: 'New Note', onChange: onNodeDataChange };
           break;
+        case 'displayNode':
+          nodeData = { label: 'Debug Display' };
+          break;
         default:
           throw new Error("Unknown node type selected");
       }
@@ -180,16 +185,37 @@ function App() {
       });
       const res = await resp.json();
       console.log('Response from backend:', res);
+      // Set the display data from the backend's response
+      if (res.output) {
+        setDisplayData(res.output);
+      }
     } catch (error) {
       console.error('Error sending graph to backend:', error);
     }
   }, [nodes, edges]);
 
+  // Use useMemo to inject display data into the nodes before rendering
+  // This is an efficient way to derive state
+  const nodesWithData = useMemo(() => {
+    return nodes.map((node) => {
+      if (node.type === 'displayNode' && displayData[node.id]) {
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            result: displayData[node.id],
+          } as DisplayNodeData,
+        };
+      }
+      return node;
+    });
+  }, [nodes, displayData]);
+
   return (
     <div className='flex flex-col h-screen w-screen'>
       <div className='flex flex-grow h-full w-full relative'>
         <ReactFlow
-          nodes={nodes}
+          nodes={nodesWithData}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
@@ -237,6 +263,13 @@ function App() {
               label: 'Note Node',
               onSelect: () => {
                 addNode('noteNode')
+                setMenu(null)
+              }
+            },
+            {
+              label: 'Display Node',
+              onSelect: () => {
+                addNode('displayNode')
                 setMenu(null)
               }
             },

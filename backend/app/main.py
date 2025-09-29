@@ -1,4 +1,4 @@
-from typing import Any, Dict, Set, Tuple
+from typing import Any, Dict, Set, Tuple, Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from processors.node_degree import NODE_INDEGREE
@@ -27,7 +27,7 @@ def read_root():
     return {"message": "Hello from the AI Graph Executor Backend!"}
 
 @app.post('/execute')
-def execute_graph(graph: GraphPayload) -> Dict[str,str]:
+def execute_graph(graph: GraphPayload) -> Dict[ str, str | Dict[str,str]]:
     nmap = {node.id: node for node in graph.nodes} # HASHMAP for quickly finding nodes
 
 
@@ -52,6 +52,9 @@ def execute_graph(graph: GraphPayload) -> Dict[str,str]:
         
         # to hold the results of interim processing
         results: Dict[str, Any] = {}
+
+        display_outputs: Dict[str,str] = {}
+
         for node_id in exec_order:
             print(f"Executing node: {node_id}")
 
@@ -72,15 +75,17 @@ def execute_graph(graph: GraphPayload) -> Dict[str,str]:
 
                 result = processing_fun(node.data, parent_results)
                 results[node_id] = result
+                if node.type=="displayNode":
+                    display_outputs[node_id] = result.to_json(orient='records')
                 print(f"  -> Output of {node_id}:\n{result}\n")
             else:
                 print(f"  -> No processing function found for type: {node.type}")
 
-
         return {
             "status": "success",
             "message": "Graph executed!",
-            "results": "Check server console for detailed output."
+            "results": "Check server console for detailed output.",
+            "output": display_outputs
         }
     except graphlib.CycleError:
         return {
