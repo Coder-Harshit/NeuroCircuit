@@ -1,7 +1,7 @@
 from typing import List
 import pandas as pd
 
-from classes import NodeData
+from app.classes import NodeData
 
 def process_display_node(data: NodeData, inputs: List[pd.DataFrame]) -> pd.DataFrame:
     """Passes through the input DataFrame without modification."""

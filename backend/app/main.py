@@ -1,9 +1,9 @@
 from typing import Any, Dict, Set, Tuple
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from processors.node_degree import NODE_INDEGREE
-from processors.node_map import NODE_PROCESSING_FUNCTIONS
-from classes import GraphPayload
+from app.processors.node_degree import NODE_INDEGREE
+from app.processors.node_map import NODE_PROCESSING_FUNCTIONS
+from app.classes import GraphPayload
 import graphlib
 
 

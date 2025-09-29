@@ -1,6 +1,6 @@
 from typing import List
 import pandas as pd
-from classes import NodeData
+from app.classes import NodeData
 
 def process_transform_node(data: NodeData, inputs: List[pd.DataFrame]) -> pd.DataFrame:
     """Applies a transformation to the input DataFrame."""
