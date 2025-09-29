@@ -105,7 +105,7 @@ def list_node_statuses():
     return get_node_status()
 
 @app.post('/packages/install')
-def install_pkg(payload: Dict[str,str]):
+def install_pkg(payload: Dict[str,Any]):
     """
     Receives a package name and attempts to install it using uv pip
     """

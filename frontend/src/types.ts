@@ -8,3 +8,15 @@ export type ContextMenuProps = {
   left: number;
   actions: MenuAction[];
 };
+
+export type NodeStatus = {
+  nodeType: string;
+  label: string;
+  description: string;
+  status: 'Installed' | 'Missing Dependencies';
+  missingDependencies: string[];
+};
+
+export type PackageManagerProps = {
+  onClose: () => void;
+};

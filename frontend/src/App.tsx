@@ -15,6 +15,7 @@ import type {
 } from './nodeTypes';
 
 import ContextMenu from './components/ui/ContextMenu';
+import PackageManager from './components/ui/PackageManager';
 
 import { v4 as uuidv4 } from 'uuid';
 
@@ -63,7 +64,6 @@ function App() {
   const [menu, setMenu] = useState<{ id: string, top: number, left: number } | null>(null);
 
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
-
 
   // // when we would be storing the nodes within the local storage we would be needing to save this counter value also ... 
 
@@ -211,6 +211,10 @@ function App() {
     });
   }, [nodes, displayData]);
 
+
+  const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
+
+
   return (
     <div className='flex flex-col h-screen w-screen'>
       <div className='flex flex-grow h-full w-full relative'>
@@ -231,12 +235,20 @@ function App() {
           <Background color='#bbb' />
         </ReactFlow>
 
-        <button
-          onClick={handleRunClick}
-          className="absolute top-4 right-4 z-10 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Run
-        </button>
+        <div className="absolute top-4 right-4 z-10 space-x-2">
+          <button
+            onClick={() => setPackageManagerOpen(true)}
+            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Manage Packages
+          </button>
+          <button
+            onClick={handleRunClick}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Run
+          </button>
+        </div>
 
       </div>
 
@@ -276,6 +288,10 @@ function App() {
           ]}
         />
       )}
+      
+      {/* MODAL */}
+      {isPackageManagerOpen && <PackageManager onClose={() => setPackageManagerOpen(false)} />}
+
     </div>
   )
 }
