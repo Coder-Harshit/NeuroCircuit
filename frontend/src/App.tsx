@@ -150,7 +150,7 @@ function App() {
     [menu, onNodeDataChange, setNodes]
   );
 
-  const handleRunClick = useCallback(() => {
+  const handleRunClick = useCallback(async () => {
     // extract just the data needed for backend
     const graphData = {
       nodes:
@@ -169,7 +169,20 @@ function App() {
       edges: edges,
     };
 
-    console.log("Graph Ready for Backend:", JSON.stringify(graphData, null, 2));
+    // console.log("Graph Ready for Backend:", JSON.stringify(graphData, null, 2));
+    try {
+      const resp = await fetch("http://127.0.0.1:8000/execute", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(graphData, null, 2),
+      });
+      const res = await resp.json();
+      console.log('Response from backend:', res);
+    } catch (error) {
+      console.error('Error sending graph to backend:', error);
+    }
   }, [nodes, edges]);
 
   return (
