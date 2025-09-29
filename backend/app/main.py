@@ -1,4 +1,4 @@
-from typing import Any, Dict, Set, Tuple, Union
+from typing import Any, Dict, Set, Tuple
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from processors.node_degree import NODE_INDEGREE
