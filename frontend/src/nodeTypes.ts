@@ -49,7 +49,11 @@ export type DisplayNodeProps = {
 };
 
 
-export type AppNodeData = InputNodeData | TransformNodeData | NoteNodeData | DisplayNodeData;
+export type AppNodeData = 
+  | InputNodeData
+  | TransformNodeData
+  | NoteNodeData
+  | DisplayNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

@@ -41,6 +41,7 @@ def get_node_status() -> List[Dict[str, Any]]:
                 "description": manifest.get("description", ""),
                 "status": status,
                 "missingDependencies": missing_deps,
+                "defaultData": manifest.get("defaultData", {})
             })
     
 

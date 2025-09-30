@@ -1,3 +1,5 @@
+import type { AppNodeData } from "./nodeTypes";
+
 export type MenuAction = {
   label: string;
   onSelect: () => void;
@@ -15,6 +17,7 @@ export type NodeStatus = {
   description: string;
   status: 'Installed' | 'Missing Dependencies';
   missingDependencies: string[];
+  defaultData: AppNodeData
 };
 
 export type PackageManagerProps = {
