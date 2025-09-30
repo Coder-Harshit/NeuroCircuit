@@ -1,14 +1,14 @@
 import subprocess
 import sys
-from typing import Any, Dict, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.processors.node_degree import NODE_INDEGREE
-from app.processors.node_map import NODE_PROCESSING_FUNCTIONS
+from app.processors.node_map import NODE_INDEGREE, NODE_PROCESSING_FUNCTIONS
 from app.classes import GraphPayload
 import graphlib
 
 from app.package_manager import get_node_status
+
 
 
 app = FastAPI()
@@ -45,6 +45,21 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
         # going from tgt to source becuase we actually want to generate the dependency list
         dep_list[edg.target].add(edg.source)
     
+    # --- In-degree validation using our dynamically loaded config ---
+    validation_errors: List[str] = []
+    for node_id, parents in dep_list.items():
+        node_type = nmap[node_id].type
+        expected_indegree = NODE_INDEGREE.get(node_type)
+        if expected_indegree is not None and len(parents) != expected_indegree:
+            validation_errors.append(
+                f"Node {node_id} ('{node_type}') expects {expected_indegree} inputs but has {len(parents)}."
+            )
+
+    if validation_errors:
+        return {"status": "error", "message": " ".join(validation_errors)}
+    # -----------------------------------------------------------------
+
+
 
     # PERFORM topological sort
     try:

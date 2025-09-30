@@ -1,7 +1,16 @@
-from typing import Any, List
 import pandas as pd
-
+from typing import Any, List
 from app.classes import NodeData
+
+
+# --- Plugin Metadata ---
+node_info = {
+    "nodeType": "inputNode",
+    "function": "process_input_node",
+    "inDegree": "0",
+}
+# -----------------------
+
 
 def process_input_node(data: NodeData, inputs: List[Any]) -> pd.DataFrame:
     """Loads data from a CSV file specified in the node's data."""
