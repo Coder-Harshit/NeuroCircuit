@@ -1,7 +1,16 @@
-from typing import List
 import pandas as pd
-
+from typing import List
 from app.classes import NodeData
+
+
+# --- Plugin Metadata ---
+node_info = {
+    "nodeType": "displayNode",
+    "function": "process_display_node",
+    "inDegree": "1",
+}
+# -----------------------
+
 
 def process_display_node(data: NodeData, inputs: List[pd.DataFrame]) -> pd.DataFrame:
     """Passes through the input DataFrame without modification."""

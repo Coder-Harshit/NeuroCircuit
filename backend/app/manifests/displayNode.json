@@ -1,0 +1,8 @@
+{
+  "nodeType": "displayNode",
+  "description": "Displays input data or messages for debugging and visualization purposes.",
+  "dependencies": [],
+  "defaultData": {
+    "label": "Display"
+  }
+}

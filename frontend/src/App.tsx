@@ -1,71 +1,57 @@
 import { useCallback, useEffect, useState, useMemo } from 'react';
-import { Background, ReactFlow, useNodesState, useEdgesState, addEdge, type Connection, type Edge } from '@xyflow/react'
+import {
+  Background,
+  ReactFlow,
+  useNodesState,
+  useEdgesState,
+  addEdge,
+  type Connection,
+  type Edge
+} from '@xyflow/react'
+import { v4 as uuidv4 } from 'uuid';
 
-import InputNode from './components/nodes/InputNode';
-import TransformNode from './components/nodes/TransformNode';
-import NoteNode from './components/nodes/NoteNode';
-import DisplayNode from './components/nodes/DisplayNode';
+import { nodeRegistry } from './components/nodes/nodeRegistry';
+import ContextMenu from './components/ui/ContextMenu';
+import PackageManager from './components/ui/PackageManager';
 
 import type {
   AppNode,
   AppNodeData,
-  InputNodeData,
-  TransformNodeData,
-  DisplayNodeData,
 } from './nodeTypes';
-
-import ContextMenu from './components/ui/ContextMenu';
-
-import { v4 as uuidv4 } from 'uuid';
+import type { NodeStatus } from './types';
 
 import './App.css'
 import '@xyflow/react/dist/style.css';
 
-const nodeTypes = {
-  inputNode: InputNode,
-  transformNode: TransformNode,
-  noteNode: NoteNode,
-  displayNode: DisplayNode,
-};
 
-const initialEdges = [{ id: 'n1-n2', source: 'n1', target: 'n2' }];
-
-const createInitialNodes = (
-  onNodeDataChange: (id: string, newData: object) => void
-): AppNode[] => [
-    {
-      id: 'n1',
-      type: 'inputNode',
-      position: { x: 0, y: 0 },
-      data: {
-        label: 'Load CSV',
-        filePath: '',
-        onChange: onNodeDataChange,
-      },
-    },
-    {
-      id: 'n2',
-      type: 'transformNode',
-      position: { x: 250, y: 100 },
-      data: {
-        label: 'Preprocess',
-        method: 'normalize',
-        onChange: onNodeDataChange,
-      },
-    },
-  ];
+const nodeTypes = nodeRegistry;
 
 function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   // state will be null when the menu is closed, or an object with its position when it's open.
   const [menu, setMenu] = useState<{ id: string, top: number, left: number } | null>(null);
+  const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
 
+  const [availableNodes, setAvailableNodes] = useState<NodeStatus[]>([]);
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
 
 
-  // // when we would be storing the nodes within the local storage we would be needing to save this counter value also ... 
+  useEffect(() => {
+    const fetchAvailableNodes = async () => {
+      try {
+        const resp = await fetch('http://127.0.0.1:8000/nodes/status');
+        const data: NodeStatus[] = await resp.json();
+        setAvailableNodes(data.filter(
+          node => node.status === 'Installed'
+        ))
+      } catch (err) {
+        console.error("Failed to fetch available nodes: ", err);
+      }
+    }
+    fetchAvailableNodes();
+  }, [isPackageManagerOpen]);
 
   const onConnect = useCallback(
     (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
@@ -92,9 +78,37 @@ function App() {
     [setNodes]
   );
 
-  useEffect(() => {
-    setNodes(createInitialNodes(onNodeDataChange));
-  }, [onNodeDataChange, setNodes]);
+  const addNode = useCallback(
+    (nodeType: string) => {
+      if (!menu) return;
+
+      const nodeBlueprint = availableNodes.find(
+        n => n.nodeType === nodeType
+      );
+      if (!nodeBlueprint) {
+        console.error(`Blueprint for node type "${nodeType}" not found.`);
+        return
+      };
+
+      const newId = uuidv4();
+
+      const newNode: AppNode = {
+        id: newId,
+        type: nodeType,
+        position: {
+          x: menu.left,
+          y: menu.top,
+        },
+        data: {
+          ...nodeBlueprint.defaultData,
+          onChange: onNodeDataChange
+        } as AppNodeData,
+      };
+      setNodes((currentNodes) => [...currentNodes, newNode]);
+      setMenu(null);
+    },
+    [menu, onNodeDataChange, setNodes, availableNodes]
+  );
 
   const paneContextMenu = useCallback(
     (evt: MouseEvent | React.MouseEvent) => {
@@ -115,77 +129,30 @@ function App() {
     [setMenu]
   )
 
-  const addNode = useCallback(
-    (nodeType: string) => {
-      if (!menu) return;
-
-      const newId = uuidv4();
-
-      let nodeData: AppNodeData;
-
-      switch (nodeType) {
-        case 'inputNode':
-          nodeData = { label: 'New Input', filePath: '', onChange: onNodeDataChange };
-          break;
-        case 'transformNode':
-          nodeData = { label: 'New Transform', method: 'normalize', onChange: onNodeDataChange };
-          break;
-        case 'noteNode':
-          nodeData = { label: 'New Note', onChange: onNodeDataChange };
-          break;
-        case 'displayNode':
-          nodeData = { label: 'Debug Display' };
-          break;
-        default:
-          throw new Error("Unknown node type selected");
-      }
-
-      const newNode: AppNode = {
-        id: newId,
-        type: nodeType,
-        position: {
-          x: menu.left,
-          y: menu.top,
-        },
-        data: nodeData,
-      };
-      setNodes((currentNodes) => [...currentNodes, newNode]);
-      setMenu(null);
-    },
-    [menu, onNodeDataChange, setNodes]
-  );
-
   const handleRunClick = useCallback(async () => {
     // extract just the data needed for backend
     const graphData = {
       nodes:
         nodes
           .filter(({ type }) => type !== 'noteNode') //Note Nodes (CommentNodes) are useless to backend
-          .map(({ id, type, position, data }) => ({
-            id,
-            type,
-            position,
-            data: {
-              label: data.label,
-              filePath: (data as InputNodeData).filePath,
-              method: (data as TransformNodeData).method,
-            },
-          })),
+          .map(({ id, type, position, data }) => {
+            const restData = { ...data };
+            delete (restData as any).onChange;
+            return { id, type, position, data: restData };
+          }),
       edges: edges,
     };
 
-    // console.log("Graph Ready for Backend:", JSON.stringify(graphData, null, 2));
     try {
       const resp = await fetch("http://127.0.0.1:8000/execute", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(graphData, null, 2),
+        body: JSON.stringify(graphData),
       });
       const res = await resp.json();
       console.log('Response from backend:', res);
-      // Set the display data from the backend's response
       if (res.output) {
         setDisplayData(res.output);
       }
@@ -204,12 +171,14 @@ function App() {
           data: {
             ...node.data,
             result: displayData[node.id],
-          } as DisplayNodeData,
+          },
         };
       }
       return node;
     });
   }, [nodes, displayData]);
+
+
 
   return (
     <div className='flex flex-col h-screen w-screen'>
@@ -231,12 +200,20 @@ function App() {
           <Background color='#bbb' />
         </ReactFlow>
 
-        <button
-          onClick={handleRunClick}
-          className="absolute top-4 right-4 z-10 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Run
-        </button>
+        <div className="absolute top-4 right-4 z-10 space-x-2">
+          <button
+            onClick={() => setPackageManagerOpen(true)}
+            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Manage Packages
+          </button>
+          <button
+            onClick={handleRunClick}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Run
+          </button>
+        </div>
 
       </div>
 
@@ -244,38 +221,19 @@ function App() {
         <ContextMenu
           top={menu.top}
           left={menu.left}
-          actions={[
-            {
-              label: 'Input Node',
-              onSelect: () => {
-                addNode('inputNode')
-                setMenu(null)
-              }
-            },
-            {
-              label: 'Transform Node',
-              onSelect: () => {
-                addNode('transformNode')
-                setMenu(null)
-              }
-            },
-            {
-              label: 'Note Node',
-              onSelect: () => {
-                addNode('noteNode')
-                setMenu(null)
-              }
-            },
-            {
-              label: 'Display Node',
-              onSelect: () => {
-                addNode('displayNode')
-                setMenu(null)
-              }
-            },
-          ]}
+          actions={availableNodes.map(node => ({
+            label: node.label,
+            onSelect: () => {
+              addNode(node.nodeType);
+              setMenu(null);
+            }
+          }))}
         />
       )}
+
+      {/* MODAL */}
+      {isPackageManagerOpen && <PackageManager onClose={() => setPackageManagerOpen(false)} />}
+
     </div>
   )
 }
