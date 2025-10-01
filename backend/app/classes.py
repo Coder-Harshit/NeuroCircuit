@@ -1,5 +1,31 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Literal, Optional, Union
+
+class InputNodeData(BaseModel):
+    label: str
+    filePath: str = ""
+    
+class TransformNodeData(BaseModel):
+    label: str
+    method: Literal['normalize', 'standardize', 'pca']
+
+class HandleMissingNodeData(BaseModel):
+    label: str
+    strategy: Literal['mean', 'median', 'most_frequent', 'constant']
+
+class DisplayNodeData(BaseModel):
+    label: str
+
+class NoteNodeData(BaseModel):
+    label: str
+
+AnyNodeData = Union[
+    InputNodeData,
+    TransformNodeData,
+    HandleMissingNodeData,
+    DisplayNodeData,
+    NoteNodeData,
+]
 
 class Position(BaseModel):
     x: float
@@ -15,7 +41,7 @@ class Node(BaseModel):
     id: str
     type: str
     position: Position
-    data: NodeData
+    data: AnyNodeData
 
 class Edge(BaseModel):
     id: str

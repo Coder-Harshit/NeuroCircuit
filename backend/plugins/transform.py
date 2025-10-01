@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import List
-from app.classes import NodeData
+from app.classes import TransformNodeData
 
 
 # --- Plugin Metadata ---
@@ -12,7 +12,7 @@ node_info = {
 # -----------------------
 
 
-def process_transform_node(data: NodeData, inputs: List[pd.DataFrame]) -> pd.DataFrame:
+def process_transform_node(data: TransformNodeData, inputs: List[pd.DataFrame]) -> pd.DataFrame:
     """Applies a transformation to the input DataFrame."""
 
     if len(inputs)==0:
