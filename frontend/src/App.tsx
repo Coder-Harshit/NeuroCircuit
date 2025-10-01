@@ -188,9 +188,9 @@ function App() {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          panOnDrag={false}
-          panOnScroll={true}
-          selectionOnDrag={true}
+          // panOnDrag={false}
+          // panOnScroll={true}
+          // selectionOnDrag={true}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           fitView

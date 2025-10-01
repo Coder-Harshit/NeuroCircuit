@@ -2,6 +2,7 @@ import InputNode from './InputNode';
 import TransformNode from './TransformNode';
 import NoteNode from './NoteNode';
 import DisplayNode from './DisplayNode';
+import HandleMissingNode from './HandleMissingNode';
 
 // This object maps the node 'type' string to its React component.
 export const nodeRegistry = {
@@ -9,4 +10,5 @@ export const nodeRegistry = {
   transformNode: TransformNode,
   noteNode: NoteNode,
   displayNode: DisplayNode,
+  handleMissingNode: HandleMissingNode
 };

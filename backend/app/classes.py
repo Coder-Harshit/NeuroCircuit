@@ -9,7 +9,8 @@ class NodeData(BaseModel):
     label: str
     filePath: Optional[str] = None
     method: Optional[str] = None
-
+    strategy: Optional[str] = None
+    
 class Node(BaseModel):
     id: str
     type: str
