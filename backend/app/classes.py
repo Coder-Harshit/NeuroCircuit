@@ -19,12 +19,20 @@ class DisplayNodeData(BaseModel):
 class NoteNodeData(BaseModel):
     label: str
 
+class FilterNodeData(BaseModel):
+    label: str
+    column: str
+    operator: str
+    value: str
+
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
     HandleMissingNodeData,
     DisplayNodeData,
     NoteNodeData,
+    FilterNodeData
 ]
 
 class Position(BaseModel):
