@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import List
-from app.classes import NodeData
+from app.classes import HandleMissingNodeData
 from sklearn.impute import SimpleImputer
 
 # --- Plugin Metadata ---
@@ -12,7 +12,7 @@ node_info = {
 # -----------------------
 
 
-def process_handle_missing(data: NodeData, inputs: List[pd.DataFrame]) -> pd.DataFrame:
+def process_handle_missing(data: HandleMissingNodeData, inputs: List[pd.DataFrame]) -> pd.DataFrame:
     if not inputs:
         return pd.DataFrame()
 
