@@ -49,11 +49,25 @@ export type DisplayNodeProps = {
 };
 
 
+// HANDLE_MISSING NODE
+export type HandleMissingNodeData = {
+  label: string;
+  strategy: 'mean' | 'median' | 'most_frequent' | 'constant';
+  onChange: (id: string, data: object) => void;
+};
+
+export type HandleMissingNodeProps = {
+    data: HandleMissingNodeData;
+    id: string;
+};
+
+
 export type AppNodeData = 
   | InputNodeData
   | TransformNodeData
   | NoteNodeData
-  | DisplayNodeData;
+  | DisplayNodeData
+  | HandleMissingNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;
