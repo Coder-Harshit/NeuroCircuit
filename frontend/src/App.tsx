@@ -30,6 +30,8 @@ function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
+  const [nodeSchemas, setNodeSchemas] = useState<Record<string, string[]>>({});
+
   // state will be null when the menu is closed, or an object with its position when it's open.
   const [menu, setMenu] = useState<{ id: string, top: number, left: number } | null>(null);
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
@@ -54,9 +56,39 @@ function App() {
   }, [isPackageManagerOpen]);
 
   const onConnect = useCallback(
-    (connection: Connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges]
-  )
+    (connection: Connection) => {
+      setEdges((eds) => addEdge(connection, eds))
+
+      if (connection.target) {
+        const inspectNode = async () => {
+          try {
+            const resp = await fetch('http://127.0.0.1:8000/inspect', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                nodes: nodes,
+                edges: addEdge(connection, edges),
+                targetNodeId: connection.target,
+              }),
+            });
+            const data = await resp.json();
+            // Update our new state with the columns from the backend
+            setNodeSchemas((prevSchemas) => ({
+              ...prevSchemas,
+              [connection.target!]: data.columns,
+            }));
+
+          } catch (error) {
+            console.error('Failed to inspect node:', error);
+          }
+        };
+
+        inspectNode();
+      }
+    },
+    [nodes, edges, setEdges]
+  );
+
 
   const onNodeDataChange = useCallback(
     (nodeId: string, newData: object) => {
@@ -171,12 +203,14 @@ function App() {
           data: {
             ...node.data,
             result: displayData[node.id],
+            onChange: onNodeDataChange, // Pass the callback
+            inputColumns: nodeSchemas[node.id] || [], // Pass the schema for this specific node
           },
         };
       }
       return node;
     });
-  }, [nodes, displayData]);
+  }, [nodes, displayData, onNodeDataChange, nodeSchemas]);
 
 
 

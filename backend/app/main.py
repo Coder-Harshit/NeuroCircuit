@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Set, Tuple
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.processors.node_map import NODE_INDEGREE, NODE_PROCESSING_FUNCTIONS
-from app.classes import GraphPayload
+from app.classes import GraphPayload, InspectRequest
 import graphlib
 
 from app.package_manager import get_node_status
@@ -145,6 +145,18 @@ def install_pkg(payload: Dict[str,Any]):
             "status": "error",
             "message": f"Failed to install package: {err}"
         }
+
+@app.post("/inspect")
+async def inspect(request: InspectRequest):
+    # For now, we'll just return a dummy response.
+    # In the future, this is where we'll build the real magic:
+    # 1. Topologically sort the graph up to the `targetNodeId`.
+    # 2. "Dry run" the graph by passing lightweight schema objects.
+    # 3. Return the final schema for the target node's input.
+    print(f"Inspecting schema for node: {request.targetNodeId}")
+    
+    # Dummy data for now, just to prove the endpoint works.
+    return {"columns": ["dummy_column_1", "dummy_column_2", "dummy_name", "dummy_age"]}
 
 
 if __name__ == "__main__":

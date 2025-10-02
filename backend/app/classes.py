@@ -63,3 +63,8 @@ class Edge(BaseModel):
 class GraphPayload(BaseModel):
     nodes: List[Node]
     edges: List[Edge]
+
+class InspectRequest(BaseModel):
+    nodes: List[Node]
+    edges: List[Edge]
+    targetNodeId: str # The ID of the node we want the input schema for    
