@@ -1,0 +1,10 @@
+{
+  "nodeType": "combineNode",
+  "label": "Concatenate",
+  "description": "Combines two datasets vertically or horizontally.",
+  "dependencies": ["pandas"],
+  "defaultData": {
+    "label": "Concatenate",
+    "axis": 0
+  }
+}

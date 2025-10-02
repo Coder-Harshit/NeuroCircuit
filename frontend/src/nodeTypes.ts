@@ -76,13 +76,27 @@ export type FilterRowsNodeProps = {
     id: string;
 };
 
+// Combine NODE
+export type CombineNodeData = {
+  label: string;
+  axis: 0 | 1;
+  onChange: (id: string, data: object) => void;
+};
+
+export type CombineNodeProps = {
+    data: CombineNodeData;
+    id: string;
+};
+
+
 export type AppNodeData = 
   | InputNodeData
   | TransformNodeData
   | NoteNodeData
   | DisplayNodeData
   | HandleMissingNodeData
-  | FilterRowsNodeData;
+  | FilterRowsNodeData
+  | CombineNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

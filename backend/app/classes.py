@@ -25,6 +25,9 @@ class FilterNodeData(BaseModel):
     operator: str
     value: str
 
+class CombineNodeData(BaseModel):
+    label: str
+    axis: Literal[0,1] = 0
 
 AnyNodeData = Union[
     InputNodeData,
@@ -32,7 +35,8 @@ AnyNodeData = Union[
     HandleMissingNodeData,
     DisplayNodeData,
     NoteNodeData,
-    FilterNodeData
+    FilterNodeData,
+    CombineNodeData
 ]
 
 class Position(BaseModel):
