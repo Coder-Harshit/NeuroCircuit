@@ -88,6 +88,20 @@ export type CombineNodeProps = {
     id: string;
 };
 
+// SelectColumn NODE
+export type SelectColumnData = {
+  label: string;
+  columns: string
+  onChange: (id: string, data: object) => void;
+  inputColumns?: string[]
+};
+
+export type SelectColumnProps = {
+    data: SelectColumnData;
+    id: string;
+};
+
+
 
 export type AppNodeData = 
   | InputNodeData
@@ -96,7 +110,8 @@ export type AppNodeData =
   | DisplayNodeData
   | HandleMissingNodeData
   | FilterRowsNodeData
-  | CombineNodeData;
+  | CombineNodeData
+  | SelectColumnData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

@@ -29,6 +29,11 @@ class CombineNodeData(BaseModel):
     label: str
     axis: Literal[0,1] = 0
 
+class SelectColumnNodeData(BaseModel):
+    label: str
+    columns: str
+    # nodeType: Literal["selectColumnNode"]
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
@@ -36,7 +41,8 @@ AnyNodeData = Union[
     DisplayNodeData,
     NoteNodeData,
     FilterNodeData,
-    CombineNodeData
+    CombineNodeData,
+    SelectColumnNodeData
 ]
 
 class Position(BaseModel):

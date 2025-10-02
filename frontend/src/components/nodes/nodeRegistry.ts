@@ -5,6 +5,7 @@ import DisplayNode from './DisplayNode';
 import HandleMissingNode from './HandleMissingNode';
 import FilterRowsNode from './FilterRowsNode';
 import CombineNode from './CombineNode';
+import SelectColumnNode from './SelectColumnNode';
 
 // This object maps the node 'type' string to its React component.
 export const nodeRegistry = {
@@ -15,4 +16,5 @@ export const nodeRegistry = {
   handleMissingNode: HandleMissingNode,
   filterRowsNode: FilterRowsNode,
   combineNode: CombineNode,
+  selectColumnNode: SelectColumnNode
 };

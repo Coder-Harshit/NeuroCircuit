@@ -197,20 +197,27 @@ function App() {
   // This is an efficient way to derive state
   const nodesWithData = useMemo(() => {
     return nodes.map((node) => {
+      const baseData = {
+        ...node.data,
+        onChange: onNodeDataChange,
+        inputColumns: nodeSchemas[node.id] || [],
+      };
+
       if (node.type === 'displayNode' && displayData[node.id]) {
         return {
           ...node,
           data: {
             ...node.data,
             result: displayData[node.id],
-            onChange: onNodeDataChange, // Pass the callback
-            inputColumns: nodeSchemas[node.id] || [], // Pass the schema for this specific node
           },
         };
       }
-      return node;
+      return {
+        ...node,
+        data: baseData
+      };
     });
-  }, [nodes, displayData, onNodeDataChange, nodeSchemas]);
+  }, [nodes, onNodeDataChange, nodeSchemas, displayData]);
 
 
 
