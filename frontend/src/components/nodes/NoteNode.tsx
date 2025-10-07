@@ -11,7 +11,8 @@ function NoteNode({ id, data }: NoteNodeProps ) {
       <textarea
         value={data.label}
         onChange={handleChange}
-        className="nodrag w-full h-full p-2 bg-transparent resize-none focus:outline-none"
+        aria-label="Note"
+        className="nodrag w-full h-full p-2 bg-transparent resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         rows={5}
         placeholder="Type your note..."
       />

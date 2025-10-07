@@ -23,8 +23,11 @@ export function ThemeToggle({ colorMode, setColorMode }: ThemeToggleProps) {
     return (
         <button
             onClick={toggleTheme}
-            className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white font-bold p-2 rounded-full inline-flex items-center justify-center"
+            aria-label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
+            title={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
+            className="bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white font-bold p-2 rounded-full inline-flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
         >
+            <span className="sr-only">Toggle theme</span>
             {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
         </button>
     );

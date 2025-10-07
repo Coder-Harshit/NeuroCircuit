@@ -2,13 +2,14 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   Background,
   ReactFlow,
+  useReactFlow,
   useNodesState,
   useEdgesState,
   addEdge,
   type Connection,
   type Edge,
   type ColorMode,
-  Controls
+  Controls,
 } from '@xyflow/react'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -49,6 +50,8 @@ function App() {
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
   const [availableNodes, setAvailableNodes] = useState<NodeStatus[]>([]);
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
+  const [isPanning, setIsPanning] = useState(false);
+  const flow = useReactFlow();
 
   // Get preferred theme from local storage or system preference
   const getInitialColorMode = (): ColorMode => {
@@ -115,6 +118,62 @@ function App() {
     }
     fetchAvailableNodes();
   }, [isPackageManagerOpen]);
+
+  // Enable spacebar-to-pan interaction: hold Space to pan the viewport
+  useEffect(() => {
+    let spaceDown = false;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !spaceDown) {
+        const active = document.activeElement as HTMLElement | null;
+        const tag = active?.tagName;
+        // don't hijack space when typing into inputs
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active?.isContentEditable) return;
+        e.preventDefault();
+        spaceDown = true;
+        setIsPanning(true);
+        document.body.style.cursor = 'grab';
+      }
+    };
+
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && spaceDown) {
+        spaceDown = false;
+        setIsPanning(false);
+        document.body.style.cursor = '';
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      document.body.style.cursor = '';
+    };
+  }, []);
+
+  // Wire up custom events to the ReactFlow instance (zoom)
+  useEffect(() => {
+    const onZoomEvent = (e: Event) => {
+      const custom = e as CustomEvent<{ delta: number }>;
+      try {
+        if (custom?.detail?.delta) {
+          const { delta } = custom.detail;
+          const currentZoom = (typeof flow.getZoom === 'function') ? flow.getZoom() : 1;
+          const newZoom = currentZoom + delta;
+          if (typeof flow.getViewport === 'function' && typeof flow.setViewport === 'function') {
+            const vp = flow.getViewport();
+            flow.setViewport({ x: vp.x, y: vp.y, zoom: newZoom });
+          }
+        }
+      } catch {
+        // ignore when flow is not ready
+      }
+    };
+
+    window.addEventListener('xyflow-zoom', onZoomEvent as EventListener);
+    return () => window.removeEventListener('xyflow-zoom', onZoomEvent as EventListener);
+  }, [flow]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -240,10 +299,10 @@ function App() {
       nodes:
         nodes
           .filter(({ type }) => type !== 'noteNode') //Note Nodes (CommentNodes) are useless to backend
-      .map(({ id, type, position, data }) => {
-        const restData = { ...(data as Record<string, unknown>) };
-        delete (restData as Record<string, unknown>)['onChange'];
-        return { id, type, position, data: restData };
+          .map(({ id, type, position, data }) => {
+            const restData = { ...(data as Record<string, unknown>) };
+            delete (restData as Record<string, unknown>)['onChange'];
+            return { id, type, position, data: restData };
           }),
       edges: edges,
     };
@@ -298,7 +357,7 @@ function App() {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          panOnDrag={false}
+          panOnDrag={isPanning}
           panOnScroll={true}
           selectionOnDrag={true}
           onConnect={onConnect}
@@ -312,47 +371,47 @@ function App() {
           <Background className="bg-white dark:bg-gray-900" />
           <Controls />
         </ReactFlow>
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+          <div className="inline-flex items-center gap-2 rounded-md p-1 shadow-2xl opacity-50 hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => setPackageManagerOpen(true)}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-medium py-1 px-3 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            >
+              Manage
+            </button>
 
-        <div className="absolute top-4 right-4 z-10 space-x-2">
-          <button
-            onClick={() => setPackageManagerOpen(true)}
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Manage Packages
-          </button>
+            <button
+              onClick={handleRunClick}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-3 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+            >
+              Run
+            </button>
 
-          <button
-            onClick={handleRunClick}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          >
-            Run
-          </button>
-          
-          <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
+            <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
+          </div>
 
+        </div>
 
       </div>
 
-    </div>
-
       {
-    menu && (
-      <ContextMenu
-        top={menu.top}
-        left={menu.left}
-        actions={availableNodes.map(node => ({
-          label: node.label,
-          onSelect: () => {
-            addNode(node.nodeType);
-            setMenu(null);
-          }
-        }))}
-      />
-    )
-  }
+        menu && (
+          <ContextMenu
+            top={menu.top}
+            left={menu.left}
+            actions={availableNodes.map(node => ({
+              label: node.label,
+              onSelect: () => {
+                addNode(node.nodeType);
+                setMenu(null);
+              }
+            }))}
+          />
+        )
+      }
 
-  {/* MODAL */ }
-  { isPackageManagerOpen && <PackageManager onClose={() => setPackageManagerOpen(false)} /> }
+      {/* MODAL */}
+      {isPackageManagerOpen && <PackageManager onClose={() => setPackageManagerOpen(false)} />}
 
 
     </div >

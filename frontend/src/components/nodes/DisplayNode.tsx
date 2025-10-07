@@ -2,8 +2,15 @@ import { Handle, Position } from '@xyflow/react';
 import type { DisplayNodeProps } from '../../nodeTypes';
 
 function DisplayNode({ data }: DisplayNodeProps) {
-  // Parse the JSON string result if it exists
-  const tableData = data.result ? JSON.parse(data.result) : [];
+  // Parse the JSON string result if it exists and guard against invalid JSON
+  let tableData: Record<string, unknown>[] = [];
+  if (data.result) {
+    try {
+      tableData = JSON.parse(data.result) as Record<string, unknown>[];
+    } catch {
+      tableData = [];
+    }
+  }
 
   return (
     <div className="bg-white border border-gray-400 rounded-lg shadow-md w-[400px] max-h-[300px] flex flex-col">
@@ -15,13 +22,13 @@ function DisplayNode({ data }: DisplayNodeProps) {
           <table className="table-auto w-full text-xs">
             <thead>
               <tr className="bg-slate-100">
-                {Object.keys(tableData[0]).map(key => <th className="p-1 text-left" key={key}>{key}</th>)}
+                {Object.keys(tableData[0]).map(key => <th scope="col" className="p-1 text-left" key={key}>{key}</th>)}
               </tr>
             </thead>
             <tbody>
-              {tableData.map((row: any, index: number) => (
+              {tableData.map((row: Record<string, unknown>, index: number) => (
                 <tr key={index} className="border-b">
-                  {Object.values(row).map((val: any, i: number) => <td className="p-1" key={i}>{val}</td>)}
+                  {Object.values(row).map((val: unknown, i: number) => <td className="p-1" key={i}>{String(val)}</td>)}
                 </tr>
               ))}
             </tbody>

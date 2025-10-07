@@ -39,7 +39,7 @@ function TransformNode({ id, data }: TransformNodeProps) {
           name="method"
           value={data.method}
           onChange={handleChange}
-          className="nodrag w-full p-1 border border-slate-400 rounded-sm"
+          className="nodrag w-full p-1 border border-slate-400 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <option value="normalize">Normalize</option>
           <option value="standardize">Standardize</option>
