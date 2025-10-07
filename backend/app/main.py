@@ -51,12 +51,12 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
     for node_id, parents in dep_list.items():
         node_type = nmap[node_id].type
         expected_indegree = NODE_INDEGREE.get(node_type)
-        if expected_indegree is not None and len(parents) != expected_indegree:
+        if (expected_indegree is None) or (len(parents) != expected_indegree):
             validation_errors.append(
                 f"Node {node_id} ('{node_type}') expects {expected_indegree} inputs but has {len(parents)}."
             )
 
-    if validation_errors:
+    if len(validation_errors)>0:
         return {"status": "error", "message": " ".join(validation_errors)}
     # -----------------------------------------------------------------
 

@@ -25,4 +25,4 @@ for (_, module_name, _) in pkgutil.iter_modules(['plugins']):
 
         # Register the in-degree
         if 'inDegree' in module.node_info:
-            NODE_INDEGREE[node_type] = module.node_info['inDegree']
+            NODE_INDEGREE[node_type] = int(module.node_info['inDegree'])
