@@ -1,0 +1,12 @@
+{
+  "nodeType": "filterRowsNode",
+  "label": "Filter Rows",
+  "description": "Filters rows from a DataFrame based on a condition.",
+  "dependencies": ["pandas"],
+  "defaultData": {
+    "label": "Filter Rows",
+    "column": "",
+    "operator": "==",
+    "value": ""
+  }
+}

@@ -7,6 +7,7 @@ from app.classes import InputNodeData
 node_info = {
     "nodeType": "inputNode",
     "function": "process_input_node",
+    "inspection_function": "inspect_load_csv",
     "inDegree": "0",
 }
 # -----------------------
@@ -32,3 +33,17 @@ def process_input_node(data: InputNodeData, inputs: List[Any]) -> pd.DataFrame:
     except FileNotFoundError:
         print(f"Error: File not found at {data.filePath}")
         return pd.DataFrame() # Return empty DataFrame on error
+
+def inspect_load_csv(data: InputNodeData, inputs: List) -> List[str]:
+    """
+    Inspects an inputNode to get its output schema (column names).
+    Efficiently reads only the header of the CSV.
+    """
+    file_path = data.filePath
+    if file_path:
+        try:
+            df_header = pd.read_csv(file_path, nrows=0)
+            return df_header.columns.tolist()
+        except Exception:
+            return []
+    return []

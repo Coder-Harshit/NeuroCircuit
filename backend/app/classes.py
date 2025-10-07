@@ -19,12 +19,30 @@ class DisplayNodeData(BaseModel):
 class NoteNodeData(BaseModel):
     label: str
 
+class FilterNodeData(BaseModel):
+    label: str
+    column: str
+    operator: str
+    value: str
+
+class CombineNodeData(BaseModel):
+    label: str
+    axis: Literal[0,1] = 0
+
+class SelectColumnNodeData(BaseModel):
+    label: str
+    columns: str
+    # nodeType: Literal["selectColumnNode"]
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
     HandleMissingNodeData,
     DisplayNodeData,
     NoteNodeData,
+    FilterNodeData,
+    CombineNodeData,
+    SelectColumnNodeData
 ]
 
 class Position(BaseModel):
@@ -51,3 +69,8 @@ class Edge(BaseModel):
 class GraphPayload(BaseModel):
     nodes: List[Node]
     edges: List[Edge]
+
+class InspectRequest(BaseModel):
+    nodes: List[Node]
+    edges: List[Edge]
+    targetNodeId: str # The ID of the node we want the input schema for    

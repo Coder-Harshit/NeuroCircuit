@@ -7,6 +7,7 @@ from app.classes import TransformNodeData
 node_info = {
     "nodeType": "transformNode",
     "function": "process_transform_node",
+    "inspection_function": "inspect_pass_through",
     "inDegree": "1",
 }
 # -----------------------
@@ -35,3 +36,12 @@ def process_transform_node(data: TransformNodeData, inputs: List[pd.DataFrame]) 
     # We can add 'pca' and others later
 
     return df
+
+def inspect_pass_through(data: TransformNodeData, inputs: List[List[str]]) -> List[str]:
+    """
+    A generic inspection function for nodes that don't change the schema.
+    It simply passes the schema from its first parent through.
+    """
+    if inputs:
+        return inputs[0] # Pass the column list from the first parent
+    return []

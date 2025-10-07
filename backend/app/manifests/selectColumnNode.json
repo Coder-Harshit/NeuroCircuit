@@ -1,0 +1,10 @@
+{
+  "nodeType": "selectColumnNode",
+  "label": "Select Columns",
+  "description": "Selects specific columns from a DataFrame.",
+  "dependencies": ["pandas"],
+  "defaultData": {
+    "label": "Select Columns",
+    "columns": ""
+  }
+}

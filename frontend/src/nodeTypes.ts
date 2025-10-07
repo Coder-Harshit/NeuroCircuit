@@ -62,12 +62,56 @@ export type HandleMissingNodeProps = {
 };
 
 
+// FILTER_ROWS NODE
+export type FilterRowsNodeData = {
+  label: string;
+  column: string;
+  operator: string;
+  value: string;
+  onChange: (id: string, data: object) => void;
+};
+
+export type FilterRowsNodeProps = {
+    data: FilterRowsNodeData;
+    id: string;
+};
+
+// Combine NODE
+export type CombineNodeData = {
+  label: string;
+  axis: 0 | 1;
+  onChange: (id: string, data: object) => void;
+};
+
+export type CombineNodeProps = {
+    data: CombineNodeData;
+    id: string;
+};
+
+// SelectColumn NODE
+export type SelectColumnData = {
+  label: string;
+  columns: string
+  onChange: (id: string, data: object) => void;
+  inputColumns?: string[]
+};
+
+export type SelectColumnProps = {
+    data: SelectColumnData;
+    id: string;
+};
+
+
+
 export type AppNodeData = 
   | InputNodeData
   | TransformNodeData
   | NoteNodeData
   | DisplayNodeData
-  | HandleMissingNodeData;
+  | HandleMissingNodeData
+  | FilterRowsNodeData
+  | CombineNodeData
+  | SelectColumnData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

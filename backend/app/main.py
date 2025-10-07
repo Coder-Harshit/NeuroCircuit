@@ -3,9 +3,10 @@ import sys
 from typing import Any, Dict, List, Set, Tuple
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.processors.node_map import NODE_INDEGREE, NODE_PROCESSING_FUNCTIONS
-from app.classes import GraphPayload
+from app.processors.node_map import NODE_INDEGREE, NODE_PROCESSING_FUNCTIONS, NODE_INSPECTION_FUNCTIONS
+from app.classes import GraphPayload, InspectRequest
 import graphlib
+import pandas as pd
 
 from app.package_manager import get_node_status
 
@@ -146,6 +147,104 @@ def install_pkg(payload: Dict[str,Any]):
             "message": f"Failed to install package: {err}"
         }
 
+@app.post("/inspect")
+async def inspect(request: InspectRequest):
+    """
+    Inspects the graph to determine the input schema for a target node by
+    performing a lightweight metadata propagation.
+    """
+    nmap = {node.id: node for node in request.nodes}
+    
+    # Build the dependency list for the topological sort
+    dep_list: Dict[str, Set[str]] = {node.id: set() for node in request.nodes}
+    for edge in request.edges:
+        dep_list[edge.target].add(edge.source)
+
+    # Sort the graph topologically to get the execution order
+    try:
+        ts = graphlib.TopologicalSorter(dep_list)
+        sorted_nodes = list(ts.static_order())
+    except graphlib.CycleError:
+        return {"columns": ["Error: Cycle detected in graph"]}
+
+    # --- METADATA PROPAGATION ---
+    # We will store the output schema (column list) of each node here
+    schemas: Dict[str, List[str]] = {}
+
+    # "Dry run" the graph, node by node
+    for node_id in sorted_nodes:
+        node = nmap[node_id]
+        
+        # Find the schemas of the parent nodes
+        parent_ids = dep_list[node.id]
+        input_schemas = [schemas.get(pid, []) for pid in parent_ids]
+
+        # Get the appropriate inspection function for this node type
+        inspect_func = NODE_INSPECTION_FUNCTIONS.get(node.type)
+
+        if inspect_func:
+            # Call the node's inspection function with its data and input schemas
+            output_schema = inspect_func(node.data, input_schemas)
+            schemas[node.id] = output_schema
+        else:
+            # If no inspection function, assume the schema passes through unchanged
+            # (This is a safe default for nodes like "Note" or "Display")
+            schemas[node.id] = input_schemas[0] if input_schemas else []
+
+        # If we have just processed the parent of our target, we have our answer
+        for edge in request.edges:
+            if edge.target == request.targetNodeId and edge.source == node_id:
+                return {"columns": schemas.get(node_id, [])}
+
+    # If the target node had no parent or something went wrong
+    return {"columns": []}
+
+# @app.post("/inspect")
+# async def inspect(request: InspectRequest):
+#     """
+#     Inspects the graph to determine the input schema for a target node.
+#     """
+#     # For now, we'll just return a dummy response.
+#     # In the future, this is where we'll build the real magic:
+#     # 1. Topologically sort the graph up to the `targetNodeId`.
+#     # 2. "Dry run" the graph by passing lightweight schema objects.
+#     # 3. Return the final schema for the target node's input.
+#     print(f"Inspecting schema for input to node: {request.targetNodeId}")
+    
+#     # Create a quick lookup map for nodes
+#     node_map = {node.id: node for node in request.nodes}
+
+#     # Find the parent node connected to the target node's input
+#     parent_id = None
+#     for edge in request.edges:
+#         if edge.target == request.targetNodeId:
+#             parent_id = edge.source
+#             break
+    
+#     if not parent_id:
+#         # If there's no parent, there are no columns to show
+#         return {"columns": []}
+
+#     parent_node = node_map.get(parent_id)
+#     if not parent_node:
+#         return {"columns": []}
+
+#     # --- THE NEW LOGIC ---
+#     # For now, we'll only handle the case where the parent is a CSV loader
+#     if parent_node.type == "inputNode":
+#         file_path = parent_node.data.filePath
+#         if file_path:
+#             try:
+#                 # Efficiently read only the header row of the CSV
+#                 df_header = pd.read_csv(file_path, nrows=0)
+#                 return {"columns": df_header.columns.tolist()}
+#             except Exception as e:
+#                 print(f"Error inspecting CSV: {e}")
+#                 return {"columns": [f"Error: {e}"]}
+    
+#     # If the parent is not an input node, we'll return an empty list for now.
+#     # In the future, we will build the full "metadata propagation" here.
+#     return {"columns": ["Parent is not a CSV loader"]}
 
 if __name__ == "__main__":
     pass
