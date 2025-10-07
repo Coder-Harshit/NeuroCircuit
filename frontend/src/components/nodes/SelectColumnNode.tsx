@@ -41,9 +41,9 @@ function SelectColumnNode({ id, data }: SelectColumnProps) {
                   name={col}
                   checked={selectedColumns.has(col)}
                   onChange={(e) => handleCheckboxChange(col, e.target.checked)}
-                  className="mr-2"
+                  className="mr-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
                 />
-                <label htmlFor={`${id}-${col}`}>{col}</label>
+                <label htmlFor={`${id}-${col}`} className="select-none">{col}</label>
               </div>
             ))
           ) : (

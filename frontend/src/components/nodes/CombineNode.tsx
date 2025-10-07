@@ -19,7 +19,8 @@ function combineNode({ id, data }: CombineNodeProps) {
         <select
           value={data.axis}
           onChange={handleAxisChange}
-          className="w-full p-2 border border-slate-300 rounded-md"
+          aria-label="Concatenate axis"
+          className="w-full p-2 border border-slate-300 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <option value={0}>Rows (Vertical)</option>
           <option value={1}>Columns (Horizontal)</option>

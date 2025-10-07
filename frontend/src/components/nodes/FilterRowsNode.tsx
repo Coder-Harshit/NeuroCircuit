@@ -19,12 +19,12 @@ function FilterRowsNode({id, data}: FilterRowsNodeProps) {
           placeholder="Column Name"
           value={data.column}
           onChange={(e) => handleChange('column', e.target.value)}
-          className="nodrag w-full p-1 border border-slate-400 rounded-sm"
+          className="nodrag w-full p-1 border border-slate-400 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         />
         <select
           value={data.operator}
           onChange={(e) => handleChange('operator', e.target.value)}
-          className="nodrag w-full p-1 border border-slate-400 rounded-sm"
+          className="nodrag w-full p-1 border border-slate-400 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <option value="==">== (equals)</option>
           <option value="!=">!= (not equals)</option>
@@ -38,7 +38,7 @@ function FilterRowsNode({id, data}: FilterRowsNodeProps) {
           placeholder="Value"
           value={data.value}
           onChange={(e) => handleChange('value', e.target.value)}
-          className="nodrag w-full p-1 border border-slate-400 rounded-sm"
+          className="nodrag w-full p-1 border border-slate-400 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         />
       </div>
       <Handle type="source" position={Position.Right} />

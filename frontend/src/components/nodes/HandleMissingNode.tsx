@@ -22,7 +22,8 @@ function HandleMissingNode({id, data}: HandleMissingNodeProps) {
           name="strategy"
           value={data.strategy}
           onChange={handleChange}
-          className="nodrag w-full p-1 border border-slate-400 rounded-sm"
+          aria-label="Missing data strategy"
+          className="nodrag w-full p-1 border border-slate-400 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
         >
           <option value="mean">Mean</option>
           <option value="median">Median</option>
