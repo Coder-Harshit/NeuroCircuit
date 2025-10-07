@@ -7,6 +7,7 @@ from sklearn.impute import SimpleImputer
 node_info = {
     "nodeType": "handleMissingNode",
     "function": "process_handle_missing",
+    "inspection_function": "inspect_pass_through",
     "inDegree": "1",
 }
 # -----------------------
@@ -29,3 +30,12 @@ def process_handle_missing(data: HandleMissingNodeData, inputs: List[pd.DataFram
         df[numeric_cols] = imputer.fit_transform(df[numeric_cols])
 
     return df
+
+def inspect_pass_through(data: HandleMissingNodeData, inputs: List[List[str]]) -> List[str]:
+    """
+    A generic inspection function for nodes that don't change the schema.
+    It simply passes the schema from its first parent through.
+    """
+    if inputs:
+        return inputs[0] # Pass the column list from the first parent
+    return []

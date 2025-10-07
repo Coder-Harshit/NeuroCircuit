@@ -5,6 +5,7 @@ from app.classes import FilterNodeData
 node_info = {
     "nodeType": "filterRowsNode",
     "function": "process_filter_rows",
+    "inspection_function": "inspect_pass_through",
     "inDegree": "1",
 }
 
@@ -36,3 +37,12 @@ def process_filter_rows(data: FilterNodeData, inputs: List[pd.DataFrame]) -> pd.
     except Exception as e:
         print(f"  -> Error during filtering: {e}")
         return df
+    
+def inspect_pass_through(data: FilterNodeData, inputs: List[List[str]]) -> List[str]:
+    """
+    A generic inspection function for nodes that don't change the schema.
+    It simply passes the schema from its first parent through.
+    """
+    if inputs:
+        return inputs[0] # Pass the column list from the first parent
+    return []

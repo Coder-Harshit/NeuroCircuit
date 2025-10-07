@@ -1,39 +1,28 @@
-import importlib.util
-from pathlib import Path
-from typing import Dict, Any, Tuple
+import importlib
+import pkgutil
+from typing import Callable, Dict
 
-def load_plugins() -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    """
-    Scans the 'plugins' directory, dynamically imports the modules,
-    and registers their processing functions.
-    """
-    NODE_PROCESSING_FUNCTIONS: Dict[str,Any] = {}
-    NODE_INDEGREE: Dict[str,int] = {}
-    plugins_dir = Path(__file__).parent.parent.parent / "plugins"
+NODE_PROCESSING_FUNCTIONS: Dict[str,Callable] = {}
+NODE_INSPECTION_FUNCTIONS: Dict[str, Callable] = {}
+NODE_INDEGREE: Dict[str,int] = {}
+for (_, module_name, _) in pkgutil.iter_modules(['plugins']):
+    module = importlib.import_module(f'plugins.{module_name}')
+    # The module should have a 'node_info' dictionary
+    if hasattr(module, 'node_info'):
+        node_type = module.node_info['nodeType']
+        
+        # Register the processing function
+        if 'function' in module.node_info:
+            func_name = module.node_info['function']
+            if hasattr(module, func_name):
+                NODE_PROCESSING_FUNCTIONS[node_type] = getattr(module, func_name)
 
-    for file_path in plugins_dir.glob("*.py"):
-        if file_path.name == "__init__.py":
-            continue
+        # --- NEW: Register the inspection function ---
+        if 'inspection_function' in module.node_info:
+            inspect_func_name = module.node_info['inspection_function']
+            if hasattr(module, inspect_func_name):
+                NODE_INSPECTION_FUNCTIONS[node_type] = getattr(module, inspect_func_name)
 
-        # Dynamically import the Python module from the file
-        spec = importlib.util.spec_from_file_location(file_path.stem, file_path)
-        if spec and spec.loader:
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-
-            # Look for the 'node_info' metadata and the function
-            if hasattr(module, 'node_info') and hasattr(module, module.node_info['function']):
-                node_type = module.node_info['nodeType']
-                function_name = module.node_info['function']
-                indegree = int(module.node_info['inDegree'])
-                processing_function = getattr(module, function_name)
-
-                NODE_INDEGREE[node_type] = indegree
-
-                NODE_PROCESSING_FUNCTIONS[node_type] = processing_function
-                print(f"-> Successfully loaded plugin: {node_type}")
-
-    return NODE_PROCESSING_FUNCTIONS, NODE_INDEGREE
-
-# Load the plugins when the server starts
-NODE_PROCESSING_FUNCTIONS, NODE_INDEGREE = load_plugins()
+        # Register the in-degree
+        if 'inDegree' in module.node_info:
+            NODE_INDEGREE[node_type] = module.node_info['inDegree']

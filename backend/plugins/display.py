@@ -7,6 +7,7 @@ from app.classes import DisplayNodeData
 node_info = {
     "nodeType": "displayNode",
     "function": "process_display_node",
+    "inspection_function": "inspect_pass_through",
     "inDegree": "1",
 }
 # -----------------------
@@ -21,3 +22,12 @@ def process_display_node(data: DisplayNodeData, inputs: List[pd.DataFrame]) -> p
         return pd.DataFrame()
     
     return inputs[0]
+
+def inspect_pass_through(data: DisplayNodeData, inputs: List[List[str]]) -> List[str]:
+    """
+    A generic inspection function for nodes that don't change the schema.
+    It simply passes the schema from its first parent through.
+    """
+    if inputs:
+        return inputs[0] # Pass the column list from the first parent
+    return []
