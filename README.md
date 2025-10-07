@@ -52,7 +52,7 @@ Tired of writing the same “load CSV / clean data / run model” boilerplate ag
 
 ### Prerequisites
 
-* Node.js (v18 or later)
+* Node.js (v22 or later)
 * Python (v3.11 or later)
 * `uv` or `pip` for Python package management
 
