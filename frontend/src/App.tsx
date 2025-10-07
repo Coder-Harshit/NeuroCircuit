@@ -6,7 +6,9 @@ import {
   useEdgesState,
   addEdge,
   type Connection,
-  type Edge
+  type Edge,
+  type ColorMode,
+  Controls
 } from '@xyflow/react'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,9 +24,11 @@ import type { NodeStatus } from './types';
 
 import './App.css'
 import '@xyflow/react/dist/style.css';
+import { ThemeToggle } from './components/ui/ThemeToggle';
 
 
 const localKey = "neurocircuit-flow";
+const themeKey = "neurocircuit-theme";
 
 
 const nodeTypes = nodeRegistry;
@@ -36,15 +40,34 @@ function App() {
   const [nodeSchemas, setNodeSchemas] = useState<Record<string, string[]>>({});
 
   // state will be null when the menu is closed, or an object with its position when it's open.
-  const [menu, setMenu] = useState<{ 
+  const [menu, setMenu] = useState<{
     id: string,
     top: number,
     left: number
   } | null>(null);
-  
+
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
   const [availableNodes, setAvailableNodes] = useState<NodeStatus[]>([]);
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
+
+  // Get preferred theme from local storage or system preference
+  const getInitialColorMode = (): ColorMode => {
+    const savedTheme = localStorage.getItem(themeKey) as ColorMode;
+    if (savedTheme) return savedTheme;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+
+  const [colorMode, setColorMode] = useState<ColorMode>(getInitialColorMode);
+
+  // EFFECT to toggle the 'dark' class on the HTML element
+  useEffect(() => {
+    if (colorMode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem(themeKey, colorMode); // Save theme preference
+  }, [colorMode]);
 
   // Load the state from local storage on initial render
   useEffect(() => {
@@ -58,7 +81,7 @@ function App() {
     };
 
     restoreFlow();
-  }, []);
+  }, [setEdges, setNodes]);
 
   // Save the state to local storage whenever nodes or edges change
   useEffect(() => {
@@ -70,7 +93,10 @@ function App() {
       localStorage.setItem(localKey, JSON.stringify(flow));
     };
 
-    if (nodes.length > 0) { // Only save if there are nodes
+    // If the graph is empty, remove any saved flow. Otherwise save the current flow.
+    if (nodes.length === 0 && edges.length === 0) {
+      localStorage.removeItem(localKey);
+    } else {
       saveFlow();
     }
   }, [nodes, edges]);
@@ -92,36 +118,48 @@ function App() {
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      setEdges((eds) => addEdge(connection, eds))
+      // Use functional update so we always work with the latest edges
+      setEdges((eds) => {
+        const newEdges = addEdge(connection, eds);
 
-      if (connection.target) {
-        const inspectNode = async () => {
-          try {
-            const resp = await fetch('http://127.0.0.1:8000/inspect', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                nodes: nodes,
-                edges: addEdge(connection, edges),
-                targetNodeId: connection.target,
-              }),
-            });
-            const data = await resp.json();
-            // Update our new state with the columns from the backend
-            setNodeSchemas((prevSchemas) => ({
-              ...prevSchemas,
-              [connection.target!]: data.columns,
-            }));
+        if (connection.target) {
+          // fire-and-forget async inspect using the up-to-date edge list
+          (async () => {
+            try {
+              // sanitize nodes: remove functions (like onChange) before sending to backend
+              const sanitizedNodes = nodes.map(({ id, type, position, data }) => {
+                const restData = { ...(data as Record<string, unknown>) };
+                // remove function references before sending to backend
+                delete (restData as Record<string, unknown>)['onChange'];
+                return { id, type, position, data: restData };
+              });
 
-          } catch (error) {
-            console.error('Failed to inspect node:', error);
-          }
-        };
+              const resp = await fetch('http://127.0.0.1:8000/inspect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  nodes: sanitizedNodes,
+                  edges: newEdges,
+                  targetNodeId: connection.target,
+                }),
+              });
 
-        inspectNode();
-      }
+              if (!resp.ok) throw new Error(`Inspect failed ${resp.status}`);
+              const data = await resp.json();
+              setNodeSchemas((prevSchemas) => ({
+                ...prevSchemas,
+                [connection.target!]: data.columns || [],
+              }));
+            } catch (error) {
+              console.error('Failed to inspect node:', error);
+            }
+          })();
+        }
+
+        return newEdges;
+      });
     },
-    [nodes, edges, setEdges]
+    [nodes, setEdges]
   );
 
 
@@ -167,8 +205,8 @@ function App() {
           y: menu.top,
         },
         data: {
-          ...nodeBlueprint.defaultData,
-          onChange: onNodeDataChange
+          ...(nodeBlueprint.defaultData || {}),
+          onChange: onNodeDataChange,
         } as AppNodeData,
       };
       setNodes((currentNodes) => [...currentNodes, newNode]);
@@ -202,10 +240,10 @@ function App() {
       nodes:
         nodes
           .filter(({ type }) => type !== 'noteNode') //Note Nodes (CommentNodes) are useless to backend
-          .map(({ id, type, position, data }) => {
-            const restData = { ...data };
-            delete (restData as any).onChange;
-            return { id, type, position, data: restData };
+      .map(({ id, type, position, data }) => {
+        const restData = { ...(data as Record<string, unknown>) };
+        delete (restData as Record<string, unknown>)['onChange'];
+        return { id, type, position, data: restData };
           }),
       edges: edges,
     };
@@ -236,20 +274,16 @@ function App() {
         ...node.data,
         onChange: onNodeDataChange,
         inputColumns: nodeSchemas[node.id] || [],
-      };
+      } as AppNodeData;
 
-      if (node.type === 'displayNode' && displayData[node.id]) {
-        return {
-          ...node,
-          data: {
-            ...node.data,
-            result: displayData[node.id],
-          },
-        };
-      }
+      // Merge result into the base data for display nodes while preserving onChange/inputColumns
+      const mergedData = node.type === 'displayNode' && displayData[node.id]
+        ? { ...baseData, result: displayData[node.id] }
+        : baseData;
+
       return {
         ...node,
-        data: baseData
+        data: mergedData,
       };
     });
   }, [nodes, onNodeDataChange, nodeSchemas, displayData]);
@@ -264,16 +298,19 @@ function App() {
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          // panOnDrag={false}
-          // panOnScroll={true}
-          // selectionOnDrag={true}
+          panOnDrag={false}
+          panOnScroll={true}
+          selectionOnDrag={true}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
-          fitView
           onPaneContextMenu={paneContextMenu}
           onPaneClick={paneClick}
+          colorMode={colorMode}
+          fitView
         >
-          <Background color='#bbb' />
+          {/* <Background color='#bbb' /> */}
+          <Background className="bg-white dark:bg-gray-900" />
+          <Controls />
         </ReactFlow>
 
         <div className="absolute top-4 right-4 z-10 space-x-2">
@@ -283,34 +320,42 @@ function App() {
           >
             Manage Packages
           </button>
+
           <button
             onClick={handleRunClick}
             className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
           >
             Run
           </button>
-        </div>
+          
+          <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
+
 
       </div>
 
-      {menu && (
-        <ContextMenu
-          top={menu.top}
-          left={menu.left}
-          actions={availableNodes.map(node => ({
-            label: node.label,
-            onSelect: () => {
-              addNode(node.nodeType);
-              setMenu(null);
-            }
-          }))}
-        />
-      )}
-
-      {/* MODAL */}
-      {isPackageManagerOpen && <PackageManager onClose={() => setPackageManagerOpen(false)} />}
-
     </div>
+
+      {
+    menu && (
+      <ContextMenu
+        top={menu.top}
+        left={menu.left}
+        actions={availableNodes.map(node => ({
+          label: node.label,
+          onSelect: () => {
+            addNode(node.nodeType);
+            setMenu(null);
+          }
+        }))}
+      />
+    )
+  }
+
+  {/* MODAL */ }
+  { isPackageManagerOpen && <PackageManager onClose={() => setPackageManagerOpen(false)} /> }
+
+
+    </div >
   )
 }
 
