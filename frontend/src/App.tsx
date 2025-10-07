@@ -24,6 +24,9 @@ import './App.css'
 import '@xyflow/react/dist/style.css';
 
 
+const localKey = "neurocircuit-flow";
+
+
 const nodeTypes = nodeRegistry;
 
 function App() {
@@ -33,12 +36,44 @@ function App() {
   const [nodeSchemas, setNodeSchemas] = useState<Record<string, string[]>>({});
 
   // state will be null when the menu is closed, or an object with its position when it's open.
-  const [menu, setMenu] = useState<{ id: string, top: number, left: number } | null>(null);
+  const [menu, setMenu] = useState<{ 
+    id: string,
+    top: number,
+    left: number
+  } | null>(null);
+  
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
-
   const [availableNodes, setAvailableNodes] = useState<NodeStatus[]>([]);
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
 
+  // Load the state from local storage on initial render
+  useEffect(() => {
+    const restoreFlow = () => {
+      const flow = JSON.parse(localStorage.getItem(localKey) || "null");
+
+      if (flow) {
+        setNodes(flow.nodes || []);
+        setEdges(flow.edges || []);
+      }
+    };
+
+    restoreFlow();
+  }, []);
+
+  // Save the state to local storage whenever nodes or edges change
+  useEffect(() => {
+    const saveFlow = () => {
+      const flow = {
+        nodes: nodes,
+        edges: edges,
+      };
+      localStorage.setItem(localKey, JSON.stringify(flow));
+    };
+
+    if (nodes.length > 0) { // Only save if there are nodes
+      saveFlow();
+    }
+  }, [nodes, edges]);
 
   useEffect(() => {
     const fetchAvailableNodes = async () => {
