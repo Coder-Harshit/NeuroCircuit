@@ -10,6 +10,7 @@ import {
   type Edge,
   type ColorMode,
   Controls,
+  // MarkerType,
 } from '@xyflow/react'
 import { v4 as uuidv4 } from 'uuid';
 
@@ -368,6 +369,18 @@ function App() {
     });
   }, [nodes, onNodeDataChange, nodeSchemas, displayData, error?.nodeId]);
 
+
+  // const defaultEdgeOptions = {
+  //   type: 'smoothstep',
+  //   markerEnd: {
+  //       type: MarkerType.ArrowClosed,
+  //       color: 'var(--color-edge)',
+  //   },
+  //   style: {
+  //       stroke: 'var(--color-edge)',
+  //   },
+// };
+
   return (
     <div className='h-screen w-screen bg-[var(--color-surface-1)] text-[var(--color-text-1)]'>
       {/* === ERROR BANNER === */}
@@ -409,6 +422,7 @@ function App() {
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           onPaneContextMenu={paneContextMenu}
+          // defaultEdgeOptions={defaultEdgeOptions}
           onPaneClick={paneClick}
           colorMode={colorMode}
           proOptions={
