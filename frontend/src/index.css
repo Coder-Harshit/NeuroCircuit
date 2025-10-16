@@ -80,4 +80,14 @@
   body, .react-flow__node, .react-flow__edge, button, input, select {
     transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
   }
+
+  .react-flow__edge.selected .react-flow__edge-path {
+    stroke: var(--color-edge-selected);
+    stroke-width: 2.5;
+  }
+
+  .react-flow__handle {
+    width: .5rem !important;
+    height: .5rem !important;
+  }
 }

@@ -45,40 +45,50 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
   };
 
   return (
-    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
-      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-1/2 p-6 text-slate-900 dark:text-slate-100">
-        <div className="flex justify-between items-center mb-4">
+    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-20" onClick={onClose}>
+      <div
+        className="w-full max-w-2xl rounded-lg shadow-xl bg-[var(--color-surface-2)] border border-[var(--color-border-1)] text-[var(--color-text-1)] flex flex-col max-h-[80vh]"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+      >
+        <div className="flex justify-between items-center p-4 border-b border-[var(--color-border-1)]">
           <h2 className="text-xl font-bold">Node Package Manager</h2>
-          <button onClick={onClose} className="text-2xl font-bold p-1 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500" aria-label="Close package manager">×</button>
+          <button onClick={onClose} className="p-1 rounded-full text-[var(--color-text-2)] hover:bg-[var(--color-surface-3)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]" aria-label="Close package manager">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
-        {isLoading ? <p>Loading...</p> : (
-          <ul className="space-y-2">
-            {nodes.map(node => (
-              <li key={node.nodeType} className="p-2 border dark:border-slate-700 rounded-md">
-                <div className="font-bold">{node.label}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">{node.description}</div>
-                {node.status === 'Missing Dependencies' && (
-                  <div className="mt-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-red-500 text-sm">Missing: {(node.missingDependencies || []).join(', ')}</span>
-                      {(node.missingDependencies || []).map(dep => (
-                        <button
-                          key={dep}
-                          onClick={() => handleInstall(dep)}
-                          disabled={!!installing}
-                          className="ml-2 bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold py-1 px-2 rounded disabled:bg-gray-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                          aria-label={`Install ${dep}`}
-                        >
-                          {installing === dep ? 'Installing...' : `Install ${dep}`}
-                        </button>
-                      ))}
+
+        <div className="p-4 overflow-y-auto">
+          {isLoading ? <p className="text-center text-[var(--color-text-2)]">Loading node statuses...</p> : (
+            <ul className="space-y-3">
+              {nodes.map(node => (
+                <li key={node.nodeType} className="p-3 border border-[var(--color-border-2)] rounded-md bg-[var(--color-surface-1)]">
+                  <p className="font-bold">{node.label}</p>
+                  <p className="text-sm text-[var(--color-text-2)]">{node.description}</p>
+                  {node.status === 'Missing Dependencies' && (
+                    <div className="mt-2 pt-2 border-t border-[var(--color-border-1)]">
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm text-[var(--color-danger-text)]">
+                          Missing: <span className="font-semibold">{(node.missingDependencies || []).join(', ')}</span>
+                        </span>
+                        {(node.missingDependencies || []).map(dep => (
+                          <button
+                            key={dep}
+                            onClick={() => handleInstall(dep)}
+                            disabled={!!installing}
+                            className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-accent-text)] text-xs font-bold py-1 px-3 rounded disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+                            aria-label={`Install ${dep}`}
+                          >
+                            {installing === dep ? 'Installing...' : `Install ${dep}`}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
