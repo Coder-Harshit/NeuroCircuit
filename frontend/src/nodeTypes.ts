@@ -12,6 +12,8 @@ export type CommonNodeData = {
 export type InputNodeData = {
   label: string;
   filePath: string;
+  file?: File | null;
+  accept?: string;
 } & CommonNodeData;
 
 export type InputNodeProps = {

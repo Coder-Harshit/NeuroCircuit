@@ -1,7 +1,10 @@
+from http.client import HTTPException
+from pathlib import Path
 import subprocess
 import sys
+import shutil
 from typing import Any, Dict, List, Set, Tuple
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from app.processors.node_map import (
     NODE_INDEGREE,
@@ -12,6 +15,9 @@ from app.classes import GraphPayload, InspectRequest
 import graphlib
 
 from app.package_manager import get_node_status
+
+TEMP_UPLOAD_DIR = Path("temp_uploads")
+TEMP_UPLOAD_DIR.mkdir(exist_ok=True)
 
 app = FastAPI()
 
@@ -121,7 +127,6 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
         }
     except graphlib.CycleError as e:
         return {"status": "error", "message": f"Graph contains a cycle: {e}"}
-    
 
 @app.get("/nodes/status")
 def list_node_statuses():
@@ -206,6 +211,26 @@ async def inspect(request: InspectRequest):
     # If the target node had no parent or something went wrong
     return {"columns": []}
 
+@app.post('/files/upload')
+async def upload_file(file: UploadFile = File(...)):
+    """
+    Accepts a file upload, saves it to a temporary directory on the server,
+    and returns the path to the saved file.
+    """
+        
+    try:
+        if file.filename is None: raise Exception("No file uploaded")
+        temp_fp = TEMP_UPLOAD_DIR / file.filename
+
+        with open(temp_fp, "wb") as bfr:
+            shutil.copyfileobj(file.file, bfr)
+
+        return {"status": "success", "filePath": str(temp_fp)}
+    except Exception as e:
+        return {"status": "error", "message": f"Could not upload file: {e}"}
+    finally:
+        # Close the file to release resources
+        file.file.close()
 
 if __name__ == "__main__":
     pass
