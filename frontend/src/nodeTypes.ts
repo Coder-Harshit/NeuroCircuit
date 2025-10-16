@@ -2,15 +2,21 @@
 
 import type { Node } from '@xyflow/react';
 
+export type CommonNodeData = {
+  onChange: (id: string, data: object) => void;
+  isError?: boolean;
+}
+
+
 // INPUT NODE
 export type InputNodeData = {
   label: string;
   filePath: string;
-  onChange: (id: string, data: object) => void;
-};
+} & CommonNodeData;
+
 export type InputNodeProps = {
-    data: InputNodeData;
-    id: string;
+  data: InputNodeData;
+  id: string;
 };
 
 
@@ -18,11 +24,11 @@ export type InputNodeProps = {
 export type TransformNodeData = {
   label: string;
   method: 'normalize' | 'standardize' | 'pca';
-  onChange: (id: string, data: object) => void;
-};
+} & CommonNodeData;
+
 export type TransformNodeProps = {
-    data: TransformNodeData;
-    id: string;
+  data: TransformNodeData;
+  id: string;
 };
 
 
@@ -31,34 +37,37 @@ export type NoteNodeData = {
   label: string;
   onChange: (id: string, data: object) => void;
 };
+
 export type NoteNodeProps = {
-    data: NoteNodeData;
-    id: string;
+  data: NoteNodeData;
+  id: string;
 };
+
 
 
 // DISPLAY NODE
 export type DisplayNodeData = {
   label: string;
   result?: string; // JSON String
+  isError?: boolean;
 };
 
 export type DisplayNodeProps = {
-    data: DisplayNodeData;
-    id: string;
+  data: DisplayNodeData;
+  id: string;
 };
+
 
 
 // HANDLE_MISSING NODE
 export type HandleMissingNodeData = {
   label: string;
   strategy: 'mean' | 'median' | 'most_frequent' | 'constant';
-  onChange: (id: string, data: object) => void;
-};
+} & CommonNodeData;
 
 export type HandleMissingNodeProps = {
-    data: HandleMissingNodeData;
-    id: string;
+  data: HandleMissingNodeData;
+  id: string;
 };
 
 
@@ -68,42 +77,40 @@ export type FilterRowsNodeData = {
   column: string;
   operator: string;
   value: string;
-  onChange: (id: string, data: object) => void;
-};
+} & CommonNodeData;
 
 export type FilterRowsNodeProps = {
-    data: FilterRowsNodeData;
-    id: string;
+  data: FilterRowsNodeData;
+  id: string;
 };
+
 
 // Combine NODE
 export type CombineNodeData = {
   label: string;
   axis: 0 | 1;
-  onChange: (id: string, data: object) => void;
-};
+} & CommonNodeData;
 
 export type CombineNodeProps = {
-    data: CombineNodeData;
-    id: string;
+  data: CombineNodeData;
+  id: string;
 };
 
 // SelectColumn NODE
 export type SelectColumnData = {
   label: string;
   columns: string
-  onChange: (id: string, data: object) => void;
   inputColumns?: string[]
-};
+} & CommonNodeData;
 
 export type SelectColumnProps = {
-    data: SelectColumnData;
-    id: string;
+  data: SelectColumnData;
+  id: string;
 };
 
 
 
-export type AppNodeData = 
+export type AppNodeData =
   | InputNodeData
   | TransformNodeData
   | NoteNodeData
