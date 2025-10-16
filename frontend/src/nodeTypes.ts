@@ -5,6 +5,7 @@ import type { Node } from '@xyflow/react';
 export type CommonNodeData = {
   onChange: (id: string, data: object) => void;
   isError?: boolean;
+  category?: string;
 }
 
 

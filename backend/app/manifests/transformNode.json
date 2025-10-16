@@ -1,6 +1,7 @@
 {
   "nodeType": "transformNode",
   "label": "PreProcess Data",
+  "category": "Manipulation",
   "description": "Applies data transformations like normalization or standardization.",
   "dependencies": [
     "pandas",

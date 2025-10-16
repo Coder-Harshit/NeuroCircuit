@@ -1,7 +1,7 @@
 {
   "nodeType": "inputNode",
   "label": "File Input",
-  "category": "Data - Input",
+  "category": "Input",
   "description": "Loads data from a local file.",
   "dependencies": [],
   "defaultData": {
