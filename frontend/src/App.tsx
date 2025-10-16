@@ -461,8 +461,10 @@ function App() {
           <ContextMenu
             top={menu.top}
             left={menu.left}
+            onClose={() => setMenu(null)}
             actions={availableNodes.map(node => ({
               label: node.label,
+              category: node.category,
               onSelect: () => {
                 addNode(node.nodeType);
                 setMenu(null);

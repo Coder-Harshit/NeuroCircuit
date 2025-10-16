@@ -1,8 +1,12 @@
 {
   "nodeType": "handleMissingNode",
   "label": "Handle Missing Values",
+  "category": "Manipulation",
   "description": "Fills or drops rows with missing data (NaN).",
-  "dependencies": ["pandas", "scikit-learn"],
+  "dependencies": [
+    "pandas",
+    "scikit-learn"
+  ],
   "defaultData": {
     "label": "Handle Missing",
     "strategy": "mean"

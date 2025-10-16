@@ -5,6 +5,7 @@ import type { Node } from '@xyflow/react';
 export type CommonNodeData = {
   onChange: (id: string, data: object) => void;
   isError?: boolean;
+  category?: string;
 }
 
 
@@ -12,6 +13,8 @@ export type CommonNodeData = {
 export type InputNodeData = {
   label: string;
   filePath: string;
+  file?: File | null;
+  accept?: string;
 } & CommonNodeData;
 
 export type InputNodeProps = {

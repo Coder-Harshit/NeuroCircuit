@@ -1,12 +1,12 @@
 {
   "nodeType": "inputNode",
-  "label": "Load CSV",
-  "description": "Loads data from a local CSV file into a DataFrame.",
-  "dependencies": [
-    "pandas"
-  ],
+  "label": "File Input",
+  "category": "Input",
+  "description": "Loads data from a local file.",
+  "dependencies": [],
   "defaultData": {
-    "label": "Load CSV",
-    "filePath": "data.csv"
+    "label": "File Input",
+    "filePath": "",
+    "accept": ".csv, text/csv"
   }
 }
