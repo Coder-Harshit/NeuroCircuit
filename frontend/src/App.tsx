@@ -23,8 +23,8 @@ import type {
 } from './nodeTypes';
 import type { NodeStatus } from './types';
 
-import './App.css'
 import '@xyflow/react/dist/style.css';
+import './App.css'
 import { ThemeToggle } from './components/ui/ThemeToggle';
 
 
@@ -178,8 +178,16 @@ function App() {
   const onConnect = useCallback(
     (connection: Connection) => {
       // Use functional update so we always work with the latest edges
+      const newEdge = {
+        ...connection,
+        // style: { 
+        //   stroke: colorMode === 'dark' ? 'green' : '#000000',
+        //   stroke: colorMode === 'dark' ? 'limegreen' : '#000000',
+        //   strokeWidth: 2
+        // },
+      }
       setEdges((eds) => {
-        const newEdges = addEdge(connection, eds);
+        const newEdges = addEdge(newEdge, eds);
 
         if (connection.target) {
           // fire-and-forget async inspect using the up-to-date edge list
@@ -347,8 +355,6 @@ function App() {
     });
   }, [nodes, onNodeDataChange, nodeSchemas, displayData]);
 
-
-
   return (
     <div className='flex flex-col h-screen w-screen'>
       <div className='flex flex-grow h-full w-full relative'>
@@ -365,6 +371,9 @@ function App() {
           onPaneContextMenu={paneContextMenu}
           onPaneClick={paneClick}
           colorMode={colorMode}
+          proOptions={
+            {hideAttribution:true}
+          }
           fitView
         >
           {/* <Background color='#bbb' /> */}
