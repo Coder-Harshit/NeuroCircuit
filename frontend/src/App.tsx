@@ -356,7 +356,7 @@ function App() {
   }, [nodes, onNodeDataChange, nodeSchemas, displayData]);
 
   return (
-    <div className='flex flex-col h-screen w-screen'>
+    <div className='h-screen w-screen bg-[var(--color-surface-1)] text-[var(--color-text-1)]'>
       <div className='flex flex-grow h-full w-full relative'>
         <ReactFlow
           nodes={nodesWithData}
@@ -372,34 +372,33 @@ function App() {
           onPaneClick={paneClick}
           colorMode={colorMode}
           proOptions={
-            {hideAttribution:true}
+            { hideAttribution: true }
           }
           fitView
         >
           {/* <Background color='#bbb' /> */}
-          <Background className="bg-white dark:bg-gray-900" />
+          <Background color={colorMode === 'dark' ? '#334155' : '#d1d5db'} gap={16} />
           <Controls />
         </ReactFlow>
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-          <div className="inline-flex items-center gap-2 rounded-md p-1 shadow-2xl opacity-50 hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => setPackageManagerOpen(true)}
-              className="bg-gray-500 hover:bg-gray-700 text-white font-medium py-1 px-3 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              Manage
-            </button>
+        {/* === UI CONTROLS PANEL === */}
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-lg bg-[var(--color-surface-2)]/80 p-2 shadow-lg backdrop-blur-sm border border-[var(--color-border-1)]">
+          <button
+            onClick={() => setPackageManagerOpen(true)}
+            className="bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)] text-[var(--color-text-2)] font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+          >
+            Manage Nodes
+          </button>
 
-            <button
-              onClick={handleRunClick}
-              className="bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-3 rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-            >
-              Run
-            </button>
+          <button
+            onClick={handleRunClick}
+            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+          >
+            Run Pipeline
+          </button>
 
-            <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
-          </div>
-
+          <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
         </div>
+        {/* ========================== */}
 
       </div>
 
@@ -421,9 +420,7 @@ function App() {
 
       {/* MODAL */}
       {isPackageManagerOpen && <PackageManager onClose={() => setPackageManagerOpen(false)} />}
-
-
-    </div >
+    </div>
   )
 }
 

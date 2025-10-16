@@ -1,18 +1,24 @@
 import type { ChangeEvent } from 'react';
 import type { NoteNodeProps } from '../../nodeTypes';
 
-function NoteNode({ id, data }: NoteNodeProps ) {
-    const handleChange = (event: ChangeEvent<HTMLTextAreaElement>)=> {
-        data.onChange(id,{label: event.target.value});
-    };
+function NoteNode({ id, data }: NoteNodeProps) {
+  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    data.onChange(id, { label: event.target.value });
+  };
 
   return (
-    <div className="bg-yellow-200 border border-yellow-400 rounded-md shadow-md w-[250px]">
+    <div
+      className={`
+        w-[250px] nodrag rounded-lg shadow-md
+        bg-[var(--color-note-surface)] text-[var(--color-note-text)]
+        border-2 resize overflow-auto
+      `}
+    >
       <textarea
         value={data.label}
         onChange={handleChange}
         aria-label="Note"
-        className="nodrag w-full h-full p-2 bg-transparent resize-none focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        className="nodrag w-full h-full p-3 bg-transparent resize-none focus:outline-none placeholder:text-current/60"
         rows={5}
         placeholder="Type your note..."
       />

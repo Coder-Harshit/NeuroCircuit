@@ -2,31 +2,32 @@ import { Handle, Position } from '@xyflow/react';
 import type { ChangeEvent } from 'react';
 import type { InputNodeProps } from '../../nodeTypes';
 
+const formElementClasses = "nodrag w-full p-2 border rounded-md bg-[var(--color-surface-3)] border-[var(--color-border-2)] text-[var(--color-text-1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
+
 function InputNode({ id, data }: InputNodeProps ) {
     const handleChange = (event: ChangeEvent<HTMLInputElement>)=> {
-        data.onChange(id,{filePath: event.target.value});
+        data.onChange(id, { filePath: event.target.value });
     };
 
   return (
-    <div className="bg-white border border-slate-300 rounded-md w-[250px] shadow-md">
-      <div className="bg-sky-200 py-2 px-4 rounded-t-md font-bold text-slate-700">
-        {data.label}
+    <div className="w-[300px] rounded-lg shadow-md bg-[var(--color-surface-2)] border border-[var(--color-border-1)] text-[var(--color-text-1)]">
+      <div className="p-2 border-b border-[var(--color-border-1)] bg-[var(--color-node-header)] rounded-t-lg">
+        <p className="font-bold text-[var(--color-node-header-text)]">{data.label}</p>
       </div>
-      <div className="p-4">
-        <label htmlFor="filePath" className="block text-sm font-medium text-slate-600 mb-1">
+      <div className="p-4 space-y-2">
+        <label htmlFor="filePath" className="block text-sm font-medium text-[var(--color-text-2)]">
           File Path
        </label>
         <input
           id="filePath"
           name="filePath"
-          // value={data.filePath ?? ''}
           value={data.filePath ?? ''}
           onChange={handleChange}
           aria-label="File path"
-          className="nodrag w-full p-1 border border-slate-400 rounded-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          className={formElementClasses}
         />
       </div>
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Right} className="!bg-[var(--color-accent)]" />
     </div>
   );
 }
