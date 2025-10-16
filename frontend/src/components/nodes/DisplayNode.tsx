@@ -13,8 +13,15 @@ function DisplayNode({ data }: DisplayNodeProps) {
   }
 
   return (
-    <div className="bg-white border border-gray-400 rounded-lg shadow-md w-[400px] max-h-[300px] flex flex-col">
-      <div className="bg-gray-200 py-1 px-3 rounded-t-lg font-bold text-gray-700">
+    <div className="
+    rounded-lg shadow-md w-[400px] max-h-[300px] flex flex-col 
+    bg-surface-lgt dark:bg-surface-drk
+    border-[1px] border-border-lgt dark:border-border-drk
+    ">
+      <div className="py-1 px-3 rounded-t-lg font-bold 
+      bg-surface-muted-lgt dark:bg-surface-muted-drk
+      text-text-lgt dark:text-text-drk
+      ">
         Display
       </div>
       <div className="p-2 flex-grow overflow-auto">
