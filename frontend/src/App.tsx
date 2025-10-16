@@ -52,15 +52,15 @@ function App() {
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
   const [isPanning, setIsPanning] = useState(false);
   const flow = useReactFlow();
-
   // Get preferred theme from local storage or system preference
   const getInitialColorMode = (): ColorMode => {
     const savedTheme = localStorage.getItem(themeKey) as ColorMode;
     if (savedTheme) return savedTheme;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   };
-
   const [colorMode, setColorMode] = useState<ColorMode>(getInitialColorMode);
+  const [error, setError] = useState<{ nodeId: string; message: string } | null>(null);
+
 
   // EFFECT to toggle the 'dark' class on the HTML element
   useEffect(() => {
@@ -229,7 +229,6 @@ function App() {
     [nodes, setEdges]
   );
 
-
   const onNodeDataChange = useCallback(
     (nodeId: string, newData: object) => {
       setNodes((currentNodes) =>
@@ -302,6 +301,8 @@ function App() {
   )
 
   const handleRunClick = useCallback(async () => {
+    setError(null) // Clear previous errors on a new run
+
     // extract just the data needed for backend
     const graphData = {
       nodes:
@@ -323,13 +324,22 @@ function App() {
         },
         body: JSON.stringify(graphData),
       });
+
       const res = await resp.json();
       console.log('Response from backend:', res);
+
+      if (res.status === 'error') {
+        setError({ nodeId: res.errorNodeId, message: res.message });
+        return; // Stop the rest of the processing as soon as first error is encountered
+      }
+
       if (res.output) {
         setDisplayData(res.output);
       }
     } catch (error) {
       console.error('Error sending graph to backend:', error);
+      // You could set a generic error here if the server is unreachable
+      setError({ nodeId: '', message: 'Could not connect to the backend executor.' });
     }
   }, [nodes, edges]);
 
@@ -350,13 +360,43 @@ function App() {
 
       return {
         ...node,
-        data: mergedData,
+        data: {
+          ...mergedData,
+          isError: node.id === error?.nodeId,
+        },
       };
     });
-  }, [nodes, onNodeDataChange, nodeSchemas, displayData]);
+  }, [nodes, onNodeDataChange, nodeSchemas, displayData, error?.nodeId]);
 
   return (
     <div className='h-screen w-screen bg-[var(--color-surface-1)] text-[var(--color-text-1)]'>
+      {/* === ERROR BANNER === */}
+      {error && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-full max-w-2xl p-4 rounded-lg shadow-xl bg-[var(--color-danger-surface)] border border-[var(--color-danger-border)] text-[var(--color-danger-text)]">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              {/* Simple Error Icon */}
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3 flex-grow">
+              <h3 className="text-sm font-bold">Execution Failed</h3>
+              <p className="mt-1 text-sm">{error.message}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="ml-4 p-1 rounded-md hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-danger-surface)] focus-visible:ring-white"
+            >
+              <span className="sr-only">Dismiss</span>
+              {/* Close Icon */}
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
+            </button>
+          </div>
+        </div>
+      )}
+      {/* ==================== */}
+      
       <div className='flex flex-grow h-full w-full relative'>
         <ReactFlow
           nodes={nodesWithData}
