@@ -34,6 +34,10 @@ class SelectColumnNodeData(BaseModel):
     columns: str
     # nodeType: Literal["selectColumnNode"]
 
+class LoadImageNodeData(BaseModel):
+    label: str
+    filePath: str = ""
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
@@ -42,7 +46,8 @@ AnyNodeData = Union[
     NoteNodeData,
     FilterNodeData,
     CombineNodeData,
-    SelectColumnNodeData
+    SelectColumnNodeData,
+    LoadImageNodeData
 ]
 
 class Position(BaseModel):

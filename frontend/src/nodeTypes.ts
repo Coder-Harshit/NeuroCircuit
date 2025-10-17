@@ -112,6 +112,18 @@ export type SelectColumnProps = {
 };
 
 
+// LoadImage NODE
+export type LoadImageNodeData = {
+  label: string;
+  filePath: string;
+  file?: File | null;
+  accept?: string;
+} & CommonNodeData;
+
+export type LoadImageNodeProps = {
+  data: LoadImageNodeData;
+  id: string;
+}
 
 export type AppNodeData =
   | InputNodeData
@@ -121,7 +133,8 @@ export type AppNodeData =
   | HandleMissingNodeData
   | FilterRowsNodeData
   | CombineNodeData
-  | SelectColumnData;
+  | SelectColumnData
+  | LoadImageNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;
