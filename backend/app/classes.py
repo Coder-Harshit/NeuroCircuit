@@ -40,8 +40,6 @@ class LoadImageNodeData(BaseModel):
 
 class SaveImageNodeData(BaseModel):
     label: str
-    filePath: str = "image.png"
-    accept: Optional[str] = None
 
 AnyNodeData = Union[
     InputNodeData,

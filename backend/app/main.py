@@ -1,12 +1,12 @@
-from http.client import HTTPException
 import json
 from pathlib import Path
 import subprocess
 import sys
 import shutil
 from typing import Any, Dict, List, Set, Tuple
-from fastapi import FastAPI, UploadFile, File
+from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from app.processors.node_map import (
     NODE_INDEGREE,
     NODE_PROCESSING_FUNCTIONS,
@@ -33,6 +33,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def remove_file(path: Path):
+    try:
+        if path.is_file():
+            path.unlink()
+            print(f"Cleaned up temporary file: {path}")
+    except Exception as e:
+        print(f"Error removing temporary file {path}: {e}")
+
 
 
 @app.get("/")
@@ -98,6 +108,7 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
         
         results: Dict[str, Any] = {}
         display_outputs: Dict[str, str] = {}
+        dl_files: List[str] = []
 
         for node_id in exec_order:
             # Although already filtered, double-check just in case
@@ -155,7 +166,9 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
                          print(f"Error converting output of {node_id} to JSON: {json_err}")
                          node_errors[node_id] = f"Output could not be displayed: {json_err}"
                          display_outputs[node_id] = json.dumps([{"error": f"Could not serialize output: {json_err}"}])
-
+                elif node.type == "saveImageNode":
+                    if isinstance(result, str) and result:
+                        dl_files.append(result)
 
             except Exception as e:
                 # Catch errors during the *execution* of a specific node
@@ -176,7 +189,8 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
             "exec_order": exec_order, # The order attempted
             "output": display_outputs,
             "skipped_nodes": skipped_nodes, # List of IDs that were skipped
-            "node_errors": node_errors # Dictionary of {node_id: error_message}
+            "download_files": dl_files,
+            "node_errors": node_errors, # Dictionary of {node_id: error_message}
         }
 
     except graphlib.CycleError as e:
@@ -292,5 +306,35 @@ async def upload_file(file: UploadFile = File(...)):
         # Close the file to release resources
         file.file.close()
 
+@app.get('/files/download')
+async def download_file(filepath: str, bg_tasks: BackgroundTasks):
+    """
+    Downloads a file from the temporary directory and deletes it afterwards.
+    """
+    try:
+        # Create the full path and resolve any ".." components
+        secure_base_path = TEMP_UPLOAD_DIR.resolve()
+        file_to_download = (secure_base_path / Path(filepath).name).resolve()
+
+        # SECURITY CHECK
+        if secure_base_path not in file_to_download.parents:
+            raise HTTPException(status_code=403, detail="Access denied: File is outside the allowed directory.")
+
+        if not file_to_download.is_file():
+            raise HTTPException(status_code=404, detail="File not found.")
+
+        bg_tasks.add_task(remove_file, file_to_download)
+
+        return FileResponse(
+            path=str(file_to_download),
+            filename=file_to_download.name,
+            media_type='application/octet-stream'
+        )
+    except Exception as e:
+        # Log the error on the server for debugging
+        print(f"Error preparing file download for {filepath}: {e}")
+        # Raise a generic error for the client
+        raise HTTPException(status_code=500, detail="Could not process file for download.")
+    
 if __name__ == "__main__":
     pass

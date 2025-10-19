@@ -115,9 +115,6 @@ export type SelectColumnProps = {
 // LoadImage NODE
 export type LoadImageNodeData = {
   label: string;
-  filePath: string;
-  file?: File | null;
-  accept?: string;
 } & CommonNodeData;
 
 export type LoadImageNodeProps = {

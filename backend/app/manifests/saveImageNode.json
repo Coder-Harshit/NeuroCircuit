@@ -1,14 +1,12 @@
 {
   "nodeType": "saveImageNode",
-  "label": "Image Ouput",
-  "category": "Input",
+  "label": "Download Image",
+  "category": "Output",
   "description": "Save Image",
   "dependencies": [
     "opencv-python-headless"
   ],
   "defaultData": {
-    "label": "Image File",
-    "filePath": "",
-    "accept": ".png, .jpeg, .jpg, image/png, image/jpeg"
+    "label": "Download Image"
   }
 }
