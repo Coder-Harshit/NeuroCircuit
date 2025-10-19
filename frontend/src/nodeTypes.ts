@@ -112,6 +112,29 @@ export type SelectColumnProps = {
 };
 
 
+// LoadImage NODE
+export type LoadImageNodeData = {
+  label: string;
+} & CommonNodeData;
+
+export type LoadImageNodeProps = {
+  data: LoadImageNodeData;
+  id: string;
+}
+
+
+// SaveImage Node
+export type SaveImageNodeData = {
+  label: string;
+  filePath: string;
+  // 'accept' from manifest isn't directly used in UI but kept for data consistency
+  accept?: string; 
+} & CommonNodeData;
+
+export type SaveImageNodeProps = {
+  data: SaveImageNodeData;
+  id: string;
+};
 
 export type AppNodeData =
   | InputNodeData
@@ -121,7 +144,9 @@ export type AppNodeData =
   | HandleMissingNodeData
   | FilterRowsNodeData
   | CombineNodeData
-  | SelectColumnData;
+  | SelectColumnData
+  | LoadImageNodeData
+  | SaveImageNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

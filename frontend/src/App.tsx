@@ -27,6 +27,7 @@ import type { NodeStatus } from './types';
 import '@xyflow/react/dist/style.css';
 import './App.css'
 import { ThemeToggle } from './components/ui/ThemeToggle';
+import { triggerBrowserDownload } from './utils/trigDownload';
 
 
 const localKey = "neurocircuit-flow";
@@ -337,6 +338,14 @@ function App() {
       if (res.output) {
         setDisplayData(res.output);
       }
+
+      if (res.download_files && Array.isArray(res.download_files)) {
+        res.download_files.forEach((filename: string) => {
+          console.log(`Triggering download for: ${filename}`);
+          triggerBrowserDownload(filename);
+        });
+      }
+      
     } catch (error) {
       console.error('Error sending graph to backend:', error);
       // You could set a generic error here if the server is unreachable
