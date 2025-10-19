@@ -1,3 +1,4 @@
+from typing import List
 import cv2 as cv
 from app.classes import LoadImageNodeData
 # --- Plugin Metadata ---
@@ -10,8 +11,12 @@ node_info = {
 # -----------------------
 
 
-def image_input_node(data: LoadImageNodeData, **kwargs):
+def image_input_node(data: LoadImageNodeData, inputs: List[None]):
     """Loads an image from a file specified in the node's data."""
+    if not data.filePath:
+        # Raise an error if the path is empty
+        raise ValueError("File path is missing in the Image Input node.")
+
     print(f"  -> Loading image from: {data.filePath}")
 
     try:
@@ -19,6 +24,8 @@ def image_input_node(data: LoadImageNodeData, **kwargs):
             raise FileNotFoundError
         else:
             img = cv.imread(data.filePath)
+        if img is None:
+            raise IOError(f"Failed to load image. Check that the file exists and is a valid image: {data.filePath}")
         return img
     except FileNotFoundError:
         print(f"Error: File not found at {data.filePath}")

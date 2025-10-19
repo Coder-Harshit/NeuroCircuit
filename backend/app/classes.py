@@ -38,6 +38,11 @@ class LoadImageNodeData(BaseModel):
     label: str
     filePath: str = ""
 
+class SaveImageNodeData(BaseModel):
+    label: str
+    filePath: str = "image.png"
+    accept: Optional[str] = None
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
@@ -47,7 +52,8 @@ AnyNodeData = Union[
     FilterNodeData,
     CombineNodeData,
     SelectColumnNodeData,
-    LoadImageNodeData
+    LoadImageNodeData,
+    SaveImageNodeData,
 ]
 
 class Position(BaseModel):
