@@ -46,7 +46,10 @@ class ResizeImageNodeData(BaseModel):
     width: int
     height: int
 
-
+class CvtColorImageNodeData(BaseModel):
+    label: str
+    in_colorspace: Literal["GRAY", "BGR", "RGB", "HSV", "LAB"]
+    out_colorspace: Literal["GRAY", "BGR", "RGB", "HSV", "LAB"]
 
 AnyNodeData = Union[
     InputNodeData,
@@ -60,6 +63,7 @@ AnyNodeData = Union[
     LoadImageNodeData,
     SaveImageNodeData,
     ResizeImageNodeData,
+    CvtColorImageNodeData,
 ]
 
 class Position(BaseModel):
