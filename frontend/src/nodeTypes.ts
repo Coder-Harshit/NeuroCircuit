@@ -165,6 +165,19 @@ export type CvtColorImageNodeProps = {
 };
 
 
+// FlipImage Node
+export type FlipImageNodeData = {
+  label: string;
+  horizontal: boolean;
+  vertical: boolean;
+} & CommonNodeData;
+
+export type FlipImageNodeProps = {
+  data: FlipImageNodeData;
+  id: string;
+};
+
+
 export type AppNodeData =
   | InputNodeData
   | TransformNodeData
@@ -178,6 +191,7 @@ export type AppNodeData =
   | SaveImageNodeData
   | ResizeImageNodeData
   | CvtColorImageNodeData
+  | FlipImageNodeData
   ;
 
 // A final AppNode type that uses our custom data type

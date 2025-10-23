@@ -51,6 +51,11 @@ class CvtColorImageNodeData(BaseModel):
     in_colorspace: Literal["GRAY", "BGR", "RGB", "HSV", "LAB"]
     out_colorspace: Literal["GRAY", "BGR", "RGB", "HSV", "LAB"]
 
+class FlipImageNodeData(BaseModel):
+    label: str
+    horizontal: bool = False
+    vertical: bool = False
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
@@ -64,6 +69,7 @@ AnyNodeData = Union[
     SaveImageNodeData,
     ResizeImageNodeData,
     CvtColorImageNodeData,
+    FlipImageNodeData,
 ]
 
 class Position(BaseModel):
