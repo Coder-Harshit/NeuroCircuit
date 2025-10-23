@@ -41,6 +41,24 @@ class LoadImageNodeData(BaseModel):
 class SaveImageNodeData(BaseModel):
     label: str
 
+class ResizeImageNodeData(BaseModel):
+    label: str
+    width: int
+    height: int
+
+class CvtColorImageNodeData(BaseModel):
+    label: str
+    in_colorspace: Literal["GRAY", "BGR", "RGB", "HSV", "LAB"]
+    out_colorspace: Literal["GRAY", "BGR", "RGB", "HSV", "LAB"]
+
+class FlipImageNodeData(BaseModel):
+    label: str
+    horizontal: bool = False
+    vertical: bool = False
+
+class DisplayImageNodeData(BaseModel):
+    label: str
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
@@ -52,6 +70,10 @@ AnyNodeData = Union[
     SelectColumnNodeData,
     LoadImageNodeData,
     SaveImageNodeData,
+    ResizeImageNodeData,
+    CvtColorImageNodeData,
+    FlipImageNodeData,
+    DisplayImageNodeData,
 ]
 
 class Position(BaseModel):

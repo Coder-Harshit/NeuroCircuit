@@ -2,6 +2,8 @@
 
 import type { Node } from '@xyflow/react';
 
+type ColorSpace = "GRAY" | "BGR" | "RGB" | "HSV" | "LAB";
+
 export type CommonNodeData = {
   onChange: (id: string, data: object) => void;
   isError?: boolean;
@@ -128,13 +130,65 @@ export type SaveImageNodeData = {
   label: string;
   filePath: string;
   // 'accept' from manifest isn't directly used in UI but kept for data consistency
-  accept?: string; 
+  accept?: string;
 } & CommonNodeData;
 
 export type SaveImageNodeProps = {
   data: SaveImageNodeData;
   id: string;
 };
+
+
+// ResizeImage Node
+export type ResizeImageNodeData = {
+  label: string;
+  width: number;
+  height: number;
+} & CommonNodeData;
+
+export type ResizeImageNodeProps = {
+  data: ResizeImageNodeData;
+  id: string;
+};
+
+
+// ResizeImage Node
+export type CvtColorImageNodeData = {
+  label: string;
+  in_colorspace: ColorSpace;
+  out_colorspace: ColorSpace;
+} & CommonNodeData;
+
+export type CvtColorImageNodeProps = {
+  data: CvtColorImageNodeData;
+  id: string;
+};
+
+
+// FlipImage Node
+export type FlipImageNodeData = {
+  label: string;
+  horizontal: boolean;
+  vertical: boolean;
+} & CommonNodeData;
+
+export type FlipImageNodeProps = {
+  data: FlipImageNodeData;
+  id: string;
+};
+
+
+// DISPLAY_IMAGE NODE
+export type DisplayImageNodeData = {
+  label: string;
+  imageBase64?: string;
+} & CommonNodeData;
+
+export type DisplayImageNodeProps = {
+  data: DisplayImageNodeData;
+  id: string;
+};
+
 
 export type AppNodeData =
   | InputNodeData
@@ -146,7 +200,12 @@ export type AppNodeData =
   | CombineNodeData
   | SelectColumnData
   | LoadImageNodeData
-  | SaveImageNodeData;
+  | SaveImageNodeData
+  | ResizeImageNodeData
+  | CvtColorImageNodeData
+  | FlipImageNodeData
+  | DisplayImageNodeData
+  ;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;
