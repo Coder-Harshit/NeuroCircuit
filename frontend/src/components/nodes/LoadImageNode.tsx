@@ -126,6 +126,7 @@ function LoadImageNode({ id, data }: LoadImageNodeProps) {
                         id={`file-${id}`}
                         ref={fileInputRef}
                         type="file"
+                        accept='image/*'
                         onChange={handleInputChange}
                         className="hidden"
                         disabled={isUploading}
