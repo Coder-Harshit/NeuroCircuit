@@ -7,7 +7,7 @@
     "opencv-python-headless"
   ],
   "defaultData": {
-    "label": "Image File",
+    "label": "Load Image",
     "filePath": "",
     "accept": ".png, .jpeg, .jpg, image/png, image/jpeg"
   }

@@ -102,7 +102,7 @@ function LoadImageNode({ id, data }: LoadImageNodeProps) {
         e.dataTransfer.dropEffect = 'copy';
     };
 
-    const displayName = localFile?.name ?? data.filePath?.split(/[\\/]/).pop() ?? '';
+    const displayName = localFile?.name ?? '';
     const isError = data.isError || !!uploadError;
 
     return (
@@ -128,7 +128,6 @@ function LoadImageNode({ id, data }: LoadImageNodeProps) {
                         type="file"
                         onChange={handleInputChange}
                         className="hidden"
-                        accept={data.accept ?? '*/*'}
                         disabled={isUploading}
                     />
 
