@@ -1,11 +1,21 @@
 name: DockerBuild CI
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+  push:
+    tags:
+      - v*
+
+env:
+  FRONTEND_IMAGE: neurocircuit-frontend
+  BACKEND_IMAGE: neurocircuit-backend
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -16,10 +26,55 @@ jobs:
       
       - name: Build Frontend docker image
         run: |
-          docker build ./frontend -t neurocircuit-frontend:latest
+          docker build ./frontend -t $FRONTEND_IMAGE --label "runnumber=${GITHUB_RUN_ID}"
         
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Frontend docker image to GHCR
+        run: |
+          IMAGE_ID=ghcr.io/${{github.repository_owner}}/$FRONTEND_IMAGE
+
+          #UPPERCASE->lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]') 
+
+          #strips the git ref prefix from the version.
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          #strips the "v" prefix from the tag name.
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $FRONTEND_IMAGE $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+
       - name: Build Backend docker image
         run: |
-          docker build ./backend -t neurocircuit-backend:latest
+          docker build ./backend -t $BACKEND_IMAGE --label "runnumber=${GITHUB_RUN_ID}"
 
-      
+      - name: Push Backend docker image to GHCR
+        run: |
+          IMAGE_ID=ghcr.io/${{github.repository_owner}}/$BACKEND_IMAGE
+
+          #UPPERCASE->lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]') 
+
+          #strips the git ref prefix from the version.
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          #strips the "v" prefix from the tag name.
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $BACKEND_IMAGE $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
