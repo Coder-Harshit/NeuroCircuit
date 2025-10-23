@@ -363,20 +363,30 @@ function App() {
         inputColumns: nodeSchemas[node.id] || [],
       } as AppNodeData;
 
-      // Merge result into the base data for display nodes while preserving onChange/inputColumns
-      const mergedData = node.type === 'displayNode' && displayData[node.id]
-        ? { ...baseData, result: displayData[node.id] }
-        : baseData;
+      let mergedData: AppNodeData = baseData;
+
+      // 1. Check for *table* display data (displayNode)
+      if (node.type === 'displayNode' && displayData[node.id]) {
+        mergedData = { ...baseData, result: displayData[node.id] };
+      }
+      // 2. Check for *image* display data (displayImageNode)
+      else if (node.type === 'displayImageNode' && displayData[node.id]) {
+        // The backend puts the base64 string into displayData[node.id]
+        mergedData = { ...baseData, imageBase64: displayData[node.id] };
+      }
+      
+      const nodeError = (error && node.id === error.nodeId) ? error.message : undefined;
 
       return {
         ...node,
         data: {
           ...mergedData,
-          isError: node.id === error?.nodeId,
+          isError: !!nodeError,
+          errorMessage: nodeError,
         },
       };
     });
-  }, [nodes, onNodeDataChange, nodeSchemas, displayData, error?.nodeId]);
+  }, [nodes, onNodeDataChange, nodeSchemas, displayData, error]);
 
 
   // const defaultEdgeOptions = {

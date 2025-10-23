@@ -178,6 +178,18 @@ export type FlipImageNodeProps = {
 };
 
 
+// DISPLAY_IMAGE NODE
+export type DisplayImageNodeData = {
+  label: string;
+  imageBase64?: string;
+} & CommonNodeData;
+
+export type DisplayImageNodeProps = {
+  data: DisplayImageNodeData;
+  id: string;
+};
+
+
 export type AppNodeData =
   | InputNodeData
   | TransformNodeData
@@ -192,6 +204,7 @@ export type AppNodeData =
   | ResizeImageNodeData
   | CvtColorImageNodeData
   | FlipImageNodeData
+  | DisplayImageNodeData
   ;
 
 // A final AppNode type that uses our custom data type

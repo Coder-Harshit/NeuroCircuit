@@ -11,6 +11,7 @@ import SaveImageNode from './SaveImageNode';
 import ResizeImageNode from './ResizeImageNode';
 import CvtColorImageNode from './CvtColorImageNode';
 import FlipImageNode from './FlipImageNode';
+import DisplayImageNode from './displayImageNode';
 
 // This object maps the node 'type' string to its React component.
 export const nodeRegistry = {
@@ -27,4 +28,5 @@ export const nodeRegistry = {
   resizeImageNode: ResizeImageNode,
   cvtColorImageNode: CvtColorImageNode,
   flipImageNode: FlipImageNode,
+  displayImageNode: DisplayImageNode,
 };

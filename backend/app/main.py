@@ -166,6 +166,8 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
                          print(f"Error converting output of {node_id} to JSON: {json_err}")
                          node_errors[node_id] = f"Output could not be displayed: {json_err}"
                          display_outputs[node_id] = json.dumps([{"error": f"Could not serialize output: {json_err}"}])
+                elif node.type == "displayImageNode":
+                    display_outputs[node_id] = result # The result is already the base64 string
                 elif node.type == "saveImageNode":
                     if isinstance(result, str) and result:
                         dl_files.append(result)

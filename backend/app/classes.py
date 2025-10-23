@@ -56,6 +56,9 @@ class FlipImageNodeData(BaseModel):
     horizontal: bool = False
     vertical: bool = False
 
+class DisplayImageNodeData(BaseModel):
+    label: str
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
@@ -70,6 +73,7 @@ AnyNodeData = Union[
     ResizeImageNodeData,
     CvtColorImageNodeData,
     FlipImageNodeData,
+    DisplayImageNodeData,
 ]
 
 class Position(BaseModel):
