@@ -8,6 +8,7 @@ import CombineNode from './CombineNode';
 import SelectColumnNode from './SelectColumnNode';
 import LoadImageNode from './LoadImageNode';
 import SaveImageNode from './SaveImageNode';
+import ResizeImageNode from './ResizeImageNode';
 
 // This object maps the node 'type' string to its React component.
 export const nodeRegistry = {
@@ -21,4 +22,5 @@ export const nodeRegistry = {
   selectColumnNode: SelectColumnNode,
   loadImageNode: LoadImageNode,
   saveImageNode: SaveImageNode,
+  resizeImageNode: ResizeImageNode
 };

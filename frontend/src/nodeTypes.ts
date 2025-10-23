@@ -136,6 +136,19 @@ export type SaveImageNodeProps = {
   id: string;
 };
 
+
+// ResizeImage Node
+export type ResizeImageNodeData = {
+  label: string;
+  width: number;
+  height: number;
+} & CommonNodeData;
+
+export type ResizeImageNodeProps = {
+  data: ResizeImageNodeData;
+  id: string;
+};
+
 export type AppNodeData =
   | InputNodeData
   | TransformNodeData

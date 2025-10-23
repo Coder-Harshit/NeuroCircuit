@@ -41,6 +41,13 @@ class LoadImageNodeData(BaseModel):
 class SaveImageNodeData(BaseModel):
     label: str
 
+class ResizeImageNodeData(BaseModel):
+    label: str
+    width: int
+    height: int
+
+
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
@@ -52,6 +59,7 @@ AnyNodeData = Union[
     SelectColumnNodeData,
     LoadImageNodeData,
     SaveImageNodeData,
+    ResizeImageNodeData,
 ]
 
 class Position(BaseModel):
