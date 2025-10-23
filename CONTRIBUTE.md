@@ -7,5 +7,5 @@ While Creating any new Node Component make sure ***ALL*** the Following requirem
 
 ## BACKEND
 - [ ] Node Manifest created in [`manifests dir`](backend/app/manifests)
-- [ ] Backend Function created in [`plugins dir`](backend/plugins)
 - [ ] NodeClass registered in Backend [`classes.py`](backend/app/classes.py)
+- [ ] Backend Function created in [`plugins dir`](backend/plugins)
