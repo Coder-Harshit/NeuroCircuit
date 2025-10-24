@@ -54,8 +54,11 @@ markupsafe==3.0.3
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
+pip==25.2
+    # via backend (pyproject.toml)
 pydantic==2.11.9
     # via
+    #   backend (pyproject.toml)
     #   fastapi
     #   fastapi-cloud-cli
 pydantic-core==2.33.2
