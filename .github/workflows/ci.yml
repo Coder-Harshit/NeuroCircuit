@@ -46,7 +46,7 @@ jobs:
             ${{ env.BACKEND_DIR }}/requirements.txt
           author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
           committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
-          label: 'bot, bugfix'
+          labels: 'bot, bugfix'
 
   build:
     runs-on: ubuntu-latest
