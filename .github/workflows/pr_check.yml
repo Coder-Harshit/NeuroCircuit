@@ -1,0 +1,32 @@
+name: PR Validation Check
+
+on:
+  pull_request:
+    branches: 
+      - main
+
+env:
+  FRONTEND_IMAGE: neurocircuit-frontend-pr
+  BACKEND_IMAGE: neurocircuit-backend-pr
+
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Frontend docker image
+        run: |
+          docker build ./frontend -t $FRONTEND_IMAGE
+        
+      - name: Build Backend docker image
+        run: |
+          docker build ./backend -t $BACKEND_IMAGE
+
+      
