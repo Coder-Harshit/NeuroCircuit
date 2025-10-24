@@ -38,7 +38,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 ; files & dirs to be included within the installer
-Source: "PLACEHOLDER: path_to_NeuroCircuit.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\NeuroCircuitLauncher.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 ; BACKEND
 Source: "backend\requirements.txt"; DestDir: "{app}\backend"; Flags: ignoreversion;
@@ -309,12 +309,10 @@ begin
       WizardForm.ProgressGauge.Style := npbstMarquee; // Indeterminate progress
 
       Log('Pulling frontend Docker image...');
-      // TODO: Replace with correct image names from your GHCR
       Exec(ExpandConstant('{cmd}'), '/c docker pull ghcr.io/coder-harshit/neurocircuit-frontend:latest', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
       if ResultCode <> 0 then Log('Failed to pull frontend image. Code: ' + IntToStr(ResultCode));
 
       Log('Pulling backend Docker image...');
-      // TODO: Replace with correct image names from your GHCR
       Exec(ExpandConstant('{cmd}'), '/c docker pull ghcr.io/coder-harshit/neurocircuit-backend:latest', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
       if ResultCode <> 0 then Log('Failed to pull backend image. Code: ' + IntToStr(ResultCode));
 
@@ -344,13 +342,11 @@ begin
       Exec(ExpandConstant('{cmd}'), '/c npm.cmd run build', FrontendDir, SW_HIDE, ewWaitUntilTerminated, ResultCode);
       if ResultCode <> 0 then Log('npm run build failed. Code: ' + IntToStr(ResultCode));
 
-      // Install Backend Dependencies (using uv pip)
-      WizardForm.StatusLabel.Caption := 'Installing backend dependencies (uv pip install)...';
-      Log('Running uv pip install in ' + BackendDir);
-      // Assumes 'uv.exe' or 'uv' is accessible via PATH or bundled. If using standard pip:
-      // Exec(ExpandConstant('{cmd}'), '/c pip install -r requirements.txt', BackendDir, SW_HIDE, ewWaitUntilTerminated, ResultCode);
-      Exec(ExpandConstant('{cmd}'), '/c uv pip install -r requirements.txt', BackendDir, SW_HIDE, ewWaitUntilTerminated, ResultCode);
-      if ResultCode <> 0 then Log('uv pip install failed. Code: ' + IntToStr(ResultCode));
+      // Install Backend Dependencies
+      WizardForm.StatusLabel.Caption := 'Installing backend dependencies...';
+      Log('Running pip install in ' + BackendDir);
+      Exec(ExpandConstant('{cmd}'), '/c pip install -r requirements.txt', BackendDir, SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      if ResultCode <> 0 then Log('pip install failed. Code: ' + IntToStr(ResultCode));
 
       WizardForm.ProgressGauge.Style := npbstNormal;
       WizardForm.StatusLabel.Caption := StatusText;
