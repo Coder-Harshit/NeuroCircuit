@@ -34,7 +34,7 @@ jobs:
       - name: Create Pull Request if requirements.txt changed
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           commit-message: "chore(bot): Update backend/requirements.txt"
           title: "Update backend/requirements.txt"
           body: |
