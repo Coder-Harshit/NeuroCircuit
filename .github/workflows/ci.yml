@@ -11,7 +11,7 @@ on:
 env:
   FRONTEND_IMAGE: neurocircuit-frontend
   BACKEND_IMAGE: neurocircuit-backend
-  BACKEND_DIR: ./backend
+  BACKEND_DIR: backend
 
 jobs:
   update_requirements:
