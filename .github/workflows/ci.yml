@@ -14,8 +14,7 @@ env:
   BACKEND_DIR: ./backend
 
 jobs:
-  update_req:
-    if: github.ref=='refs/heads/main'
+  update_requirements:
     runs-on: ubuntu-latest
     permissions: 
       contents: write
@@ -23,8 +22,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
         
       - name: Install uv
         uses: astral-sh/setup-uv@v6
