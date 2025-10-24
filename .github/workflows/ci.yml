@@ -27,7 +27,7 @@ jobs:
         uses: astral-sh/setup-uv@v6
 
       - name: Compile requirements.txt
-        working-directory: $${{ env.BACKEND_DIR }}
+        working-directory: ${{ env.BACKEND_DIR }}
         run: uv pip compile pyproject.toml -o requirements.txt
 
       - name: Check for changes in requirements.txt
