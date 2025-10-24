@@ -1,3 +1,7 @@
 *.local
 temp_uploads/
 results/
+build/
+dist/
+*.spec
+.venv/
