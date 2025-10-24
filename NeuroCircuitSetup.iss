@@ -24,7 +24,7 @@ ArchitecturesInstallIn64BitMode=x64
 OutputBaseFilename={#AppOutputName}
 Compression=lzma
 SolidCompression=yes
-WizardStyle=modern dynamic
+WizardStyle=modern
 
 
 [Languages]
@@ -60,7 +60,7 @@ Source: "docker-compose.yml"; DestDir: "{app}"; Flags: ignoreversion
 [Icons]
 ; Creates shortcuts in Start Menu &/or Desktop
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{group}\{cm:UninstsllProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 
@@ -90,6 +90,7 @@ begin
   // Execute command, redirecting output to a temporary file
   if Exec(ExpandConstant('{cmd}'), '/c ' + Command + ' ' + Params + ' > "' + TempFileName + '" 2>&1', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
   begin
+    
     if ResultCode = 0 then
     begin
       if LoadStringFromFile(TempFileName, Output) then
