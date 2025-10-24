@@ -34,7 +34,7 @@ jobs:
       - name: Create Pull Request if requirements.txt changed
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
           commit-message: "chore(bot): Update backend/requirements.txt"
           title: "Update backend/requirements.txt"
           body: |
@@ -46,6 +46,7 @@ jobs:
             ${{ env.BACKEND_DIR }}/requirements.txt
           author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
           committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          label: 'bot, bugfix'
 
   build:
     runs-on: ubuntu-latest
