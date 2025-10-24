@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: 
       contents: write
+      pull-requests: write
     
     steps:
       - name: Checkout code
@@ -30,21 +31,21 @@ jobs:
         working-directory: ${{ env.BACKEND_DIR }}
         run: uv pip compile pyproject.toml -o requirements.txt
 
-      - name: Check for changes in requirements.txt
-        id: check_changes
-        run: |
-          git diff --quiet ${{ env.BACKEND_DIR }}/requirements.txt || echo "changed=true" >> $GITHUB_OUTPUT
-
-      - name: Commit and push changes
-        if: steps.check_changes.outputs.changed == 'true'
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git add ${{ env.BACKEND_DIR }}/requirements.txt
-          git commit -m "chore: Update requirements.txt via CI"
-          git push origin main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Pull Request if requirements.txt changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(bot): Update backend/requirements.txt"
+          title: "Update backend/requirements.txt"
+          body: |
+            This is an auto-generated PR to update `requirements.txt` based on changes to `pyproject.toml`.
+            Please review and merge.
+          branch: "bot/update-requirements" 
+          base: "main"
+          add-paths: |
+            ${{ env.BACKEND_DIR }}/requirements.txt
+          author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
 
   build:
     runs-on: ubuntu-latest
