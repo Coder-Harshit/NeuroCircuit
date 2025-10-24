@@ -3,14 +3,52 @@ name: DockerBuild CI
 on:
   workflow_dispatch:
   push:
+    branches: 
+      - main
     tags:
       - v*
 
 env:
   FRONTEND_IMAGE: neurocircuit-frontend
   BACKEND_IMAGE: neurocircuit-backend
+  BACKEND_DIR: ./backend
 
 jobs:
+  update_req:
+    if: github.ref=='refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+        
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Compile requirements.txt
+        working-directory: $${{ env.BACKEND_DIR }}
+        run: uv pip compile pyproject.toml -o requirements.txt
+
+      - name: Check for changes in requirements.txt
+        id: check_changes
+        run: |
+          git diff --quiet ${{ env.BACKEND_DIR }}/requirements.txt || echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add ${{ env.BACKEND_DIR }}/requirements.txt
+          git commit -m "chore: Update requirements.txt via CI"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   build:
     runs-on: ubuntu-latest
     permissions:
