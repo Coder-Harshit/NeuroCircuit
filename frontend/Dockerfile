@@ -15,7 +15,7 @@ RUN npm run build
 # --SERVER STAGE--
 FROM nginx:stable-alpine3.21-slim
 
-COPY --from=build /app/dist /usr/share/ngnix/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 

@@ -1,5 +1,5 @@
 # CONTIBUTION 🤝
-While Creating any new Node Component make sure ***ALL*** the Following requirements are fullfiled for your desired **Node Component**
+While Creating any new Node Component make sure ***ALL*** of the Following requirements are fullfiled for your desired **Node Component**
 ## FRONTEND
 - [ ] Frontend Node Component created in [`nodes dir.`](frontend/src/components/nodes) 
 - [ ] Node Component Registered in [`nodeRegistry.ts`](frontend/src/components/nodes/nodeRegistry.ts)

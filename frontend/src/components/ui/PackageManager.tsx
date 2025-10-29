@@ -11,10 +11,12 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
   // Optional: State to manage accordion visibility if needed later
   // const [openSection, setOpenSection] = useState<'installed' | 'available' | null>('installed');
 
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+
   const fetchNodeStatus = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/nodes/status');
+      const response = await fetch(`${API_BASE_URL}/nodes/status`);
       if (!response.ok) throw new Error('Failed to fetch node status');
       const data = await response.json();
       setNodes(data);
@@ -38,7 +40,7 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
   const handleInstall = async (packageName: string) => {
     setInstalling(packageName);
     try {
-      const response = await fetch('http://127.0.0.1:8000/packages/install', {
+      const response = await fetch(`${API_BASE_URL}/packages/install`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ packageName }),

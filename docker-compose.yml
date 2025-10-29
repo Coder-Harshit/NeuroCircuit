@@ -3,10 +3,23 @@ services:
     build:
       context: ./frontend
     ports:
-      - "5173:80"         # Map our local port 5173 to the container's port 80
+      - "5173:80"
+    networks:
+      - neuronet
 
   backend:
     build:
       context: ./backend
     ports:
-      - "8000:8000"       # Map our local port 8000 to the container's port 8000
+      - "8000:8000"
+    networks:
+      - neuronet
+    volumes:
+      - backend_pkgs:/usr/local/lib/python3.11/site-packages # since python3.11 is used in backend Dockerfile
+
+networks:
+  neuronet:
+    driver: bridge
+
+volumes:
+  backend_pkgs:
