@@ -19,7 +19,7 @@ def display_image_node(
     Receives an image from parent results and returns a base64 data URL (PNG)
     """
     if not inputs or inputs[0] is None:
-        print(f"Display Image node received invalid or no input")
+        print("Display Image node received invalid or no input")
         return None
 
     in_image = inputs[0]
