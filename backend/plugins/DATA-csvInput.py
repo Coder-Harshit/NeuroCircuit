@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Any, List
+from typing import Any
 from app.classes import InputNodeData
 
 
@@ -13,7 +13,7 @@ node_info = {
 # -----------------------
 
 
-def process_input_node(data: InputNodeData, inputs: List[Any]) -> pd.DataFrame:
+def process_input_node(data: InputNodeData, inputs: list[Any]) -> pd.DataFrame:
     """Loads data from a CSV file specified in the node's data."""
     print(f"  -> Loading data from: {data.filePath}")
 
@@ -35,7 +35,7 @@ def process_input_node(data: InputNodeData, inputs: List[Any]) -> pd.DataFrame:
         return pd.DataFrame()  # Return empty DataFrame on error
 
 
-def inspect_load_csv(data: InputNodeData, inputs: List) -> List[str]:
+def inspect_load_csv(data: InputNodeData, *args) -> list[str]:
     """
     Inspects an inputNode to get its output schema (column names).
     Efficiently reads only the header of the CSV.

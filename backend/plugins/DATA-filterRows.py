@@ -1,5 +1,4 @@
 import pandas as pd
-from typing import List
 from app.classes import FilterNodeData
 
 node_info = {
@@ -11,7 +10,7 @@ node_info = {
 
 
 def process_filter_rows(
-    data: FilterNodeData, inputs: List[pd.DataFrame]
+    data: FilterNodeData, inputs: list[pd.DataFrame]
 ) -> pd.DataFrame:
     if not inputs:
         return pd.DataFrame()
@@ -42,7 +41,7 @@ def process_filter_rows(
         return df
 
 
-def inspect_pass_through(data: FilterNodeData, inputs: List[List[str]]) -> List[str]:
+def inspect_pass_through(data: FilterNodeData, inputs: list[list[str]]) -> list[str]:
     """
     A generic inspection function for nodes that don't change the schema.
     It simply passes the schema from its first parent through.

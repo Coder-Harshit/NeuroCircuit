@@ -1,7 +1,6 @@
 import base64
 import numpy as np
 import cv2 as cv
-from typing import List, Optional
 from app.classes import DisplayImageNodeData
 
 # --- Plugin Metadata ---
@@ -14,8 +13,8 @@ node_info = {
 
 
 def display_image_node(
-    data: DisplayImageNodeData, inputs: List[np.ndarray]
-) -> Optional[str]:
+    data: DisplayImageNodeData, inputs: list[np.ndarray]
+) -> str | None:
     """
     Receives an image from parent results and returns a base64 data URL (PNG)
     """

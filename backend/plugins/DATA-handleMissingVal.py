@@ -1,5 +1,4 @@
 import pandas as pd
-from typing import List
 from app.classes import HandleMissingNodeData
 from sklearn.impute import SimpleImputer
 
@@ -14,7 +13,7 @@ node_info = {
 
 
 def process_handle_missing(
-    data: HandleMissingNodeData, inputs: List[pd.DataFrame]
+    data: HandleMissingNodeData, inputs: list[pd.DataFrame]
 ) -> pd.DataFrame:
     if not inputs:
         return pd.DataFrame()
@@ -35,8 +34,8 @@ def process_handle_missing(
 
 
 def inspect_pass_through(
-    data: HandleMissingNodeData, inputs: List[List[str]]
-) -> List[str]:
+    data: HandleMissingNodeData, inputs: list[list[str]]
+) -> list[str]:
     """
     A generic inspection function for nodes that don't change the schema.
     It simply passes the schema from its first parent through.

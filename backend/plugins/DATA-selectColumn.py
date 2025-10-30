@@ -1,5 +1,4 @@
 import pandas as pd
-from typing import List
 from app.classes import SelectColumnNodeData  # We will add this in the next step
 
 node_info = {
@@ -11,7 +10,7 @@ node_info = {
 
 
 def process_select_column(
-    data: SelectColumnNodeData, inputs: List[pd.DataFrame]
+    data: SelectColumnNodeData, inputs: list[pd.DataFrame]
 ) -> pd.DataFrame:
     """
     Selects specified columns from the input DataFrame based on the user's checkbox selections.
@@ -36,8 +35,8 @@ def process_select_column(
 
 
 def inspect_select_column(
-    data: SelectColumnNodeData, inputs: List[List[str]]
-) -> List[str]:
+    data: SelectColumnNodeData, inputs: list[list[str]]
+) -> list[str]:
     """
     Inspects the selected columns and returns the new, filtered schema.
     """

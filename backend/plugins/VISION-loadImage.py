@@ -1,4 +1,3 @@
-from typing import List
 import cv2 as cv
 from app.classes import LoadImageNodeData
 
@@ -12,7 +11,7 @@ node_info = {
 # -----------------------
 
 
-def image_input_node(data: LoadImageNodeData, inputs: List[None]):
+def image_input_node(data: LoadImageNodeData, *args):
     """Loads an image from a file specified in the node's data."""
     if not data.filePath:
         # Raise an error if the path is empty

@@ -1,4 +1,5 @@
 import cv2 as cv
+from typing import Any
 from app.classes import CvtColorImageNodeData
 
 # --- Plugin Metadata ---
@@ -11,7 +12,7 @@ node_info = {
 
 
 def cvt_color_image_node(
-    data: CvtColorImageNodeData, inputs: list
+    data: CvtColorImageNodeData, inputs: list[Any]
 ) -> cv.typing.MatLike:
     """Converts an input image from one color space to another."""
     if not inputs or inputs[0] is None:

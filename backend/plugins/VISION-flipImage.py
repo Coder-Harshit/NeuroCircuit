@@ -1,4 +1,5 @@
 import cv2 as cv
+from typing import Any
 from app.classes import FlipImageNodeData
 
 
@@ -11,7 +12,7 @@ node_info = {
 # -----------------------
 
 
-def flip_image_node(data: FlipImageNodeData, inputs: list) -> cv.typing.MatLike:
+def flip_image_node(data: FlipImageNodeData, inputs: list[Any]) -> cv.typing.MatLike:
     """Flips an input image horizontally or vertically."""
     if not inputs or inputs[0] is None:
         raise ValueError("Input image is missing for Flip Image node.")

@@ -1,4 +1,5 @@
 import cv2 as cv
+from typing import Any
 from app.classes import ResizeImageNodeData
 
 # --- Plugin Metadata ---
@@ -11,7 +12,9 @@ node_info = {
 # -----------------------
 
 
-def image_resize_node(data: ResizeImageNodeData, inputs: list) -> cv.typing.MatLike:
+def image_resize_node(
+    data: ResizeImageNodeData, inputs: list[Any]
+) -> cv.typing.MatLike:
     """Resizes an input image to the specified width and height."""
     if not inputs or inputs[0] is None:
         raise ValueError("Input image is missing for Resize Image node.")
