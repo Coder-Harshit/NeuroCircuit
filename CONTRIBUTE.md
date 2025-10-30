@@ -6,12 +6,8 @@ While Creating any new Node Component make sure ***ALL*** of the Following requi
 - [ ] Node Data & Props Established in [`nodeTypes.ts`](frontend/src/nodeTypes.ts)
 
 ### Naming Convention
-#### PLUGINS
-`{CATEGORY}-{nodeType}.py`
-
-#### MANIFESTS
+#### NODE COMPONENTS
 `{nodeType}Node.json`
-
 
 ### Node Categories
 | Category Name |
@@ -25,3 +21,10 @@ While Creating any new Node Component make sure ***ALL*** of the Following requi
 - [ ] Node Manifest created in [`manifests dir`](backend/app/manifests)
 - [ ] NodeClass registered in Backend [`classes.py`](backend/app/classes.py)
 - [ ] Backend Function created in [`plugins dir`](backend/plugins)
+
+### Naming Convention
+#### PLUGINS
+`{CATEGORY}_{nodeType}.py`
+
+#### MANIFESTS
+`{nodeType}Node.json`

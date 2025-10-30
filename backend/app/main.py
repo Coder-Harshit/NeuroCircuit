@@ -21,7 +21,9 @@ from app.package_manager import get_node_status
 
 APP_DIR = Path(__file__).parent.parent
 BACKEND_PLUGINS_DIR = APP_DIR / "plugins"
-GITHUB_RAW_BASE_URL = "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/main/"
+GITHUB_RAW_BASE_URL = (
+    "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/main/"
+)
 
 BACKEND_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -42,6 +44,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 def remove_file(path: Path):
     try:
@@ -66,35 +69,40 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
     # dep_list => DEPENDENCY LIST (opposite of ADJ. LIST)
     dep_list: Dict[str, Set[str]] = {node.id: set() for node in graph.nodes}
     # generated the dep_list
-    
-    skipped_nodes: List[str] = [] # To track skipped nodes
-    node_errors: Dict[str, str] = {} # To track errors per node
+
+    skipped_nodes: List[str] = []  # To track skipped nodes
+    node_errors: Dict[str, str] = {}  # To track errors per node
 
     for edg in graph.edges:
         # going from tgt to source becuase we actually want to generate the dependency list
         if edg.target in nmap and edg.source in nmap:
             dep_list[edg.target].add(edg.source)
         else:
-            print(f"Warning: Skipping edge {edg.id} ({edg.source} -> {edg.target}) due to missing node.")
-
+            print(
+                f"Warning: Skipping edge {edg.id} ({edg.source} -> {edg.target}) due to missing node."
+            )
 
     # --- In-degree validation ---
     for node_id, parents in dep_list.items():
         node = nmap.get(node_id)
-        if not node: continue # Skip if node doesn't exist (handled above)
-        
+        if not node:
+            continue  # Skip if node doesn't exist (handled above)
+
         node_type = node.type
         expected_indegree = NODE_INDEGREE.get(node_type)
 
         is_valid = False
         if isinstance(expected_indegree, int) and len(parents) == expected_indegree:
             is_valid = True
-        elif isinstance(expected_indegree, list) and expected_indegree[0] <= len(parents) <= expected_indegree[1]:
+        elif (
+            isinstance(expected_indegree, list)
+            and expected_indegree[0] <= len(parents) <= expected_indegree[1]
+        ):
             is_valid = True
-        
+
         # Allow nodes with no processing function (like noteNode) to bypass degree checks if not specified
         if expected_indegree is None and node_type not in NODE_PROCESSING_FUNCTIONS:
-             is_valid = True
+            is_valid = True
 
         if not is_valid:
             error_msg = f"Node '{node.data.label}' ({node_id}) expects {expected_indegree} inputs but has {len(parents)}."
@@ -108,11 +116,13 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
     try:
         # Filter out nodes with validation errors before sorting
         valid_dep_list = {
-            node_id: deps for node_id, deps in dep_list.items() if node_id not in node_errors
+            node_id: deps
+            for node_id, deps in dep_list.items()
+            if node_id not in node_errors
         }
         ts = graphlib.TopologicalSorter(valid_dep_list)
         exec_order: Tuple[str, ...] = tuple(ts.static_order())
-        
+
         results: Dict[str, Any] = {}
         display_outputs: Dict[str, str] = {}
         dl_files: List[str] = []
@@ -120,62 +130,96 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
         for node_id in exec_order:
             # Although already filtered, double-check just in case
             if node_id in node_errors:
-                 if node_id not in skipped_nodes: skipped_nodes.append(node_id)
-                 continue # Skip execution if validation failed earlier
+                if node_id not in skipped_nodes:
+                    skipped_nodes.append(node_id)
+                continue  # Skip execution if validation failed earlier
 
             node = nmap[node_id]
+            print("FUNCS:")
+            print(NODE_PROCESSING_FUNCTIONS)
+            print()
+            print()
             processing_fun = NODE_PROCESSING_FUNCTIONS.get(node.type)
-
+            print("PFUNCs:")
+            print(processing_fun)
             # --- KEY CHANGE: Check if function exists ---
             if not processing_fun:
                 # If it's a known node type that *should* have a function, it means deps are missing.
                 # If it's a type that *doesn't* have a function (like noteNode), just ignore it.
-                if node.type in NODE_INDEGREE: # Check if it's a known processing node type
-                    print(f"Skipping node {node_id} ('{node.data.label}') - processing function missing (likely due to missing dependencies).")
-                    if node_id not in skipped_nodes: skipped_nodes.append(node_id)
+                if (
+                    node.type in NODE_INDEGREE
+                ):  # Check if it's a known processing node type
+                    print(
+                        f"Skipping node {node_id} ('{node.data.label}') - processing function missing (likely due to missing dependencies)."
+                    )
+                    if node_id not in skipped_nodes:
+                        skipped_nodes.append(node_id)
                     node_errors[node_id] = "Missing dependencies prevents execution."
                     # We don't put anything in results, so downstream nodes will fail or be skipped.
                 else:
-                    print(f"Ignoring node {node_id} ('{node.data.label}') - no processing function defined.")
-                continue # Move to the next node in exec_order
+                    print(
+                        f"Ignoring node {node_id} ('{node.data.label}') - no processing function defined."
+                    )
+                continue  # Move to the next node in exec_order
             # --------------------------------------------
 
             try:
-                parent_node_ids = dep_list.get(node_id, set()) # Use .get for safety
-                
+                parent_node_ids = dep_list.get(node_id, set())  # Use .get for safety
+
                 # Check if any parent was skipped or errored
                 parent_results = []
                 can_execute = True
                 for parent_id in parent_node_ids:
                     if parent_id in skipped_nodes or parent_id not in results:
                         parent_node = nmap.get(parent_id)
-                        parent_label = getattr(getattr(parent_node, "data", None), "label", "Unknown") if parent_node else "Unknown"
-                        print(f"Skipping node {node_id} ('{node.data.label}') because parent node {parent_id} was skipped or missing results.")
-                        if node_id not in skipped_nodes: skipped_nodes.append(node_id)
-                        node_errors[node_id] = f"Input from skipped parent '{parent_label}' ({parent_id})."
+                        parent_label = (
+                            getattr(
+                                getattr(parent_node, "data", None), "label", "Unknown"
+                            )
+                            if parent_node
+                            else "Unknown"
+                        )
+                        print(
+                            f"Skipping node {node_id} ('{node.data.label}') because parent node {parent_id} was skipped or missing results."
+                        )
+                        if node_id not in skipped_nodes:
+                            skipped_nodes.append(node_id)
+                        node_errors[node_id] = (
+                            f"Input from skipped parent '{parent_label}' ({parent_id})."
+                        )
                         can_execute = False
                         break
                     parent_results.append(results[parent_id])
-                
+
                 if not can_execute:
-                    continue # Skip to next node in exec_order
+                    continue  # Skip to next node in exec_order
 
                 # --- Execute the node ---
                 print(f"Executing node: {node_id} ({node.type})")
                 result = processing_fun(node.data, parent_results)
                 results[node_id] = result
-                
-                if node.type == "displayNode":
+
+                if node.type == "display":
                     # Safely convert to JSON, handling potential non-serializable data
                     try:
-                        display_outputs[node_id] = result.to_json(orient='records', default_handler=str)
+                        display_outputs[node_id] = result.to_json(
+                            orient="records", default_handler=str
+                        )
                     except Exception as json_err:
-                         print(f"Error converting output of {node_id} to JSON: {json_err}")
-                         node_errors[node_id] = f"Output could not be displayed: {json_err}"
-                         display_outputs[node_id] = json.dumps([{"error": f"Could not serialize output: {json_err}"}])
-                elif node.type == "displayImageNode":
-                    display_outputs[node_id] = result # The result is already the base64 string
-                elif node.type == "saveImageNode":
+                        print(
+                            f"Error converting output of {node_id} to JSON: {json_err}"
+                        )
+                        node_errors[node_id] = (
+                            f"Output could not be displayed: {json_err}"
+                        )
+                        display_outputs[node_id] = json.dumps(
+                            [{"error": f"Could not serialize output: {json_err}"}]
+                        )
+                elif node.type == "displayImage":
+                    display_outputs[node_id] = (
+                        result  # The result is already the base64 string
+                    )
+                elif node.type == "saveImage":
                     if isinstance(result, str) and result:
                         dl_files.append(result)
 
@@ -184,33 +228,47 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
                 error_msg = f"Error executing node '{node.data.label}' ({node_id}): {e}"
                 print(error_msg)
                 node_errors[node_id] = str(e)
-                if node_id not in skipped_nodes: skipped_nodes.append(node_id)
+                if node_id not in skipped_nodes:
+                    skipped_nodes.append(node_id)
                 # Continue the loop to see if other independent branches can run
 
         # --- Determine Overall Status ---
         final_status = "success"
         if node_errors:
-            final_status = "partial_success" if results else "error" # Partial if at least something ran
+            final_status = (
+                "partial_success" if results else "error"
+            )  # Partial if at least something ran
 
         return {
             "status": final_status,
             "message": "Graph execution finished.",
-            "exec_order": exec_order, # The order attempted
+            "exec_order": exec_order,  # The order attempted
             "output": display_outputs,
-            "skipped_nodes": skipped_nodes, # List of IDs that were skipped
+            "skipped_nodes": skipped_nodes,  # List of IDs that were skipped
             "download_files": dl_files,
-            "node_errors": node_errors, # Dictionary of {node_id: error_message}
+            "node_errors": node_errors,  # Dictionary of {node_id: error_message}
         }
 
     except graphlib.CycleError as e:
         print(f"Cycle Error: {e}")
         # Identify nodes involved in the cycle if possible (more advanced)
-        return {"status": "error", "message": f"Graph contains a cycle: {e}", "node_errors": {}, "skipped_nodes": list(nmap.keys())}
+        return {
+            "status": "error",
+            "message": f"Graph contains a cycle: {e}",
+            "node_errors": {},
+            "skipped_nodes": list(nmap.keys()),
+        }
     except Exception as e:
         # Catch unexpected errors during setup/sorting
         print(f"General Execution Error: {e}")
-        return {"status": "error", "message": f"An unexpected error occurred: {e}", "node_errors": {}, "skipped_nodes": list(nmap.keys())}
-    
+        return {
+            "status": "error",
+            "message": f"An unexpected error occurred: {e}",
+            "node_errors": {},
+            "skipped_nodes": list(nmap.keys()),
+        }
+
+
 @app.get("/nodes/status")
 def list_node_statuses():
     """
@@ -231,20 +289,23 @@ async def fetch_codefile_github(rel_path: str, save_path: Path) -> bool:
             resp = await client.get(url)
             resp.raise_for_status()
             save_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(save_path, 'w', encoding='utf-8') as f:
+            with open(save_path, "w", encoding="utf-8") as f:
                 f.write(resp.text)
                 return True
         except httpx.HTTPStatusError as e:
-            print(f"HTTP error fetching {url}: {e.response.status_code} - {e.response.text}")
+            print(
+                f"HTTP error fetching {url}: {e.response.status_code} - {e.response.text}"
+            )
             return False
         except Exception as e:
             print(f"Error fetching or saving {url}: {e}")
             return False
 
+
 @app.post("/packages/install")
 async def install_node(payload: Dict[str, Any]):
     """
-    Installs node deps & code files 
+    Installs node deps & code files
     """
     node_type = payload.get("nodeType")
     deps = payload.get("dependencies", [])
@@ -254,31 +315,38 @@ async def install_node(payload: Dict[str, Any]):
 
     if deps:
         print("Installing dependencies", deps)
-    
+
         try:
             install_cmd = [sys.executable, "-m", "pip", "install"] + deps
             subprocess.run(install_cmd, capture_output=True, text=True, check=True)
         except subprocess.CalledProcessError as err:
-            return {"status": "error", "message": f"Failed to install dependencies: {err.stderr}"}
+            return {
+                "status": "error",
+                "message": f"Failed to install dependencies: {err.stderr}",
+            }
         except Exception as e:
-            return {"status": "error", "message": f"Unexpected error during dependency installation: {e}"}
+            return {
+                "status": "error",
+                "message": f"Unexpected error during dependency installation: {e}",
+            }
     else:
         print("No dependencies to install for node type:", node_type)
 
-
-    py_filename = ''.join(['_'+c.lower() for c in node_type]).lstrip('_') + ".py"
+    py_filename = "".join(["_" + c.lower() for c in node_type]).lstrip("_") + ".py"
     py_rel_path = f"backend/plugins/{py_filename}"
     py_save_path = BACKEND_PLUGINS_DIR / py_filename
 
     if not await fetch_codefile_github(py_rel_path, py_save_path):
-        return {"status": "error", "message": f"Failed to fetch code file for node type: {node_type}"}
-    
+        return {
+            "status": "error",
+            "message": f"Failed to fetch code file for node type: {node_type}",
+        }
+
     print("Re-scanning backend plugins...")
     discover_plugins()
 
-
     msg = f"Node '{node_type}' processed. Dependencies checked/installed. Backend code checked/downloaded."
-    
+
     return {
         "status": "success",
         "message": msg,
@@ -296,7 +364,7 @@ async def install_node(payload: Dict[str, Any]):
 # #             "status": "error",
 # #             "message": "No package name provided",
 # #         }
-    
+
 # #     # else Try to install that pkg
 # #     try:
 # #         subprocess.check_call([sys.executable, "-m", "pip", "install", pkg_name])
@@ -308,6 +376,7 @@ async def install_node(payload: Dict[str, Any]):
 
 # #     except subprocess.CalledProcessError as err:
 # #         return {"status": "error", "message": f"Failed to install package: {err}"}
+
 
 @app.post("/inspect")
 async def inspect(request: InspectRequest):
@@ -361,15 +430,17 @@ async def inspect(request: InspectRequest):
     # If the target node had no parent or something went wrong
     return {"columns": []}
 
-@app.post('/files/upload')
+
+@app.post("/files/upload")
 async def upload_file(file: UploadFile = File(...)):
     """
     Accepts a file upload, saves it to a temporary directory on the server,
     and returns the path to the saved file.
     """
-        
+
     try:
-        if file.filename is None: raise Exception("No file uploaded")
+        if file.filename is None:
+            raise Exception("No file uploaded")
         temp_fp = TEMP_UPLOAD_DIR / file.filename
 
         with open(temp_fp, "wb") as bfr:
@@ -382,7 +453,8 @@ async def upload_file(file: UploadFile = File(...)):
         # Close the file to release resources
         file.file.close()
 
-@app.get('/files/download')
+
+@app.get("/files/download")
 async def download_file(filepath: str, bg_tasks: BackgroundTasks):
     """
     Downloads a file from the temporary directory and deletes it afterwards.
@@ -394,7 +466,10 @@ async def download_file(filepath: str, bg_tasks: BackgroundTasks):
 
         # SECURITY CHECK
         if secure_base_path not in file_to_download.parents:
-            raise HTTPException(status_code=403, detail="Access denied: File is outside the allowed directory.")
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: File is outside the allowed directory.",
+            )
 
         if not file_to_download.is_file():
             raise HTTPException(status_code=404, detail="File not found.")
@@ -404,13 +479,16 @@ async def download_file(filepath: str, bg_tasks: BackgroundTasks):
         return FileResponse(
             path=str(file_to_download),
             filename=file_to_download.name,
-            media_type='application/octet-stream'
+            media_type="application/octet-stream",
         )
     except Exception as e:
         # Log the error on the server for debugging
         print(f"Error preparing file download for {filepath}: {e}")
         # Raise a generic error for the client
-        raise HTTPException(status_code=500, detail="Could not process file for download.")
-    
+        raise HTTPException(
+            status_code=500, detail="Could not process file for download."
+        )
+
+
 if __name__ == "__main__":
     pass

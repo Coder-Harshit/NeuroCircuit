@@ -43,7 +43,8 @@ def display_image_node(
 
         base64_enc_str = base64.b64encode(buffer.tobytes()).decode("ascii")
         d_url = f"data:image/png;base64,{base64_enc_str}"
-        print(d_url)
+        # with open("temp.txt",'w') as file:
+        #     file.write(d_url)
         return d_url
 
     except Exception as e:

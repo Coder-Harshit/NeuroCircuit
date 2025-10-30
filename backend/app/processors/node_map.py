@@ -17,7 +17,11 @@ def discover_plugins():
     global dictionaries mapping node types to their functions and metadata.
     Clears existing dictionaries before scanning.
     """
-    global NODE_PROCESSING_FUNCTIONS, NODE_INSPECTION_FUNCTIONS, NODE_INDEGREE, FAILED_NODE_TYPES
+    global \
+        NODE_PROCESSING_FUNCTIONS, \
+        NODE_INSPECTION_FUNCTIONS, \
+        NODE_INDEGREE, \
+        FAILED_NODE_TYPES
 
     # Clear previous state
     NODE_PROCESSING_FUNCTIONS.clear()
@@ -44,7 +48,6 @@ def discover_plugins():
         added_to_path = False
 
     try:
-
         for finder, module_name, ispkg in pkgutil.iter_modules([str(plugins_dir)]):
             module_name = f"plugins.{module_name}"
 
