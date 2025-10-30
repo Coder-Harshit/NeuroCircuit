@@ -7,15 +7,24 @@ from typing import Any, Dict, List, Set, Tuple
 from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+import httpx
 from app.processors.node_map import (
     NODE_INDEGREE,
     NODE_PROCESSING_FUNCTIONS,
     NODE_INSPECTION_FUNCTIONS,
+    discover_plugins,
 )
 from app.classes import GraphPayload, InspectRequest
 import graphlib
 
 from app.package_manager import get_node_status
+
+APP_DIR = Path(__file__).parent.parent
+BACKEND_PLUGINS_DIR = APP_DIR / "plugins"
+GITHUB_RAW_BASE_URL = "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/main/"
+
+BACKEND_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
+
 
 TEMP_UPLOAD_DIR = Path("temp_uploads")
 TEMP_UPLOAD_DIR.mkdir(exist_ok=True)
@@ -34,7 +43,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 def remove_file(path: Path):
     try:
         if path.is_file():
@@ -42,7 +50,6 @@ def remove_file(path: Path):
             print(f"Cleaned up temporary file: {path}")
     except Exception as e:
         print(f"Error removing temporary file {path}: {e}")
-
 
 
 @app.get("/")
@@ -212,28 +219,95 @@ def list_node_statuses():
     return get_node_status()
 
 
+async def fetch_codefile_github(rel_path: str, save_path: Path) -> bool:
+    """
+    Fetches a code file from the GitHub repository and saves it locally.
+    """
+    url = f"{GITHUB_RAW_BASE_URL}{rel_path}"
+    print("Fetching code file from:", url)
+
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(save_path, 'w', encoding='utf-8') as f:
+                f.write(resp.text)
+                return True
+        except httpx.HTTPStatusError as e:
+            print(f"HTTP error fetching {url}: {e.response.status_code} - {e.response.text}")
+            return False
+        except Exception as e:
+            print(f"Error fetching or saving {url}: {e}")
+            return False
+
 @app.post("/packages/install")
-def install_pkg(payload: Dict[str, Any]):
+async def install_node(payload: Dict[str, Any]):
     """
-    Receives a package name and attempts to install it using uv pip
+    Installs node deps & code files 
     """
-    pkg_name = payload.get("packageName")
-    if not pkg_name:
-        return {
-            "status": "error",
-            "message": "No package name provided",
-        }
-    # else Try to install that pkg
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", pkg_name])
-        return {
-            "status": "success",
-            "message": f"Package {pkg_name} installed successfully",
-        }
+    node_type = payload.get("nodeType")
+    deps = payload.get("dependencies", [])
 
-    except subprocess.CalledProcessError as err:
-        return {"status": "error", "message": f"Failed to install package: {err}"}
+    if not node_type:
+        return {"status": "error", "message": "No node type provided"}
 
+    if deps:
+        print("Installing dependencies", deps)
+    
+        try:
+            install_cmd = [sys.executable, "-m", "pip", "install"] + deps
+            subprocess.run(install_cmd, capture_output=True, text=True, check=True)
+        except subprocess.CalledProcessError as err:
+            return {"status": "error", "message": f"Failed to install dependencies: {err.stderr}"}
+        except Exception as e:
+            return {"status": "error", "message": f"Unexpected error during dependency installation: {e}"}
+    else:
+        print("No dependencies to install for node type:", node_type)
+
+
+    py_filename = ''.join(['_'+c.lower() for c in node_type]).lstrip('_') + ".py"
+    py_rel_path = f"backend/plugins/{py_filename}"
+    py_save_path = BACKEND_PLUGINS_DIR / py_filename
+
+    if not await fetch_codefile_github(py_rel_path, py_save_path):
+        return {"status": "error", "message": f"Failed to fetch code file for node type: {node_type}"}
+    
+    print("Re-scanning backend plugins...")
+    discover_plugins()
+
+
+    msg = f"Node '{node_type}' processed. Dependencies checked/installed. Backend code checked/downloaded."
+    
+    return {
+        "status": "success",
+        "message": msg,
+        # "frontend_needs_restart": True
+    }
+
+
+# def install_pkg(payload: Dict[str, Any]):
+# #     """
+# #     Receives a package name and attempts to install it using uv pip
+# #     """
+# #     pkg_name = payload.get("packageName")
+# #     if not pkg_name:
+# #         return {
+# #             "status": "error",
+# #             "message": "No package name provided",
+# #         }
+    
+# #     # else Try to install that pkg
+# #     try:
+# #         subprocess.check_call([sys.executable, "-m", "pip", "install", pkg_name])
+# #         discover_plugins()
+# #         return {
+# #             "status": "success",
+# #             "message": f"Package {pkg_name} installed successfully",
+# #         }
+
+# #     except subprocess.CalledProcessError as err:
+# #         return {"status": "error", "message": f"Failed to install package: {err}"}
 
 @app.post("/inspect")
 async def inspect(request: InspectRequest):

@@ -37,24 +37,28 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  const handleInstall = async (packageName: string) => {
-    setInstalling(packageName);
+  const handleInstall = async (installationNode: NodeStatus) => {
+    const nodeType = installationNode.nodeType;
+    const deps = installationNode.missingDependencies || [];
+
+    setInstalling(nodeType);
+    // setNeedsRestart(false);
     try {
       const response = await fetch(`${API_BASE_URL}/packages/install`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageName }),
+        body: JSON.stringify({ nodeType, deps }),
       });
       const result = await response.json();
       if (result.status !== 'success') {
          // Basic error display, could be improved with a state variable
-        alert(`Failed to install ${packageName}: ${result.message}`);
+        alert(`Failed to install ${installationNode}: ${result.message}`);
       }
       // Re-fetch status regardless of success/failure to update the list
       await fetchNodeStatus();
     } catch (error) {
-      console.error(`Failed to install ${packageName}:`, error);
-      alert(`Network error installing ${packageName}. See console for details.`);
+      console.error(`Failed to install ${installationNode}:`, error);
+      alert(`Network error installing ${installationNode}. See console for details.`);
     } finally {
       setInstalling(null);
     }
@@ -93,7 +97,7 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
                   <div key={dep} className="flex items-center gap-2 bg-[var(--color-surface-3)] px-2 py-1 rounded">
                      <span className="text-sm font-mono text-[var(--color-text-2)]">{dep}</span>
                      <button
-                        onClick={() => handleInstall(dep)}
+                        onClick={() => handleInstall(node)}
                         disabled={!!installing}
                         className="bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-[var(--color-accent-text)] text-xs font-bold py-1 px-3 rounded disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
                         aria-label={`Install ${dep}`}
