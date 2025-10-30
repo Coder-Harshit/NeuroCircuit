@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -24,12 +25,40 @@ BACKEND_PLUGINS_DIR = APP_DIR / "plugins"
 GITHUB_RAW_BASE_URL = (
     "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/main/"
 )
-
+MANIFESTS_DIR = APP_DIR / "app" / "manifests"
 BACKEND_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 TEMP_UPLOAD_DIR = Path("temp_uploads")
 TEMP_UPLOAD_DIR.mkdir(exist_ok=True)
+
+
+def generate_manifest_mapping() -> Dict[str, str]:
+    manifestMap = {}
+    if not MANIFESTS_DIR.exists:
+        print(f"Warning: Manifests directory not found at {MANIFESTS_DIR}")
+        return {}
+    for manifest in os.listdir(MANIFESTS_DIR):
+        try:
+            manifest_path = MANIFESTS_DIR / manifest
+            manifest_data = json.load(manifest_path.open())
+            nodeType = manifest_data.get("nodeType")
+            category = manifest_data.get("category")
+            if nodeType and category:
+                manifestMap[nodeType] = category
+            else:
+                print(
+                    f"Warning: Skipping manifest {manifest}, missing 'nodeType' or 'category'."
+                )
+        except json.JSONDecodeError:
+            print(f"Warning: Could not parse JSON from {manifest}.")
+        except Exception as e:
+            print(f"Warning: Error processing manifest {manifest}: {e}")
+    return manifestMap
+
+
+MANIFEST_MAP = generate_manifest_mapping()
+
 
 app = FastAPI()
 
@@ -304,6 +333,7 @@ async def fetch_codefile_github(rel_path: str, save_path: Path) -> bool:
 
 @app.post("/packages/install")
 async def install_node(payload: Dict[str, Any]):
+    print(payload)
     """
     Installs node deps & code files
     """
@@ -332,7 +362,7 @@ async def install_node(payload: Dict[str, Any]):
     else:
         print("No dependencies to install for node type:", node_type)
 
-    py_filename = "".join(["_" + c.lower() for c in node_type]).lstrip("_") + ".py"
+    py_filename = MANIFEST_MAP.get(node_type, "GENERAL") + "_" + node_type + ".py"
     py_rel_path = f"backend/plugins/{py_filename}"
     py_save_path = BACKEND_PLUGINS_DIR / py_filename
 
