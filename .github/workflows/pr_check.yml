@@ -56,7 +56,7 @@ jobs:
           python-version: "3.11"
 
       - name: Setup uv
-        uses: astral-sh/setup-uv@7
+        uses: astral-sh/setup-uv@v7
 
       - name: Cache uv dependencies
         uses: actions/cache@v4
