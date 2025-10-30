@@ -23,14 +23,18 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
       if (!response.ok) throw new Error("Failed to fetch node status");
       const data: NodeStatus[] = await response.json();
       setNodes(data);
-    } catch (error) {
-      console.error("Failed to fetch node status:", error);
-      setError(error.message || "Could not fetch node statuses");
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Failed to fetch node status:", error);
+        setError(err.message || "Could not fetch node statuses");
+      } else {
+        console.error("Failed to fetch node status:", err);
+      }
       // Optionally set an error state here to show in the UI
     } finally {
       setIsLoading(false);
     }
-  }, [API_BASE_URL]);
+  }, [API_BASE_URL, error]);
 
   useEffect(() => {
     fetchNodeStatus();
@@ -64,8 +68,12 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
       // Re-fetch status regardless of success/failure to update the list
       await fetchNodeStatus();
     } catch (err) {
-      console.error(`Failed to install ${nodeType}:`, err);
-      setError(err.message || `Network error installing ${nodeType}`);
+      if (err instanceof Error) {
+        console.error(`Failed to install ${nodeType}:`, err);
+        setError(err.message || `Network error installing ${nodeType}`);
+      } else {
+        console.error(`Failed to install ${nodeType}:`, err);
+      }
     } finally {
       setInstalling(null);
     }
@@ -89,9 +97,13 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
       setSuccess(result.message);
       // Re-fetch status to show the node as "Available"
       await fetchNodeStatus();
-    } catch (err: any) {
-      console.error(`Failed to uninstall ${nodeType}:`, err);
-      setError(err.message || "Network error during uninstall.");
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(`Failed to uninstall ${nodeType}:`, err);
+        setError(err.message || "Network error during uninstall.");
+      } else {
+        console.error(`Failed to uninstall ${nodeType}:`, err);
+      }
     } finally {
       setInstalling(null);
     }
