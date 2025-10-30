@@ -1,6 +1,6 @@
 {
-  "nodeType": "displayNode",
-  "category": "General",
+  "nodeType": "display",
+  "category": "DATA",
   "description": "Displays input data or messages for debugging and visualization purposes.",
   "dependencies": [],
   "defaultData": {

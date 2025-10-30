@@ -1,13 +1,10 @@
 {
-  "nodeType": "displayImageNode",
+  "nodeType": "displayImage",
   "label": "Display Image",
-  "category": "Output",
+  "category": "VISION",
   "description": "View the input image",
-  "dependencies": [
-    "numpy",
-    "opencv-python-headless"
-  ],
+  "dependencies": ["numpy", "opencv-python-headless"],
   "defaultData": {
     "label": "Display Image"
-}
+  }
 }

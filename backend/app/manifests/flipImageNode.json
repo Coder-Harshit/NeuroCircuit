@@ -1,11 +1,9 @@
 {
-  "nodeType": "flipImageNode",
+  "nodeType": "flipImage",
   "label": "Flip Image",
-  "category": "Vision",
+  "category": "VISION",
   "description": "Flips the input image either horizontally, vertically, or both",
-  "dependencies": [
-    "opencv-python-headless"
-  ],
+  "dependencies": ["opencv-python-headless"],
   "defaultData": {
     "label": "Flip Image",
     "horizontal": false,

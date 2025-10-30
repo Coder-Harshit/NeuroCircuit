@@ -1,10 +1,21 @@
-FROM python:3.11-alpine
+FROM python:3.11-slim
 
 WORKDIR /app
 
+# Installing build deps
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc
+
+# Cleanup apt cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip install uv
+
 COPY requirements.txt pyproject.toml ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN uv pip install --system --no-cache-dir -r requirements.txt
 
 COPY ./app ./app
 

@@ -1,11 +1,9 @@
 {
-  "nodeType": "resizeImageNode",
+  "nodeType": "resizeImage",
   "label": "Resize",
-  "category": "Vision",
+  "category": "VISION",
   "description": "Resize Image",
-  "dependencies": [
-    "opencv-python-headless"
-  ],
+  "dependencies": ["opencv-python-headless"],
   "defaultData": {
     "label": "Resize",
     "width": 256,

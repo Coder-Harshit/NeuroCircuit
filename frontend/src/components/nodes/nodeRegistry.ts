@@ -1,32 +1,32 @@
-import InputNode from './InputNode';
-import TransformNode from './TransformNode';
-import NoteNode from './NoteNode';
-import DisplayNode from './DisplayNode';
-import HandleMissingNode from './HandleMissingNode';
-import FilterRowsNode from './FilterRowsNode';
-import CombineNode from './CombineNode';
-import SelectColumnNode from './SelectColumnNode';
-import LoadImageNode from './LoadImageNode';
-import SaveImageNode from './SaveImageNode';
-import ResizeImageNode from './ResizeImageNode';
-import CvtColorImageNode from './CvtColorImageNode';
-import FlipImageNode from './FlipImageNode';
-import DisplayImageNode from './displayImageNode';
+import InputNode from "./csvInputNode";
+import TransformNode from "./transformNode";
+import NoteNode from "./noteNode";
+import DisplayNode from "./displayNode";
+import HandleMissingNode from "./handleMissingValNode";
+import FilterRowsNode from "./filterRowsNode";
+import CombineNode from "./combineNode";
+import SelectColumnNode from "./selectColumnNode";
+import LoadImageNode from "./loadImageNode";
+import SaveImageNode from "./saveImageNode";
+import ResizeImageNode from "./resizeImageNode";
+import CvtColorImageNode from "./cvtColorImageNode";
+import FlipImageNode from "./flipImageNode";
+import DisplayImageNode from "./displayImageNode";
 
 // This object maps the node 'type' string to its React component.
 export const nodeRegistry = {
-  inputNode: InputNode,
-  transformNode: TransformNode,
-  noteNode: NoteNode,
-  displayNode: DisplayNode,
-  handleMissingNode: HandleMissingNode,
-  filterRowsNode: FilterRowsNode,
-  combineNode: CombineNode,
-  selectColumnNode: SelectColumnNode,
-  loadImageNode: LoadImageNode,
-  saveImageNode: SaveImageNode,
-  resizeImageNode: ResizeImageNode,
-  cvtColorImageNode: CvtColorImageNode,
-  flipImageNode: FlipImageNode,
-  displayImageNode: DisplayImageNode,
+  combine: CombineNode,
+  csvInput: InputNode,
+  cvtColorImage: CvtColorImageNode,
+  displayImage: DisplayImageNode,
+  display: DisplayNode,
+  filterRows: FilterRowsNode,
+  flipImage: FlipImageNode,
+  handleMissingVal: HandleMissingNode,
+  loadImage: LoadImageNode,
+  note: NoteNode,
+  resizeImage: ResizeImageNode,
+  saveImage: SaveImageNode,
+  selectColumn: SelectColumnNode,
+  transform: TransformNode,
 };

@@ -1,7 +1,7 @@
 {
-  "nodeType": "combineNode",
+  "nodeType": "combine",
   "label": "Concatenate",
-  "category": "Manipulation",
+  "category": "DATA",
   "description": "Combines two datasets vertically or horizontally.",
   "dependencies": ["pandas"],
   "defaultData": {

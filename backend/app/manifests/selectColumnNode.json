@@ -1,7 +1,7 @@
 {
-  "nodeType": "selectColumnNode",
+  "nodeType": "selectColumn",
   "label": "Select Columns",
-  "category": "Filtering",
+  "category": "DATA",
   "description": "Selects specific columns from a DataFrame.",
   "dependencies": ["pandas"],
   "defaultData": {

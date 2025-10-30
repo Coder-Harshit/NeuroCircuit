@@ -1,7 +1,7 @@
 {
-  "nodeType": "inputNode",
+  "nodeType": "csvInput",
   "label": "File Input",
-  "category": "Input",
+  "category": "DATA",
   "description": "Loads data from a local file.",
   "dependencies": [],
   "defaultData": {

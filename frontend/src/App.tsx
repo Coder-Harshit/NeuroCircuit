@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useState, useMemo } from "react";
 import {
   Background,
   ReactFlow,
@@ -11,28 +11,23 @@ import {
   type ColorMode,
   Controls,
   // MarkerType,
-} from '@xyflow/react'
-import { v4 as uuidv4 } from 'uuid';
+} from "@xyflow/react";
+import { v4 as uuidv4 } from "uuid";
 
-import { nodeRegistry } from './components/nodes/nodeRegistry';
-import ContextMenu from './components/ui/ContextMenu';
-import PackageManager from './components/ui/PackageManager';
+import { nodeRegistry } from "./components/nodes/nodeRegistry";
+import ContextMenu from "./components/ui/ContextMenu";
+import PackageManager from "./components/ui/PackageManager";
 
-import type {
-  AppNode,
-  AppNodeData,
-} from './nodeTypes';
-import type { NodeStatus } from './types';
+import type { AppNode, AppNodeData } from "./nodeTypes";
+import type { NodeStatus } from "./types";
 
-import '@xyflow/react/dist/style.css';
-import './App.css'
-import { ThemeToggle } from './components/ui/ThemeToggle';
-import { triggerBrowserDownload } from './utils/trigDownload';
-
+import "@xyflow/react/dist/style.css";
+import "./App.css";
+import { ThemeToggle } from "./components/ui/ThemeToggle";
+import { triggerBrowserDownload } from "./utils/trigDownload";
 
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
-
 
 const nodeTypes = nodeRegistry;
 
@@ -44,9 +39,9 @@ function App() {
 
   // state will be null when the menu is closed, or an object with its position when it's open.
   const [menu, setMenu] = useState<{
-    id: string,
-    top: number,
-    left: number
+    id: string;
+    top: number;
+    left: number;
   } | null>(null);
 
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
@@ -58,18 +53,22 @@ function App() {
   const getInitialColorMode = (): ColorMode => {
     const savedTheme = localStorage.getItem(themeKey) as ColorMode;
     if (savedTheme) return savedTheme;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   };
   const [colorMode, setColorMode] = useState<ColorMode>(getInitialColorMode);
-  const [error, setError] = useState<{ nodeId: string; message: string } | null>(null);
-
+  const [error, setError] = useState<{
+    nodeId: string;
+    message: string;
+  } | null>(null);
 
   // EFFECT to toggle the 'dark' class on the HTML element
   useEffect(() => {
-    if (colorMode === 'dark') {
-      document.documentElement.classList.add('dark');
+    if (colorMode === "dark") {
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
     localStorage.setItem(themeKey, colorMode); // Save theme preference
   }, [colorMode]);
@@ -109,15 +108,13 @@ function App() {
   useEffect(() => {
     const fetchAvailableNodes = async () => {
       try {
-        const resp = await fetch('http://127.0.0.1:8000/nodes/status');
+        const resp = await fetch("http://127.0.0.1:8000/nodes/status");
         const data: NodeStatus[] = await resp.json();
-        setAvailableNodes(data.filter(
-          node => node.status === 'Installed'
-        ))
+        setAvailableNodes(data.filter((node) => node.status === "Installed"));
       } catch (err) {
         console.error("Failed to fetch available nodes: ", err);
       }
-    }
+    };
     fetchAvailableNodes();
   }, [isPackageManagerOpen]);
 
@@ -125,32 +122,38 @@ function App() {
   useEffect(() => {
     let spaceDown = false;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !spaceDown) {
+      if (e.code === "Space" && !spaceDown) {
         const active = document.activeElement as HTMLElement | null;
         const tag = active?.tagName;
         // don't hijack space when typing into inputs
-        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active?.isContentEditable) return;
+        if (
+          tag === "INPUT" ||
+          tag === "TEXTAREA" ||
+          tag === "SELECT" ||
+          active?.isContentEditable
+        )
+          return;
         e.preventDefault();
         spaceDown = true;
         setIsPanning(true);
-        document.body.style.cursor = 'grab';
+        document.body.style.cursor = "grab";
       }
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && spaceDown) {
+      if (e.code === "Space" && spaceDown) {
         spaceDown = false;
         setIsPanning(false);
-        document.body.style.cursor = '';
+        document.body.style.cursor = "";
       }
     };
 
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
     return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-      document.body.style.cursor = '';
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      document.body.style.cursor = "";
     };
   }, []);
 
@@ -161,9 +164,13 @@ function App() {
       try {
         if (custom?.detail?.delta) {
           const { delta } = custom.detail;
-          const currentZoom = (typeof flow.getZoom === 'function') ? flow.getZoom() : 1;
+          const currentZoom =
+            typeof flow.getZoom === "function" ? flow.getZoom() : 1;
           const newZoom = currentZoom + delta;
-          if (typeof flow.getViewport === 'function' && typeof flow.setViewport === 'function') {
+          if (
+            typeof flow.getViewport === "function" &&
+            typeof flow.setViewport === "function"
+          ) {
             const vp = flow.getViewport();
             flow.setViewport({ x: vp.x, y: vp.y, zoom: newZoom });
           }
@@ -173,8 +180,9 @@ function App() {
       }
     };
 
-    window.addEventListener('xyflow-zoom', onZoomEvent as EventListener);
-    return () => window.removeEventListener('xyflow-zoom', onZoomEvent as EventListener);
+    window.addEventListener("xyflow-zoom", onZoomEvent as EventListener);
+    return () =>
+      window.removeEventListener("xyflow-zoom", onZoomEvent as EventListener);
   }, [flow]);
 
   const onConnect = useCallback(
@@ -182,12 +190,12 @@ function App() {
       // Use functional update so we always work with the latest edges
       const newEdge = {
         ...connection,
-        // style: { 
+        // style: {
         //   stroke: colorMode === 'dark' ? 'green' : '#000000',
         //   stroke: colorMode === 'dark' ? 'limegreen' : '#000000',
         //   strokeWidth: 2
         // },
-      }
+      };
       setEdges((eds) => {
         const newEdges = addEdge(newEdge, eds);
 
@@ -196,16 +204,18 @@ function App() {
           (async () => {
             try {
               // sanitize nodes: remove functions (like onChange) before sending to backend
-              const sanitizedNodes = nodes.map(({ id, type, position, data }) => {
-                const restData = { ...(data as Record<string, unknown>) };
-                // remove function references before sending to backend
-                delete (restData as Record<string, unknown>)['onChange'];
-                return { id, type, position, data: restData };
-              });
+              const sanitizedNodes = nodes.map(
+                ({ id, type, position, data }) => {
+                  const restData = { ...(data as Record<string, unknown>) };
+                  // remove function references before sending to backend
+                  delete (restData as Record<string, unknown>)["onChange"];
+                  return { id, type, position, data: restData };
+                },
+              );
 
-              const resp = await fetch('http://127.0.0.1:8000/inspect', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+              const resp = await fetch("http://127.0.0.1:8000/inspect", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   nodes: sanitizedNodes,
                   edges: newEdges,
@@ -220,7 +230,7 @@ function App() {
                 [connection.target!]: data.columns || [],
               }));
             } catch (error) {
-              console.error('Failed to inspect node:', error);
+              console.error("Failed to inspect node:", error);
             }
           })();
         }
@@ -228,7 +238,7 @@ function App() {
         return newEdges;
       });
     },
-    [nodes, setEdges]
+    [nodes, setEdges],
   );
 
   const onNodeDataChange = useCallback(
@@ -240,28 +250,26 @@ function App() {
               ...node,
               data: {
                 ...node.data,
-                ...newData
+                ...newData,
               },
             };
           }
           return node;
-        })
+        }),
       );
     },
-    [setNodes]
+    [setNodes],
   );
 
   const addNode = useCallback(
     (nodeType: string) => {
       if (!menu) return;
 
-      const nodeBlueprint = availableNodes.find(
-        n => n.nodeType === nodeType
-      );
+      const nodeBlueprint = availableNodes.find((n) => n.nodeType === nodeType);
       if (!nodeBlueprint) {
         console.error(`Blueprint for node type "${nodeType}" not found.`);
-        return
-      };
+        return;
+      }
 
       const newId = uuidv4();
 
@@ -280,61 +288,57 @@ function App() {
       setNodes((currentNodes) => [...currentNodes, newNode]);
       setMenu(null);
     },
-    [menu, onNodeDataChange, setNodes, availableNodes]
+    [menu, onNodeDataChange, setNodes, availableNodes],
   );
 
   const paneContextMenu = useCallback(
     (evt: MouseEvent | React.MouseEvent) => {
       evt.preventDefault();
       setMenu({
-        id: 'add-node-menu',
+        id: "add-node-menu",
         top: evt.clientY,
-        left: evt.clientX
+        left: evt.clientX,
       });
     },
-    [setMenu]
-  )
+    [setMenu],
+  );
 
-  const paneClick = useCallback(
-    () => {
-      setMenu(null);
-    },
-    [setMenu]
-  )
+  const paneClick = useCallback(() => {
+    setMenu(null);
+  }, [setMenu]);
 
   const handleRunClick = useCallback(async () => {
-    setError(null) // Clear previous errors on a new run
+    setError(null); // Clear previous errors on a new run
 
     // extract just the data needed for backend
     const graphData = {
-      nodes:
-        nodes
-          .filter(({ type }) => type !== 'noteNode') //Note Nodes (CommentNodes) are useless to backend
-          .map(({ id, type, position, data }) => {
-            const restData = { ...(data as Record<string, unknown>) };
-            delete (restData as Record<string, unknown>)['onChange'];
-            return { id, type, position, data: restData };
-          }),
+      nodes: nodes
+        .filter(({ type }) => type !== "note") //Note Nodes (CommentNodes) are useless to backend
+        .map(({ id, type, position, data }) => {
+          const restData = { ...(data as Record<string, unknown>) };
+          delete (restData as Record<string, unknown>)["onChange"];
+          return { id, type, position, data: restData };
+        }),
       edges: edges,
     };
 
     try {
+      // console.log(graphData);
       const resp = await fetch("http://127.0.0.1:8000/execute", {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(graphData),
       });
 
       const res = await resp.json();
-      console.log('Response from backend:', res);
+      console.log("Response from backend:", res);
 
-      if (res.status === 'error') {
+      if (res.status === "error") {
         setError({ nodeId: res.errorNodeId, message: res.message });
         return; // Stop the rest of the processing as soon as first error is encountered
       }
-
       if (res.output) {
         setDisplayData(res.output);
       }
@@ -345,11 +349,13 @@ function App() {
           triggerBrowserDownload(filename);
         });
       }
-      
     } catch (error) {
-      console.error('Error sending graph to backend:', error);
+      console.error("Error sending graph to backend:", error);
       // You could set a generic error here if the server is unreachable
-      setError({ nodeId: '', message: 'Could not connect to the backend executor.' });
+      setError({
+        nodeId: "",
+        message: "Could not connect to the backend executor.",
+      });
     }
   }, [nodes, edges]);
 
@@ -366,16 +372,17 @@ function App() {
       let mergedData: AppNodeData = baseData;
 
       // 1. Check for *table* display data (displayNode)
-      if (node.type === 'displayNode' && displayData[node.id]) {
+      if (node.type === "display" && displayData[node.id]) {
         mergedData = { ...baseData, result: displayData[node.id] };
       }
       // 2. Check for *image* display data (displayImageNode)
-      else if (node.type === 'displayImageNode' && displayData[node.id]) {
+      else if (node.type === "displayImage" && displayData[node.id]) {
         // The backend puts the base64 string into displayData[node.id]
         mergedData = { ...baseData, imageBase64: displayData[node.id] };
       }
-      
-      const nodeError = (error && node.id === error.nodeId) ? error.message : undefined;
+
+      const nodeError =
+        error && node.id === error.nodeId ? error.message : undefined;
 
       return {
         ...node,
@@ -388,7 +395,6 @@ function App() {
     });
   }, [nodes, onNodeDataChange, nodeSchemas, displayData, error]);
 
-
   // const defaultEdgeOptions = {
   //   type: 'smoothstep',
   //   markerEnd: {
@@ -398,18 +404,27 @@ function App() {
   //   style: {
   //       stroke: 'var(--color-edge)',
   //   },
-// };
+  // };
 
   return (
-    <div className='h-screen w-screen bg-[var(--color-surface-1)] text-[var(--color-text-1)]'>
+    <div className="h-screen w-screen bg-[var(--color-surface-1)] text-[var(--color-text-1)]">
       {/* === ERROR BANNER === */}
       {error && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-full max-w-2xl p-4 rounded-lg shadow-xl bg-[var(--color-danger-surface)] border border-[var(--color-danger-border)] text-[var(--color-danger-text)]">
           <div className="flex items-start">
             <div className="flex-shrink-0">
               {/* Simple Error Icon */}
-              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div className="ml-3 flex-grow">
@@ -422,14 +437,21 @@ function App() {
             >
               <span className="sr-only">Dismiss</span>
               {/* Close Icon */}
-              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
+              <svg
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+              </svg>
             </button>
           </div>
         </div>
       )}
       {/* ==================== */}
-      
-      <div className='flex flex-grow h-full w-full relative'>
+
+      <div className="flex flex-grow h-full w-full relative">
         <ReactFlow
           nodes={nodesWithData}
           edges={edges}
@@ -444,13 +466,14 @@ function App() {
           // defaultEdgeOptions={defaultEdgeOptions}
           onPaneClick={paneClick}
           colorMode={colorMode}
-          proOptions={
-            { hideAttribution: true }
-          }
+          proOptions={{ hideAttribution: true }}
           fitView
         >
           {/* <Background color='#bbb' /> */}
-          <Background color={colorMode === 'dark' ? '#334155' : '#d1d5db'} gap={16} />
+          <Background
+            color={colorMode === "dark" ? "#334155" : "#d1d5db"}
+            gap={16}
+          />
           <Controls />
         </ReactFlow>
         {/* === UI CONTROLS PANEL === */}
@@ -472,31 +495,30 @@ function App() {
           <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
         </div>
         {/* ========================== */}
-
       </div>
 
-      {
-        menu && (
-          <ContextMenu
-            top={menu.top}
-            left={menu.left}
-            onClose={() => setMenu(null)}
-            actions={availableNodes.map(node => ({
-              label: node.label,
-              category: node.category,
-              onSelect: () => {
-                addNode(node.nodeType);
-                setMenu(null);
-              }
-            }))}
-          />
-        )
-      }
+      {menu && (
+        <ContextMenu
+          top={menu.top}
+          left={menu.left}
+          onClose={() => setMenu(null)}
+          actions={availableNodes.map((node) => ({
+            label: node.label,
+            category: node.category,
+            onSelect: () => {
+              addNode(node.nodeType);
+              setMenu(null);
+            },
+          }))}
+        />
+      )}
 
       {/* MODAL */}
-      {isPackageManagerOpen && <PackageManager onClose={() => setPackageManagerOpen(false)} />}
+      {isPackageManagerOpen && (
+        <PackageManager onClose={() => setPackageManagerOpen(false)} />
+      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

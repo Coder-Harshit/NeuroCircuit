@@ -1,11 +1,9 @@
 {
-  "nodeType": "cvtColorImageNode",
+  "nodeType": "cvtColorImage",
   "label": "Colorspace Conversion",
-  "category": "Vision",
+  "category": "VISION",
   "description": "Converts an image from one color space to another",
-  "dependencies": [
-    "opencv-python-headless"
-  ],
+  "dependencies": ["opencv-python-headless"],
   "defaultData": {
     "label": "Change Colorspace",
     "in_colorspace": "BGR",
