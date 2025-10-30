@@ -18,47 +18,17 @@ from app.processors.node_map import (
 from app.classes import GraphPayload, InspectRequest
 import graphlib
 
-from app.package_manager import get_node_status
+from app.package_manager import get_node_status, MANIFEST_MAP
 
 APP_DIR = Path(__file__).parent.parent
 BACKEND_PLUGINS_DIR = APP_DIR / "plugins"
 GITHUB_RAW_BASE_URL = (
-    "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/main/"
+    "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/node_manager/"
 )
-MANIFESTS_DIR = APP_DIR / "app" / "manifests"
 BACKEND_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
-
 
 TEMP_UPLOAD_DIR = Path("temp_uploads")
 TEMP_UPLOAD_DIR.mkdir(exist_ok=True)
-
-
-def generate_manifest_mapping() -> Dict[str, str]:
-    manifestMap = {}
-    if not MANIFESTS_DIR.exists:
-        print(f"Warning: Manifests directory not found at {MANIFESTS_DIR}")
-        return {}
-    for manifest in os.listdir(MANIFESTS_DIR):
-        try:
-            manifest_path = MANIFESTS_DIR / manifest
-            manifest_data = json.load(manifest_path.open())
-            nodeType = manifest_data.get("nodeType")
-            category = manifest_data.get("category")
-            if nodeType and category:
-                manifestMap[nodeType] = category
-            else:
-                print(
-                    f"Warning: Skipping manifest {manifest}, missing 'nodeType' or 'category'."
-                )
-        except json.JSONDecodeError:
-            print(f"Warning: Could not parse JSON from {manifest}.")
-        except Exception as e:
-            print(f"Warning: Error processing manifest {manifest}: {e}")
-    return manifestMap
-
-
-MANIFEST_MAP = generate_manifest_mapping()
-
 
 app = FastAPI()
 
@@ -90,17 +60,17 @@ def read_root():
 
 
 @app.post("/execute")
-def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
+def execute_graph(graph: GraphPayload) -> dict[str, Any]:
     nmap = {node.id: node for node in graph.nodes}  # HASHMAP for quickly finding nodes
 
     # We would need to perform topological sort as the nodes could be in random order, i.e. to make sure dependencies are finished first and then only main task is executed
 
     # dep_list => DEPENDENCY LIST (opposite of ADJ. LIST)
-    dep_list: Dict[str, Set[str]] = {node.id: set() for node in graph.nodes}
+    dep_list: dict[str, set[str]] = {node.id: set() for node in graph.nodes}
     # generated the dep_list
 
-    skipped_nodes: List[str] = []  # To track skipped nodes
-    node_errors: Dict[str, str] = {}  # To track errors per node
+    skipped_nodes: list[str] = []  # To track skipped nodes
+    node_errors: dict[str, str] = {}  # To track errors per node
 
     for edg in graph.edges:
         # going from tgt to source becuase we actually want to generate the dependency list
@@ -150,11 +120,11 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
             if node_id not in node_errors
         }
         ts = graphlib.TopologicalSorter(valid_dep_list)
-        exec_order: Tuple[str, ...] = tuple(ts.static_order())
+        exec_order: tuple[str, ...] = tuple(ts.static_order())
 
-        results: Dict[str, Any] = {}
-        display_outputs: Dict[str, str] = {}
-        dl_files: List[str] = []
+        results: dict[str, Any] = {}
+        display_outputs: dict[str, str] = {}
+        dl_files: list[str] = []
 
         for node_id in exec_order:
             # Although already filtered, double-check just in case
@@ -164,38 +134,25 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
                 continue  # Skip execution if validation failed earlier
 
             node = nmap[node_id]
-            print("FUNCS:")
-            print(NODE_PROCESSING_FUNCTIONS)
-            print()
-            print()
             processing_fun = NODE_PROCESSING_FUNCTIONS.get(node.type)
-            print("PFUNCs:")
-            print(processing_fun)
-            # --- KEY CHANGE: Check if function exists ---
+
             if not processing_fun:
-                # If it's a known node type that *should* have a function, it means deps are missing.
-                # If it's a type that *doesn't* have a function (like noteNode), just ignore it.
-                if (
-                    node.type in NODE_INDEGREE
-                ):  # Check if it's a known processing node type
+                if node.type in NODE_INDEGREE or node.type in MANIFEST_MAP:
                     print(
                         f"Skipping node {node_id} ('{node.data.label}') - processing function missing (likely due to missing dependencies)."
                     )
                     if node_id not in skipped_nodes:
                         skipped_nodes.append(node_id)
-                    node_errors[node_id] = "Missing dependencies prevents execution."
-                    # We don't put anything in results, so downstream nodes will fail or be skipped.
+                    if node_id not in node_errors:
+                        node_errors[node_id] = "Node is not correctly installed."
                 else:
                     print(
                         f"Ignoring node {node_id} ('{node.data.label}') - no processing function defined."
                     )
-                continue  # Move to the next node in exec_order
-            # --------------------------------------------
+                continue
 
             try:
-                parent_node_ids = dep_list.get(node_id, set())  # Use .get for safety
-
-                # Check if any parent was skipped or errored
+                parent_node_ids = dep_list.get(node_id, set())
                 parent_results = []
                 can_execute = True
                 for parent_id in parent_node_ids:
@@ -213,9 +170,10 @@ def execute_graph(graph: GraphPayload) -> Dict[str, Any]:
                         )
                         if node_id not in skipped_nodes:
                             skipped_nodes.append(node_id)
-                        node_errors[node_id] = (
-                            f"Input from skipped parent '{parent_label}' ({parent_id})."
-                        )
+                        if node_id not in node_errors:
+                            node_errors[node_id] = (
+                                f"Input from skipped parent '{parent_label}' ({parent_id})."
+                            )
                         can_execute = False
                         break
                     parent_results.append(results[parent_id])
@@ -332,45 +290,55 @@ async def fetch_codefile_github(rel_path: str, save_path: Path) -> bool:
 
 
 @app.post("/packages/install")
-async def install_node(payload: Dict[str, Any]):
+async def install_node(payload: dict[str, Any]):
     print(payload)
     """
     Installs node deps & code files
     """
     node_type = payload.get("nodeType")
-    deps = payload.get("dependencies", [])
+    deps = payload.get("deps", [])
 
     if not node_type:
         return {"status": "error", "message": "No node type provided"}
 
     if deps:
-        print("Installing dependencies", deps)
+        print(f"Installing dependencies for {node_type}: {', '.join(deps)}")
 
         try:
-            install_cmd = [sys.executable, "-m", "pip", "install"] + deps
-            subprocess.run(install_cmd, capture_output=True, text=True, check=True)
+            cmd = [sys.executable, "-m", "pip", "install"] + deps
+            print("Running Command: ", [" ".join(cmd)])
+            subprocess.check_call(cmd)
         except subprocess.CalledProcessError as err:
+            error_output = err.stderr.decode("utf-8") if err.stderr else str(err)
+            print(f"Failed to install dependencies: {error_output}")
             return {
                 "status": "error",
-                "message": f"Failed to install dependencies: {err.stderr}",
+                "message": f"Failed to install dependencies: {error_output}",
             }
         except Exception as e:
+            print(f"Unexpected error during dependency installation: {e}")
             return {
                 "status": "error",
                 "message": f"Unexpected error during dependency installation: {e}",
             }
     else:
-        print("No dependencies to install for node type:", node_type)
+        print(f"No Python dependencies to install for node type: {node_type}")
+
+    if node_type not in MANIFEST_MAP:
+        return {"status": "error", "message": f"Unknown node type: {node_type}"}
 
     py_filename = MANIFEST_MAP.get(node_type, "GENERAL") + "_" + node_type + ".py"
     py_rel_path = f"backend/plugins/{py_filename}"
     py_save_path = BACKEND_PLUGINS_DIR / py_filename
 
-    if not await fetch_codefile_github(py_rel_path, py_save_path):
-        return {
-            "status": "error",
-            "message": f"Failed to fetch code file for node type: {node_type}",
-        }
+    if not os.path.exists(py_save_path):
+        if not await fetch_codefile_github(py_rel_path, py_save_path):
+            return {
+                "status": "error",
+                "message": f"Failed to fetch code file for node type: {node_type}",
+            }
+    else:
+        print("PLUGIN CODE FILE ALREADY PRESENT!")
 
     print("Re-scanning backend plugins...")
     discover_plugins()
@@ -382,6 +350,50 @@ async def install_node(payload: Dict[str, Any]):
         "message": msg,
         # "frontend_needs_restart": True
     }
+
+
+@app.post("/packages/uninstall")
+async def uninstall_node(payload: dict[str, Any]):
+    """
+    Uninstalls the node by deleting its plugin file (code file)
+    DOES NOT UNINSTALL ITS DEPS (as of now)!
+    """
+    node_type = payload.get("nodeType")
+    if not node_type:
+        return {"status": "error", "message": "No node type provided"}
+
+    if node_type not in MANIFEST_MAP:
+        return {"status": "error", "message": f"Unknown node type: {node_type}"}
+
+    try:
+        py_filename = MANIFEST_MAP.get(node_type, "GENERAL") + "_" + node_type + ".py"
+        plugin_path = BACKEND_PLUGINS_DIR / py_filename
+
+        if plugin_path.is_file():
+            os.remove(plugin_path)
+            print("REMOVED plugin file", plugin_path)
+            discover_plugins()
+
+            return {
+                "status": "success",
+                "message": f"Node '{node_type}' uninstalled successfully.",
+            }
+        else:
+            print(f"Uninstall failed: Plugin file not found at {plugin_path}")
+            # If file is not found, it's already "uninstalled".
+            # We should still re-scan just in case and return success.
+            discover_plugins()
+            return {
+                "status": "success",
+                "message": f"Node '{node_type}' was not installed, state refreshed.",
+            }
+
+    except Exception as e:
+        print(f"Error during uninstall of {node_type}: {e}")
+        return {
+            "status": "error",
+            "message": f"An unexpected error occurred: {e}",
+        }
 
 
 # def install_pkg(payload: Dict[str, Any]):

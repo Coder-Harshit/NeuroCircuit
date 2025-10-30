@@ -18,9 +18,10 @@ export type NodeStatus = {
   label: string;
   description: string;
   category?: string;
-  status: 'Installed' | 'Missing Dependencies';
+  status: "Installed" | "Missing Dependencies" | "Available";
+  dependencies: string[];
   missingDependencies: string[];
-  defaultData: AppNodeData
+  defaultData: AppNodeData;
 };
 
 export type PackageManagerProps = {
