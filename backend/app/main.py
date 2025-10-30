@@ -4,7 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 import shutil
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set
 from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -22,9 +22,7 @@ from app.package_manager import get_node_status, MANIFEST_MAP
 
 APP_DIR = Path(__file__).parent.parent
 BACKEND_PLUGINS_DIR = APP_DIR / "plugins"
-GITHUB_RAW_BASE_URL = (
-    "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/main/"
-)
+CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/Coder-Harshit/NeuroCircuit@main/"
 BACKEND_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
 
 TEMP_UPLOAD_DIR = Path("temp_uploads")
@@ -264,11 +262,11 @@ def list_node_statuses():
     return get_node_status()
 
 
-async def fetch_codefile_github(rel_path: str, save_path: Path) -> bool:
+async def fetch_codefile_cnd(rel_path: str, save_path: Path) -> bool:
     """
-    Fetches a code file from the GitHub repository and saves it locally.
+    Fetches a code file from the jsDelivr CDN and saves it locally.
     """
-    url = f"{GITHUB_RAW_BASE_URL}{rel_path}"
+    url = f"{CDN_BASE_URL}{rel_path}"
     print("Fetching code file from:", url)
 
     async with httpx.AsyncClient() as client:
@@ -332,7 +330,7 @@ async def install_node(payload: dict[str, Any]):
     py_save_path = BACKEND_PLUGINS_DIR / py_filename
 
     if not os.path.exists(py_save_path):
-        if not await fetch_codefile_github(py_rel_path, py_save_path):
+        if not await fetch_codefile_cnd(py_rel_path, py_save_path):
             return {
                 "status": "error",
                 "message": f"Failed to fetch code file for node type: {node_type}",
