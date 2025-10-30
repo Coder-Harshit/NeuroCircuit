@@ -1,5 +1,4 @@
 import importlib
-import os
 from pathlib import Path
 import pkgutil
 import sys
@@ -40,7 +39,6 @@ def discover_plugins():
         print(f"ERROR: Plugins directory not found at {plugins_dir}")
         return
 
-    original_sys_path = sys.path[:]
     if str(backend_dir) not in sys.path:
         sys.path.insert(0, str(backend_dir))
         added_to_path = True
@@ -48,7 +46,7 @@ def discover_plugins():
         added_to_path = False
 
     try:
-        for finder, module_name, ispkg in pkgutil.iter_modules([str(plugins_dir)]):
+        for _, module_name, _ in pkgutil.iter_modules([str(plugins_dir)]):
             module_name = f"plugins.{module_name}"
 
             try:
@@ -118,7 +116,7 @@ def discover_plugins():
         if added_to_path and str(backend_dir) in sys.path:
             sys.path.remove(str(backend_dir))
 
-    print(f"--- Plugin Discovery Finished ---")
+    print("--- Plugin Discovery Finished ---")
     print(
         f"Successfully loaded functions for node types: {list(NODE_PROCESSING_FUNCTIONS.keys())}"
     )

@@ -2,31 +2,76 @@ name: PR Validation Check
 
 on:
   pull_request:
-    branches: 
+    branches:
       - main
 
-env:
-  FRONTEND_IMAGE: neurocircuit-frontend-pr
-  BACKEND_IMAGE: neurocircuit-backend-pr
-
-
 jobs:
-  build-check:
+  frontend-check:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./frontend
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Build Frontend docker image
-        run: |
-          docker build ./frontend -t $FRONTEND_IMAGE
-        
-      - name: Build Backend docker image
-        run: |
-          docker build ./backend -t $BACKEND_IMAGE
+      - name: Setup Node.js (v22)
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
 
-      
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: node-cache
+        with:
+          path: frontend/node_modules
+          key: ${{runner.os}}-node-v22-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Install dependencies
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Run linter (ESlint)
+        run: npm run lint
+
+      - name: Run Typescript type check & build
+        run: npm run build
+
+  backend-check:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: ${{ runner.os }}-uv-v7-${{ hashFiles('backend/uv.lock') }}
+
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Run linter (Ruff)
+        run: uv run ruff check .
+
+      - name: Run formatter check (Ruff)
+        run: uv run ruff format --check .
+
+      - name: Run tests (Pytests)
+        run: uv run pytest

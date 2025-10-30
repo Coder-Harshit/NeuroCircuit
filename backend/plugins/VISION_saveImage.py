@@ -28,5 +28,5 @@ def image_save_node(data: SaveImageNodeData, inputs: List[cv.typing.MatLike]) ->
     if not success:
         raise IOError(f"OpenCV failed to save temporary image to {save_path}.")
 
-    print(f"  -> Temporary image saved.")
+    print("  -> Temporary image saved.")
     return filename

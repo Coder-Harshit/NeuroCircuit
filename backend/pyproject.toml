@@ -12,8 +12,11 @@ dependencies = [
 
 [dependency-groups]
 aiml = [
+    "numpy>=2.3.4",
+    "opencv-python-headless>=4.11.0.86",
     "pandas>=2.3.2",
 ]
 test = [
     "pytest>=8.4.2",
+    "ruff>=0.14.2",
 ]
