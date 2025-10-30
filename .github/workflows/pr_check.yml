@@ -65,7 +65,7 @@ jobs:
           key: ${{ runner.os }}-uv-v7-${{ hashFiles('backend/uv.lock') }}
 
       - name: Install dependencies
-        run: uv pip sync --all-groups
+        run: uv sync --all-groups
 
       - name: Run linter (Ruff)
         run: uv run ruff check .
