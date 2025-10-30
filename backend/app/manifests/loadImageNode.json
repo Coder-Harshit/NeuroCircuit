@@ -1,11 +1,9 @@
 {
-  "nodeType": "loadImageNode",
+  "nodeType": "loadImage",
   "label": "Image Input",
-  "category": "Input",
+  "category": "VISION",
   "description": "Loads Image",
-  "dependencies": [
-    "opencv-python-headless"
-  ],
+  "dependencies": ["opencv-python-headless"],
   "defaultData": {
     "label": "Load Image",
     "filePath": "",

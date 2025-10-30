@@ -3,13 +3,16 @@ from app.classes import CvtColorImageNodeData
 
 # --- Plugin Metadata ---
 node_info = {
-    "nodeType": "cvtColorImageNode",
+    "nodeType": "cvtColorImage",
     "function": "cvt_color_image_node",
     "inDegree": "1",
 }
 # -----------------------
 
-def cvt_color_image_node(data: CvtColorImageNodeData, inputs: list) -> cv.typing.MatLike:
+
+def cvt_color_image_node(
+    data: CvtColorImageNodeData, inputs: list
+) -> cv.typing.MatLike:
     """Converts an input image from one color space to another."""
     if not inputs or inputs[0] is None:
         raise ValueError("Input image is missing for Color Space Conversion node.")
@@ -21,9 +24,10 @@ def cvt_color_image_node(data: CvtColorImageNodeData, inputs: list) -> cv.typing
     conversionCode = getattr(cv, conversionFlag, None)
 
     if conversionCode is None:
-        raise ValueError(f"Invalid color space conversion: {data.in_colorspace} to {data.out_colorspace}")
+        raise ValueError(
+            f"Invalid color space conversion: {data.in_colorspace} to {data.out_colorspace}"
+        )
 
-
-    converted_img = cv.cvtColor(image_in,conversionCode)
+    converted_img = cv.cvtColor(image_in, conversionCode)
 
     return converted_img

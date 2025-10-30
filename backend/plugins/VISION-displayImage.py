@@ -6,13 +6,16 @@ from app.classes import DisplayImageNodeData
 
 # --- Plugin Metadata ---
 node_info = {
-    "nodeType": "displayImageNode",
+    "nodeType": "displayImage",
     "function": "display_image_node",
     "inDegree": 1,
 }
 # -----------------------
 
-def display_image_node(data: DisplayImageNodeData, inputs: List[np.ndarray]) -> Optional[str]:
+
+def display_image_node(
+    data: DisplayImageNodeData, inputs: List[np.ndarray]
+) -> Optional[str]:
     """
     Receives an image from parent results and returns a base64 data URL (PNG)
     """
@@ -34,16 +37,18 @@ def display_image_node(data: DisplayImageNodeData, inputs: List[np.ndarray]) -> 
             out_img = in_image
 
         # IMAGE ENCODE
-        status, buffer = cv.imencode('.png', out_img)
+        status, buffer = cv.imencode(".png", out_img)
         if not status:
             print("Failed to encode image in Display Image node.")
             return None
-        
+
         base64_enc_str = base64.b64encode(buffer.tobytes()).decode("ascii")
         d_url = f"data:image/png;base64,{base64_enc_str}"
         print(d_url)
         return d_url
 
     except Exception as e:
-        print(f"Error in display_image_node ({getattr(data, 'label', 'Display Image')}): {e}")
+        print(
+            f"Error in display_image_node ({getattr(data, 'label', 'Display Image')}): {e}"
+        )
         return None

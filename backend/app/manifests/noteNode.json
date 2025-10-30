@@ -1,6 +1,6 @@
 {
-  "nodeType": "noteNode",
-  "category": "General",
+  "nodeType": "note",
+  "category": "GENERAL",
   "description": "A node for adding comments and annotations to the workflow.",
   "dependencies": [],
   "defaultData": {

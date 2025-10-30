@@ -1,11 +1,9 @@
 {
-  "nodeType": "filterRowsNode",
+  "nodeType": "filterRows",
   "label": "Filter Rows",
-  "category": "Filtering",
+  "category": "DATA",
   "description": "Filters rows from a DataFrame based on a condition.",
-  "dependencies": [
-    "pandas"
-  ],
+  "dependencies": ["pandas"],
   "defaultData": {
     "label": "Filter Rows",
     "column": "",
