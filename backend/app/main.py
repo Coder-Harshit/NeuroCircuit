@@ -23,7 +23,7 @@ from app.package_manager import get_node_status, MANIFEST_MAP
 APP_DIR = Path(__file__).parent.parent
 BACKEND_PLUGINS_DIR = APP_DIR / "plugins"
 GITHUB_RAW_BASE_URL = (
-    "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/node_manager/"
+    "https://raw.githubusercontent.com/Coder-Harshit/NeuroCircuit/main/"
 )
 BACKEND_PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
 
