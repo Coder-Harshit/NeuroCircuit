@@ -1,15 +1,15 @@
 services:
   frontend:
-    build:
-      context: ./frontend
+    image: ghcr.io/coder-harshit/neurocircuit-frontend:latest
     ports:
       - "5173:80"
     networks:
       - neuronet
+    depends_on:
+      - backend
 
   backend:
-    build:
-      context: ./backend
+    image: ghcr.io/coder-harshit/neurocircuit-backend:latest
     ports:
       - "8000:8000"
     networks:
