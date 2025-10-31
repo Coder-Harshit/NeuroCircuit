@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import {
   Background,
   ReactFlow,
@@ -24,7 +24,10 @@ import type { NodeStatus } from "./types";
 import "@xyflow/react/dist/style.css";
 import "./App.css";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
-import { triggerBrowserDownload } from "./utils/trigDownload";
+import {
+  triggerBrowserDownload,
+  triggerJSONDownload,
+} from "./utils/trigDownload";
 
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
@@ -62,6 +65,8 @@ function App() {
     nodeId: string;
     message: string;
   } | null>(null);
+
+  const loadWorkflowInputRef = useRef<HTMLInputElement>(null);
 
   // EFFECT to toggle the 'dark' class on the HTML element
   useEffect(() => {
@@ -395,16 +400,71 @@ function App() {
     });
   }, [nodes, onNodeDataChange, nodeSchemas, displayData, error]);
 
-  // const defaultEdgeOptions = {
-  //   type: 'smoothstep',
-  //   markerEnd: {
-  //       type: MarkerType.ArrowClosed,
-  //       color: 'var(--color-edge)',
-  //   },
-  //   style: {
-  //       stroke: 'var(--color-edge)',
-  //   },
-  // };
+  const handleSaveWorkflow = useCallback(() => {
+    if (!flow) return;
+
+    const flowData = flow.toObject();
+    const sanitizedNodes = flowData.nodes.map((node) => {
+      const { onChange: _onChange, ...serializableData } = node.data;
+      return { ...node, data: serializableData };
+    });
+
+    const saveObj = {
+      nodes: sanitizedNodes,
+      edges: flowData.edges,
+      viewport: flow.getViewport(),
+    };
+
+    triggerJSONDownload(saveObj, "myWorkflow.neuro.json");
+  }, [flow]);
+
+  const handleLoadWorkflow = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const fileContent = e.target?.result as string;
+        const loadedFlow = JSON.parse(fileContent);
+
+        if (loadedFlow.nodes && loadedFlow.edges) {
+          const restoredNodes = loadedFlow.nodes.map((node: AppNode) => {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                onChange: onNodeDataChange,
+              },
+            };
+          });
+
+          setNodes(restoredNodes);
+          setEdges(loadedFlow.edges);
+          setTimeout(() => {
+            flow.fitView();
+          }, 50);
+        } else {
+          throw new Error("Invalid workflow file format.");
+        }
+      } catch (err) {
+        console.error("Failed to load workflow:", err);
+        setError({
+          nodeId: "",
+          message:
+            err instanceof Error
+              ? err.message
+              : "Could not parse workflow file",
+        });
+      }
+    };
+    reader.readAsText(file);
+
+    if (event.target) {
+      event.target.value = "";
+    }
+  };
 
   return (
     <div className="h-screen w-screen bg-[var(--color-surface-1)] text-[var(--color-text-1)]">
@@ -479,6 +539,20 @@ function App() {
         {/* === UI CONTROLS PANEL === */}
         <div className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-lg bg-[var(--color-surface-2)]/80 p-2 shadow-lg backdrop-blur-sm border border-[var(--color-border-1)]">
           <button
+            onClick={() => loadWorkflowInputRef.current?.click()}
+            className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+            title="Load workflow from a file"
+          >
+            Load Workflow
+          </button>
+          <button
+            onClick={handleSaveWorkflow}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+            title="Save workflow to a file"
+          >
+            Save Workflow
+          </button>
+          <button
             onClick={() => setPackageManagerOpen(true)}
             className="bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)] text-[var(--color-text-2)] font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
           >
@@ -517,6 +591,14 @@ function App() {
       {isPackageManagerOpen && (
         <PackageManager onClose={() => setPackageManagerOpen(false)} />
       )}
+
+      <input
+        type="file"
+        ref={loadWorkflowInputRef}
+        onChange={handleLoadWorkflow}
+        accept=".json, .neuro.json, application/json"
+        style={{ display: "none" }}
+      ></input>
     </div>
   );
 }
