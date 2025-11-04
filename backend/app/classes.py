@@ -77,7 +77,13 @@ class DisplayImageNodeData(BaseModel):
 class BlurImageNodeData(BaseModel):
     label: str
     blurType: Literal["GAUSSIAN", "MEDIAN", "BILATERAL"] = "GAUSSIAN"
-    kernelSize: int
+    kernelSize: int = 5
+
+
+class CannyEdgeNodeData(BaseModel):
+    label: str
+    threshold1: int = 100
+    threshold2: int = 200
 
 
 AnyNodeData = Union[
@@ -96,6 +102,7 @@ AnyNodeData = Union[
     FlipImageNodeData,
     DisplayImageNodeData,
     BlurImageNodeData,
+    CannyEdgeNodeData,
 ]
 
 

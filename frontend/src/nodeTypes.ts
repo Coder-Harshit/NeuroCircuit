@@ -186,6 +186,18 @@ export type BlurImageNodeProps = {
   id: string;
 };
 
+// CANNY_EDGE NODE
+export type CannyEdgeNodeData = {
+  label: string;
+  threshold1: number;
+  threshold2: number;
+} & CommonNodeData;
+
+export type CannyEdgeNodeProps = {
+  data: CannyEdgeNodeData;
+  id: string;
+};
+
 export type AppNodeData =
   | InputNodeData
   | TransformNodeData
@@ -201,7 +213,8 @@ export type AppNodeData =
   | CvtColorImageNodeData
   | FlipImageNodeData
   | DisplayImageNodeData
-  | BlurImageNodeData;
+  | BlurImageNodeData
+  | CannyEdgeNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

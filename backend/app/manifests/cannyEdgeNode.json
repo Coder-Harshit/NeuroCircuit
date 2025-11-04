@@ -1,0 +1,12 @@
+{
+  "nodeType": "cannyEdge",
+  "label": "Canny Edge",
+  "category": "VISION",
+  "description": "Detects edges in an image using the Canny algorithm.",
+  "dependencies": ["opencv-python-headless"],
+  "defaultData": {
+    "label": "Canny Edge",
+    "threshold1": 100,
+    "threshold2": 200
+  }
+}
