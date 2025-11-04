@@ -1,6 +1,6 @@
 // src/nodeTypes.ts
 
-import type { Node } from '@xyflow/react';
+import type { Node } from "@xyflow/react";
 
 type ColorSpace = "GRAY" | "BGR" | "RGB" | "HSV" | "LAB";
 
@@ -8,8 +8,7 @@ export type CommonNodeData = {
   onChange: (id: string, data: object) => void;
   isError?: boolean;
   category?: string;
-}
-
+};
 
 // INPUT NODE
 export type InputNodeData = {
@@ -24,18 +23,16 @@ export type InputNodeProps = {
   id: string;
 };
 
-
 // TRANSFORM NODE
 export type TransformNodeData = {
   label: string;
-  method: 'normalize' | 'standardize' | 'pca';
+  method: "normalize" | "standardize" | "pca";
 } & CommonNodeData;
 
 export type TransformNodeProps = {
   data: TransformNodeData;
   id: string;
 };
-
 
 // NOTE NODE
 export type NoteNodeData = {
@@ -47,8 +44,6 @@ export type NoteNodeProps = {
   data: NoteNodeData;
   id: string;
 };
-
-
 
 // DISPLAY NODE
 export type DisplayNodeData = {
@@ -62,19 +57,16 @@ export type DisplayNodeProps = {
   id: string;
 };
 
-
-
 // HANDLE_MISSING NODE
 export type HandleMissingNodeData = {
   label: string;
-  strategy: 'mean' | 'median' | 'most_frequent' | 'constant';
+  strategy: "mean" | "median" | "most_frequent" | "constant";
 } & CommonNodeData;
 
 export type HandleMissingNodeProps = {
   data: HandleMissingNodeData;
   id: string;
 };
-
 
 // FILTER_ROWS NODE
 export type FilterRowsNodeData = {
@@ -88,7 +80,6 @@ export type FilterRowsNodeProps = {
   data: FilterRowsNodeData;
   id: string;
 };
-
 
 // Combine NODE
 export type CombineNodeData = {
@@ -104,15 +95,14 @@ export type CombineNodeProps = {
 // SelectColumn NODE
 export type SelectColumnData = {
   label: string;
-  columns: string
-  inputColumns?: string[]
+  columns: string;
+  inputColumns?: string[];
 } & CommonNodeData;
 
 export type SelectColumnProps = {
   data: SelectColumnData;
   id: string;
 };
-
 
 // LoadImage NODE
 export type LoadImageNodeData = {
@@ -122,8 +112,7 @@ export type LoadImageNodeData = {
 export type LoadImageNodeProps = {
   data: LoadImageNodeData;
   id: string;
-}
-
+};
 
 // SaveImage Node
 export type SaveImageNodeData = {
@@ -138,7 +127,6 @@ export type SaveImageNodeProps = {
   id: string;
 };
 
-
 // ResizeImage Node
 export type ResizeImageNodeData = {
   label: string;
@@ -150,7 +138,6 @@ export type ResizeImageNodeProps = {
   data: ResizeImageNodeData;
   id: string;
 };
-
 
 // ResizeImage Node
 export type CvtColorImageNodeData = {
@@ -164,7 +151,6 @@ export type CvtColorImageNodeProps = {
   id: string;
 };
 
-
 // FlipImage Node
 export type FlipImageNodeData = {
   label: string;
@@ -177,7 +163,6 @@ export type FlipImageNodeProps = {
   id: string;
 };
 
-
 // DISPLAY_IMAGE NODE
 export type DisplayImageNodeData = {
   label: string;
@@ -189,6 +174,29 @@ export type DisplayImageNodeProps = {
   id: string;
 };
 
+// BLUR_IMAGE NODE
+export type BlurImageNodeData = {
+  label: string;
+  blurType: "GAUSSIAN" | "MEDIA" | "BILATERAL";
+  kernelSize: number;
+} & CommonNodeData;
+
+export type BlurImageNodeProps = {
+  data: BlurImageNodeData;
+  id: string;
+};
+
+// CANNY_EDGE NODE
+export type CannyEdgeNodeData = {
+  label: string;
+  threshold1: number;
+  threshold2: number;
+} & CommonNodeData;
+
+export type CannyEdgeNodeProps = {
+  data: CannyEdgeNodeData;
+  id: string;
+};
 
 export type AppNodeData =
   | InputNodeData
@@ -205,7 +213,8 @@ export type AppNodeData =
   | CvtColorImageNodeData
   | FlipImageNodeData
   | DisplayImageNodeData
-  ;
+  | BlurImageNodeData
+  | CannyEdgeNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

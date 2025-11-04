@@ -1,0 +1,12 @@
+{
+  "nodeType": "blurImage",
+  "label": "Blur Image",
+  "category": "VISION",
+  "description": "Applies a blur filter to an image to reduce noise.",
+  "dependencies": ["opencv-python-headless"],
+  "defaultData": {
+    "label": "Blur",
+    "blurType": "GAUSSIAN",
+    "kernelSize": 5
+  }
+}
