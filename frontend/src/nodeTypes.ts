@@ -51,6 +51,7 @@ export type DisplayNodeData = {
   label: string;
   result?: string; // JSON String
   isError?: boolean;
+  description?: string;
 };
 
 export type DisplayNodeProps = {
