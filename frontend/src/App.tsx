@@ -286,6 +286,7 @@ function App() {
         },
         data: {
           ...(nodeBlueprint.defaultData || {}),
+          description: nodeBlueprint.description || "",
           onChange: onNodeDataChange,
         } as AppNodeData,
       };

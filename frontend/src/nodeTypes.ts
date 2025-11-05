@@ -8,6 +8,7 @@ export type CommonNodeData = {
   onChange: (id: string, data: object) => void;
   isError?: boolean;
   category?: string;
+  description?: string;
 };
 
 // INPUT NODE
