@@ -21,7 +21,6 @@ import PackageManager from "./components/ui/PackageManager";
 import type { AppNode, AppNodeData } from "./nodeTypes";
 import type { NodeStatus } from "./types";
 
-import "@xyflow/react/dist/style.css";
 import "./App.css";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
 import {
