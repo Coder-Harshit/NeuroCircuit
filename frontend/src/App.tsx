@@ -10,7 +10,6 @@ import {
   type Edge,
   type ColorMode,
   Controls,
-  // MarkerType,
 } from "@xyflow/react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -21,23 +20,42 @@ import PackageManager from "./components/ui/PackageManager";
 import type { AppNode, AppNodeData } from "./nodeTypes";
 import type { NodeStatus } from "./types";
 
-import "@xyflow/react/dist/style.css";
 import "./App.css";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
 import {
   triggerBrowserDownload,
   triggerJSONDownload,
 } from "./utils/trigDownload";
+import TutorialModal from "./components/ui/TutorialModal";
+import { useAppHotkeys } from "./hooks/useAppHotkeys";
 
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
 
 const nodeTypes = nodeRegistry;
 
+const HelpIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+  </svg>
+);
+
 function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
-
+  const { deleteElements, screenToFlowPosition, fitView } = useReactFlow();
   const [nodeSchemas, setNodeSchemas] = useState<Record<string, string[]>>({});
 
   // state will be null when the menu is closed, or an object with its position when it's open.
@@ -48,6 +66,7 @@ function App() {
   } | null>(null);
 
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
+  const [isTutorialOpen, setTutorialOpen] = useState(false);
   const [availableNodes, setAvailableNodes] = useState<NodeStatus[]>([]);
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
   const [isPanning, setIsPanning] = useState(false);
@@ -66,6 +85,7 @@ function App() {
     message: string;
   } | null>(null);
 
+  const [clipboard, setClipboard] = useState<AppNode | null>(null);
   const loadWorkflowInputRef = useRef<HTMLInputElement>(null);
 
   // EFFECT to toggle the 'dark' class on the HTML element
@@ -267,9 +287,11 @@ function App() {
   );
 
   const addNode = useCallback(
-    (nodeType: string) => {
-      if (!menu) return;
-
+    (
+      nodeType: string,
+      presetData?: Partial<AppNodeData>,
+      presetPosition?: { x: number; y: number },
+    ) => {
       const nodeBlueprint = availableNodes.find((n) => n.nodeType === nodeType);
       if (!nodeBlueprint) {
         console.error(`Blueprint for node type "${nodeType}" not found.`);
@@ -277,24 +299,40 @@ function App() {
       }
 
       const newId = uuidv4();
-
+      const position =
+        presetPosition ??
+        screenToFlowPosition({
+          x: menu?.left ?? window.innerWidth / 2,
+          y: menu?.top ?? window.innerHeight / 2,
+        });
       const newNode: AppNode = {
         id: newId,
         type: nodeType,
-        position: {
-          x: menu.left,
-          y: menu.top,
-        },
+        position,
         data: {
           ...(nodeBlueprint.defaultData || {}),
+          ...(presetData || {}),
+          description: nodeBlueprint.description || "",
           onChange: onNodeDataChange,
         } as AppNodeData,
       };
-      setNodes((currentNodes) => [...currentNodes, newNode]);
+      console.log(newNode);
+      setNodes((currentNodes) => currentNodes.concat(newNode));
       setMenu(null);
     },
-    [menu, onNodeDataChange, setNodes, availableNodes],
+    [menu, availableNodes, screenToFlowPosition, onNodeDataChange, setNodes],
   );
+
+  useAppHotkeys({
+    nodes,
+    setNodes,
+    edges,
+    deleteElements,
+    addNode,
+    fitView,
+    clipboard,
+    setClipboard,
+  });
 
   const paneContextMenu = useCallback(
     (evt: MouseEvent | React.MouseEvent) => {
@@ -537,36 +575,49 @@ function App() {
           <Controls />
         </ReactFlow>
         {/* === UI CONTROLS PANEL === */}
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-2 rounded-lg bg-[var(--color-surface-2)]/80 p-2 shadow-lg backdrop-blur-sm border border-[var(--color-border-1)]">
-          <button
-            onClick={() => loadWorkflowInputRef.current?.click()}
-            className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-            title="Load workflow from a file"
-          >
-            Load Workflow
-          </button>
-          <button
-            onClick={handleSaveWorkflow}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-            title="Save workflow to a file"
-          >
-            Save Workflow
-          </button>
-          <button
-            onClick={() => setPackageManagerOpen(true)}
-            className="bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)] text-[var(--color-text-2)] font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
-          >
-            Manage Nodes
-          </button>
+        <div className="absolute top-4 right-4 z-10 flex justify-between items-center gap-2 rounded-lg bg-[var(--color-surface-2)]/80 p-2 shadow-lg backdrop-blur-sm border border-[var(--color-border-1)]">
+          {/* ... (Left-aligned group) ... */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => loadWorkflowInputRef.current?.click()}
+              className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+              title="Load workflow from a file"
+            >
+              Load Workflow
+            </button>
 
-          <button
-            onClick={handleRunClick}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
-          >
-            Run Pipeline
-          </button>
+            <button
+              onClick={handleSaveWorkflow}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              title="Save workflow to a file"
+            >
+              Save Workflow
+            </button>
+          </div>
 
-          <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPackageManagerOpen(true)}
+              className="bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)] text-[var(--color-text-2)] font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+            >
+              Manage Nodes
+            </button>
+
+            <button
+              onClick={handleRunClick}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+            >
+              Run Pipeline
+            </button>
+            <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
+            <button
+              onClick={() => setTutorialOpen(true)}
+              className="p-2 rounded-md text-[var(--color-text-2)] bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)]"
+              aria-label="Open tutorial"
+            >
+              <HelpIcon />
+            </button>
+          </div>
         </div>
         {/* ========================== */}
       </div>
@@ -590,6 +641,10 @@ function App() {
       {/* MODAL */}
       {isPackageManagerOpen && (
         <PackageManager onClose={() => setPackageManagerOpen(false)} />
+      )}
+
+      {isTutorialOpen && (
+        <TutorialModal onClose={() => setTutorialOpen(false)} />
       )}
 
       <input

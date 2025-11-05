@@ -2,9 +2,11 @@ import { Handle, Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { CannyEdgeNodeProps } from "../../nodeTypes";
 
+// Shared class for form elements
 const formElementClasses =
   "nodrag w-full p-2 border rounded-md bg-[var(--color-surface-3)] border-[var(--color-border-2)] text-[var(--color-text-1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
 
+// --- Icons ---
 const EdgeIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -22,6 +24,24 @@ const EdgeIcon = () => (
     <line x1="1" y1="17" x2="23" y2="7"></line>
   </svg>
 );
+const InfoIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="12" y1="16" x2="12" y2="12"></line>
+    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+  </svg>
+);
+// ---
 
 function CannyEdgeNode({ id, data }: CannyEdgeNodeProps) {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -38,16 +58,26 @@ function CannyEdgeNode({ id, data }: CannyEdgeNodeProps) {
   return (
     <div
       className={`
-            w-[250px] rounded-lg shadow-md bg-[var(--color-surface-2)] text-[var(--color-text-1)]
-            border ${borderClass}
-        `}
+        w-[250px] rounded-lg shadow-md bg-[var(--color-surface-2)] text-[var(--color-text-1)]
+        border ${borderClass}
+    `}
     >
       {/* Header */}
-      <div className="p-2 border-b border-[var(--color-border-1)] bg-[var(--color-node-header)] rounded-t-lg flex items-center gap-2">
-        <EdgeIcon />
-        <p className="font-bold text-[var(--color-node-header-text)]">
-          {data.label}
-        </p>
+      <div className="p-2 border-b border-[var(--color-border-1)] bg-[var(--color-node-header)] rounded-t-lg flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <EdgeIcon />
+          <p className="font-bold text-[var(--color-node-header-text)]">
+            {data.label}
+          </p>
+        </div>
+        {data.description && (
+          <div
+            title={data.description}
+            className="w-5 h-5 flex items-center justify-center rounded-full bg-[var(--color-surface-3)] text-[var(--color-text-2)] cursor-help"
+          >
+            <InfoIcon />
+          </div>
+        )}
       </div>
 
       {/* Body */}

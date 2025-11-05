@@ -8,6 +8,7 @@ export type CommonNodeData = {
   onChange: (id: string, data: object) => void;
   isError?: boolean;
   category?: string;
+  description?: string;
 };
 
 // INPUT NODE
@@ -50,6 +51,7 @@ export type DisplayNodeData = {
   label: string;
   result?: string; // JSON String
   isError?: boolean;
+  description?: string;
 };
 
 export type DisplayNodeProps = {
