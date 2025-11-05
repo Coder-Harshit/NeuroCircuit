@@ -10,7 +10,6 @@ import {
   type Edge,
   type ColorMode,
   Controls,
-  // MarkerType,
 } from "@xyflow/react";
 import { v4 as uuidv4 } from "uuid";
 
@@ -27,8 +26,8 @@ import {
   triggerBrowserDownload,
   triggerJSONDownload,
 } from "./utils/trigDownload";
-import { useHotkeys } from "react-hotkeys-hook";
 import TutorialModal from "./components/ui/TutorialModal";
+import { useAppHotkeys } from "./hooks/useAppHotkeys";
 
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
@@ -324,119 +323,16 @@ function App() {
     [menu, availableNodes, screenToFlowPosition, onNodeDataChange, setNodes],
   );
 
-  // HOTKEYS!!
-  const clipboardRef = useRef(clipboard);
-  useEffect(() => {
-    clipboardRef.current = clipboard;
-    console.log(clipboard);
-  }, [clipboard]);
-
-  // Delete Hotkey
-  useHotkeys(
-    ["Delete", "Backspace"],
-    (e) => {
-      e.preventDefault();
-
-      const selectedNodes = nodes.filter((n) => n.selected);
-      const selectedEdges = edges.filter((e) => e.selected);
-      deleteElements({ nodes: selectedNodes, edges: selectedEdges });
-    },
-    [nodes, edges, deleteElements],
-  );
-
-  // Copy Hotkey
-  useHotkeys(
-    "ctrl+c, meta+c",
-    (e) => {
-      e.preventDefault();
-
-      const selectedNode = nodes.find((n) => n.selected);
-      if (selectedNode) {
-        setClipboard(selectedNode);
-      }
-    },
-    [nodes],
-  );
-
-  // Paste Hotkey
-  useHotkeys(
-    "ctrl+v, meta+v",
-    (e) => {
-      e.preventDefault();
-      console.log(clipboardRef);
-      if (clipboardRef.current) {
-        const nodeToPaste = clipboardRef.current;
-        if (nodeToPaste && nodeToPaste.type) {
-          addNode(
-            nodeToPaste.type,
-            {
-              ...nodeToPaste.data,
-            },
-            {
-              x: nodeToPaste.position.x + 20,
-              y: nodeToPaste.position.y + 20,
-            },
-          );
-        }
-      }
-    },
-    [addNode],
-  ); // addNode is wrapped in useCallback, safe dependency
-
-  // Duplicate Hotkey
-  useHotkeys(
-    "ctrl+d, meta+d",
-    (e) => {
-      e.preventDefault();
-      const selectedNode = nodes.find((n) => n.selected);
-      if (selectedNode && selectedNode.type) {
-        addNode(
-          selectedNode.type,
-          {
-            ...selectedNode.data,
-          },
-          {
-            x: selectedNode.position.x + 20,
-            y: selectedNode.position.y + 20,
-          },
-        );
-      }
-    },
-    [nodes, addNode],
-  );
-
-  useHotkeys(
-    "f",
-    (e) => {
-      e.preventDefault();
-      const selectedNodes = nodes.filter((n) => n.selected);
-
-      if (selectedNodes.length > 0) {
-        fitView({
-          nodes: selectedNodes,
-          duration: 200,
-          padding: 0.2,
-        });
-      } else {
-        fitView({ duration: 200, padding: 0.1 });
-      }
-    },
-    [nodes, fitView],
-  );
-
-  useHotkeys(
-    "a",
-    (e) => {
-      e.preventDefault();
-      setNodes((nds) =>
-        nds.map((node) => ({
-          ...node,
-          selected: true,
-        })),
-      );
-    },
-    [setNodes],
-  );
+  useAppHotkeys({
+    nodes,
+    setNodes,
+    edges,
+    deleteElements,
+    addNode,
+    fitView,
+    clipboard,
+    setClipboard,
+  });
 
   const paneContextMenu = useCallback(
     (evt: MouseEvent | React.MouseEvent) => {

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { formatKeymap, KEYMAPS } from "../../keymaps";
 
 type TutorialModalProps = {
   onClose: () => void;
@@ -118,11 +119,7 @@ function TutorialModal({ onClose }: TutorialModalProps) {
               </span>{" "}
               a node or edge, then press{" "}
               <span className="font-mono p-1 rounded bg-[var(--color-surface-3)] text-[var(--color-text-1)]">
-                Delete
-              </span>{" "}
-              or{" "}
-              <span className="font-mono p-1 rounded bg-[var(--color-surface-3)] text-[var(--color-text-1)]">
-                Backspace
+                {formatKeymap(KEYMAPS.DELETE)}
               </span>{" "}
               to remove it.
             </li>
@@ -134,31 +131,31 @@ function TutorialModal({ onClose }: TutorialModalProps) {
           <ul className="list-disc list-inside space-y-2 text-[var(--color-text-2)]">
             <li>
               <span className="font-mono p-1 rounded bg-[var(--color-surface-3)] text-[var(--color-text-1)]">
-                A
+                {formatKeymap(KEYMAPS.SELECT_ALL)}
               </span>
               : Select all nodes.
             </li>{" "}
             <li>
               <span className="font-mono p-1 rounded bg-[var(--color-surface-3)] text-[var(--color-text-1)]">
-                Ctrl/Cmd + C
+                {formatKeymap(KEYMAPS.COPY)}
               </span>
               : Copy selected node.
             </li>
             <li>
               <span className="font-mono p-1 rounded bg-[var(--color-surface-3)] text-[var(--color-text-1)]">
-                Ctrl/Cmd + V
+                {formatKeymap(KEYMAPS.PASTE)}
               </span>
               : Paste node.
             </li>
             <li>
               <span className="font-mono p-1 rounded bg-[var(--color-surface-3)] text-[var(--color-text-1)]">
-                Ctrl/Cmd + D
+                {formatKeymap(KEYMAPS.DUPLICATE)}
               </span>
               : Duplicate selected node.
             </li>
             <li>
               <span className="font-mono p-1 rounded bg-[var(--color-surface-3)] text-[var(--color-text-1)]">
-                F
+                {formatKeymap(KEYMAPS.FIT_VIEW)}
               </span>
               : Fit view to selection (or all nodes).
             </li>
