@@ -1,6 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { BlurImageNodeProps } from "../../nodeTypes";
+import SingleConnectionHandle from "../handle/SingleConnectionHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -134,7 +135,7 @@ function BlurImageNode({ id, data }: BlurImageNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <SingleConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"
