@@ -1,7 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { TransformNodeProps } from "../../nodeTypes";
-import SingleConnectionHandle from "../handle/SingleConnectionHandle";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 const formElementClasses =
   "nodrag w-full p-2 border rounded-md bg-[var(--color-surface-3)] border-[var(--color-border-2)] text-[var(--color-text-1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
@@ -107,13 +107,13 @@ function TransformNode({ id, data }: TransformNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <LimitedConnectionHandle
         id="a"
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
       />
-      <SingleConnectionHandle
+      <LimitedConnectionHandle
         id="b"
         type="target"
         position={Position.Left}

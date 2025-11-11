@@ -1,6 +1,6 @@
 import { Position } from "@xyflow/react";
 import type { DisplayNodeProps } from "../../nodeTypes";
-import SingleConnectionHandle from "../handle/SingleConnectionHandle";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // --- Icons ---
 const TableIcon = () => (
@@ -111,7 +111,7 @@ function DisplayNode({ data }: DisplayNodeProps) {
           </div>
         )}
       </div>
-      <SingleConnectionHandle
+      <LimitedConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"

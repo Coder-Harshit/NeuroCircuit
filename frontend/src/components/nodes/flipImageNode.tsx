@@ -1,7 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { FlipImageNodeProps } from "../../nodeTypes";
-import SingleConnectionHandle from "../handle/SingleConnectionHandle";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // --- Icons ---
 const FlipIcon = () => (
@@ -116,13 +116,13 @@ function FlipImageNode({ id, data }: FlipImageNodeProps) {
       </div>
 
       {/* Handles */}
-      <SingleConnectionHandle
+      <LimitedConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"
         aria-label="Image input"
       />
-      <Handle
+      <LimitedConnectionHandle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
