@@ -1,5 +1,6 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { CombineNodeProps } from "../../nodeTypes";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -102,19 +103,19 @@ function CombineNode({ id, data }: CombineNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <LimitedConnectionHandle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
       />
-      <Handle
+      <LimitedConnectionHandle
         id="a"
         type="target"
         position={Position.Left}
         style={{ top: "33%" }}
         className="!bg-[var(--color-accent)]"
       />
-      <Handle
+      <LimitedConnectionHandle
         id="b"
         type="target"
         position={Position.Left}

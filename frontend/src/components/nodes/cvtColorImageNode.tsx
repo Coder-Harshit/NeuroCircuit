@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { CvtColorImageNodeProps } from "../../nodeTypes";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -134,13 +135,13 @@ function CvtColorImageNode({ id, data }: CvtColorImageNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <LimitedConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"
         aria-label="Image input"
       />
-      <Handle
+      <LimitedConnectionHandle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"

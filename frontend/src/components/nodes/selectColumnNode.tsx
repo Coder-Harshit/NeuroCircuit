@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import { useMemo } from "react";
 import type { SelectColumnProps } from "../../nodeTypes";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // Simple Columns Icon
 const ColumnsIcon = () => (
@@ -119,12 +120,12 @@ function SelectColumnNode({ id, data }: SelectColumnProps) {
         </div>
       </div>
 
-      <Handle
+      <LimitedConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"
       />
-      <Handle
+      <LimitedConnectionHandle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
