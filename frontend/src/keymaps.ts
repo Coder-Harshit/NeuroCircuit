@@ -1,6 +1,6 @@
 // To change a shortcut, you only have to edit it here.
 export const KEYMAPS = {
-  SELECT_ALL: "a",
+  SELECT_ALL: "ctrl+a, meta+a",
   COPY: "ctrl+c, meta+c",
   PASTE: "ctrl+v, meta+v",
   DUPLICATE: "ctrl+d, meta+d",

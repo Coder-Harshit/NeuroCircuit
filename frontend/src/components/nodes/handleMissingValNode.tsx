@@ -1,6 +1,7 @@
 import { Handle, Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { HandleMissingNodeProps } from "../../nodeTypes";
+import SingleConnectionHandle from "../handle/SingleConnectionHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -109,7 +110,7 @@ function HandleMissingNode({ id, data }: HandleMissingNodeProps) {
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
       />
-      <Handle
+      <SingleConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"

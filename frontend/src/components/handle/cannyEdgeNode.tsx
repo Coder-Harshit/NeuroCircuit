@@ -1,14 +1,14 @@
 import { Handle, Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
-import type { CvtColorImageNodeProps } from "../../nodeTypes";
-import SingleConnectionHandle from "../handle/SingleConnectionHandle";
+import type { CannyEdgeNodeProps } from "../../nodeTypes";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // Shared class for form elements
 const formElementClasses =
   "nodrag w-full p-2 border rounded-md bg-[var(--color-surface-3)] border-[var(--color-border-2)] text-[var(--color-text-1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
 
 // --- Icons ---
-const ColorspaceIcon = () => (
+const EdgeIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="20"
@@ -20,8 +20,9 @@ const ColorspaceIcon = () => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M12 2a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"></path>
+    <polyline points="17 1 23 7 17 13"></polyline>
+    <polyline points="7 23 1 17 7 11"></polyline>
+    <line x1="1" y1="17" x2="23" y2="7"></line>
   </svg>
 );
 const InfoIcon = () => (
@@ -43,16 +44,13 @@ const InfoIcon = () => (
 );
 // ---
 
-const colorSpaceOptions = ["GRAY", "BGR", "RGB", "HSV", "LAB"];
-
-function CvtColorImageNode({ id, data }: CvtColorImageNodeProps) {
-  // Handle changes in the select dropdowns
-  const handleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+function CannyEdgeNode({ id, data }: CannyEdgeNodeProps) {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    data.onChange(id, { [name]: value });
+    const numValue = parseInt(value, 10);
+    data.onChange(id, { [name]: isNaN(numValue) ? 0 : numValue });
   };
 
-  // Determine border style based on error state
   const isError = data.isError;
   const borderClass = isError
     ? "border-[var(--color-danger-border)] shadow-lg shadow-red-500/20"
@@ -61,14 +59,14 @@ function CvtColorImageNode({ id, data }: CvtColorImageNodeProps) {
   return (
     <div
       className={`
-            w-[250px] rounded-lg shadow-md bg-[var(--color-surface-2)] text-[var(--color-text-1)]
-            border ${borderClass}
-        `}
+        w-[250px] rounded-lg shadow-md bg-[var(--color-surface-2)] text-[var(--color-text-1)]
+        border ${borderClass}
+    `}
     >
       {/* Header */}
       <div className="p-2 border-b border-[var(--color-border-1)] bg-[var(--color-node-header)] rounded-t-lg flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <ColorspaceIcon />
+          <EdgeIcon />
           <p className="font-bold text-[var(--color-node-header-text)]">
             {data.label}
           </p>
@@ -85,70 +83,63 @@ function CvtColorImageNode({ id, data }: CvtColorImageNodeProps) {
 
       {/* Body */}
       <div className="p-4 space-y-3">
-        {/* Input Colorspace Dropdown */}
+        {/* Threshold 1 Input */}
         <div>
           <label
-            htmlFor={`in_colorspace-${id}`}
+            htmlFor={`threshold1-${id}`}
             className="block text-sm font-medium text-[var(--color-text-2)] mb-1"
           >
-            From
+            Threshold 1 (Low)
           </label>
-          <select
-            id={`in_colorspace-${id}`}
-            name="in_colorspace"
-            value={data.in_colorspace}
+          <input
+            id={`threshold1-${id}`}
+            name="threshold1"
+            type="number"
+            min="0"
+            value={data.threshold1}
             onChange={handleChange}
-            aria-label="Input colorspace"
+            aria-label="Low threshold"
             className={formElementClasses}
-          >
-            {colorSpaceOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          />
         </div>
 
-        {/* Output Colorspace Dropdown */}
+        {/* Threshold 2 Input */}
         <div>
           <label
-            htmlFor={`out_colorspace-${id}`}
+            htmlFor={`threshold2-${id}`}
             className="block text-sm font-medium text-[var(--color-text-2)] mb-1"
           >
-            To
+            Threshold 2 (High)
           </label>
-          <select
-            id={`out_colorspace-${id}`}
-            name="out_colorspace"
-            value={data.out_colorspace}
+          <input
+            id={`threshold2-${id}`}
+            name="threshold2"
+            type="number"
+            min="0"
+            value={data.threshold2}
             onChange={handleChange}
-            aria-label="Output colorspace"
+            aria-label="High threshold"
             className={formElementClasses}
-          >
-            {colorSpaceOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+          />
         </div>
       </div>
 
       {/* Handles */}
-      <SingleConnectionHandle
+      <LimitedConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"
         aria-label="Image input"
+        connectionCount={1}
       />
       <Handle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
-        aria-label="Converted image output"
+        aria-label="Edge mask output"
       />
     </div>
   );
 }
 
-export default CvtColorImageNode;
+export default CannyEdgeNode;
