@@ -228,7 +228,8 @@ export type AppNodeData =
   | FlipImageNodeData
   | DisplayImageNodeData
   | BlurImageNodeData
-  | CannyEdgeNodeData;
+  | CannyEdgeNodeData
+  | RotateImageNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

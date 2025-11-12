@@ -6,7 +6,7 @@
   "dependencies": ["opencv-python-headless"],
   "defaultData": {
     "label": "Rotate Image",
-    "in_colorspace": 90,
-    "out_colorspace": "Clockwise"
+    "angle": 90,
+    "rotationDirection": "Clockwise"
   }
 }

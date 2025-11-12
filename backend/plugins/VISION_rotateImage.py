@@ -19,7 +19,19 @@ def rotate_image_node(
         raise ValueError("Input image is missing for Rotate Image node.")
 
     image_in = inputs[0]
-    
+
+    if not isinstance(data.angle, int):
+        raise ValueError(
+            f"Invalid angle specified: {data.angle}."
+        )
+
+    if not isinstance(data.rotationDirection, str) or not data.rotationDirection in ["Clockwise", "Anticlockwise"]:
+        raise ValueError(
+            f"Invalid rotationDirection specified: {data.rotationDirection}. Must be either Clockwise or Anticlockwise."
+        )
+
+    print(f"Rotating the image by {data.angle} degree in {data.rotationDirection} direction")
+
     (h, w) = image_in.shape[:2]
     (cX, cY) = (w // 2, h // 2)
     
