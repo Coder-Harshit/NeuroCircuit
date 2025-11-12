@@ -1,4 +1,4 @@
-import { Position } from "@xyflow/react";
+import { Handle, Position } from "@xyflow/react";
 import type { CombineNodeProps } from "../../nodeTypes";
 import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
@@ -103,7 +103,7 @@ function CombineNode({ id, data }: CombineNodeProps) {
       </div>
 
       {/* Handles */}
-      <LimitedConnectionHandle
+      <Handle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"

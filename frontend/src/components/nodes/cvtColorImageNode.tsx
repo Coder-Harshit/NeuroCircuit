@@ -1,4 +1,4 @@
-import { Position } from "@xyflow/react";
+import { Handle, Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { CvtColorImageNodeProps } from "../../nodeTypes";
 import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
@@ -141,7 +141,7 @@ function CvtColorImageNode({ id, data }: CvtColorImageNodeProps) {
         className="!bg-[var(--color-accent)]"
         aria-label="Image input"
       />
-      <LimitedConnectionHandle
+      <Handle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
