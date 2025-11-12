@@ -1,7 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { ResizeImageNodeProps } from "../../nodeTypes";
-import SingleConnectionHandle from "../handle/SingleConnectionHandle";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -128,13 +128,13 @@ function ResizeImageNode({ id, data }: ResizeImageNodeProps) {
       </div>
 
       {/* Handles */}
-      <SingleConnectionHandle
+      <LimitedConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"
         aria-label="Image input"
       />
-      <Handle
+      <LimitedConnectionHandle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"

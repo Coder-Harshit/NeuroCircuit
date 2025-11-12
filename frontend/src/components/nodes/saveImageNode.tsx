@@ -1,6 +1,6 @@
 import { Position } from "@xyflow/react";
 import type { SaveImageNodeProps } from "../../nodeTypes";
-import SingleConnectionHandle from "../handle/SingleConnectionHandle";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // Simple Download Icon
 const DownloadIcon = () => (
@@ -78,7 +78,7 @@ function SaveImageNode({ data }: SaveImageNodeProps) {
       </div>
 
       {/* Input Handle Only */}
-      <SingleConnectionHandle
+      <LimitedConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"

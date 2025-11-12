@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import { useState, useRef, useEffect, type ChangeEvent } from "react";
 import type { InputNodeProps } from "../../nodeTypes";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // --- Helper Components for UI states ---
 const UploadIcon = () => (
@@ -266,7 +267,7 @@ function InputNode({ id, data }: InputNodeProps) {
           )}
         </div>
       </div>
-      <Handle
+      <LimitedConnectionHandle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"

@@ -1,6 +1,6 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import { type FilterRowsNodeProps } from "../../nodeTypes";
-import SingleConnectionHandle from "../handle/SingleConnectionHandle";
+import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -105,12 +105,12 @@ function FilterRowsNode({ id, data }: FilterRowsNodeProps) {
           className={formElementClasses}
         />
       </div>
-      <Handle
+      <LimitedConnectionHandle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
       />
-      <SingleConnectionHandle
+      <LimitedConnectionHandle
         type="target"
         position={Position.Left}
         className="!bg-[var(--color-accent)]"
