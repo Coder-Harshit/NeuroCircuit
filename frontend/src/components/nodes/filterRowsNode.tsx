@@ -1,4 +1,4 @@
-import { Position } from "@xyflow/react";
+import { Handle, Position } from "@xyflow/react";
 import { type FilterRowsNodeProps } from "../../nodeTypes";
 import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
 
@@ -105,7 +105,7 @@ function FilterRowsNode({ id, data }: FilterRowsNodeProps) {
           className={formElementClasses}
         />
       </div>
-      <LimitedConnectionHandle
+      <Handle
         type="source"
         position={Position.Right}
         className="!bg-[var(--color-accent)]"
