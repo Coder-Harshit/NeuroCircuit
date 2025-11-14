@@ -141,7 +141,7 @@ export type ResizeImageNodeProps = {
   id: string;
 };
 
-// ResizeImage Node
+// CvtColorImage Node
 export type CvtColorImageNodeData = {
   label: string;
   in_colorspace: ColorSpace;
@@ -150,6 +150,18 @@ export type CvtColorImageNodeData = {
 
 export type CvtColorImageNodeProps = {
   data: CvtColorImageNodeData;
+  id: string;
+};
+
+// RotateImage Node
+export type RotateImageNodeData = {
+  label: string;
+  angle: number;
+  rotationDirection: "Clockwise" | "Anticlockwise";
+} & CommonNodeData;
+
+export type RotateImageNodeProps = {
+  data: RotateImageNodeData;
   id: string;
 };
 
@@ -216,7 +228,8 @@ export type AppNodeData =
   | FlipImageNodeData
   | DisplayImageNodeData
   | BlurImageNodeData
-  | CannyEdgeNodeData;
+  | CannyEdgeNodeData
+  | RotateImageNodeData;
 
 // A final AppNode type that uses our custom data type
 export type AppNode = Node<AppNodeData>;

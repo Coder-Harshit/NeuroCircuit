@@ -86,6 +86,12 @@ class CannyEdgeNodeData(BaseModel):
     threshold2: int = 200
 
 
+class RotateImageNodeData(BaseModel):
+    label: str
+    angle: int
+    rotationDirection: Literal["Clockwise", "Anticlockwise"]
+
+
 AnyNodeData = Union[
     InputNodeData,
     TransformNodeData,
@@ -103,6 +109,7 @@ AnyNodeData = Union[
     DisplayImageNodeData,
     BlurImageNodeData,
     CannyEdgeNodeData,
+    RotateImageNodeData,
 ]
 
 

@@ -1,0 +1,12 @@
+{
+  "nodeType": "rotateImage",
+  "label": "Rotate Image",
+  "category": "VISION",
+  "description": "Rotates the given image by the specified angle",
+  "dependencies": ["opencv-python-headless"],
+  "defaultData": {
+    "label": "Rotate Image",
+    "angle": 90,
+    "rotationDirection": "Clockwise"
+  }
+}
