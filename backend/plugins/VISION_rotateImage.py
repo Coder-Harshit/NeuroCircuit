@@ -21,9 +21,7 @@ def rotate_image_node(
     image_in = inputs[0]
 
     if not isinstance(data.angle, int):
-        raise ValueError(
-            f"Invalid angle specified: {data.angle}."
-        )
+        raise ValueError(f"Invalid angle specified: {data.angle}.")
 
     if not isinstance(data.rotationDirection, str) or data.rotationDirection not in ["Clockwise", "Anticlockwise"]:
         raise ValueError(
