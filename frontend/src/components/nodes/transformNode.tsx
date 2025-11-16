@@ -1,4 +1,4 @@
-import { Position } from "@xyflow/react";
+import { Handle, Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { TransformNodeProps } from "../../nodeTypes";
 import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
@@ -107,7 +107,7 @@ function TransformNode({ id, data }: TransformNodeProps) {
       </div>
 
       {/* Handles */}
-      <LimitedConnectionHandle
+      <Handle
         id="a"
         type="source"
         position={Position.Right}
