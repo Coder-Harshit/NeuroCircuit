@@ -23,17 +23,24 @@ def rotate_image_node(
     if not isinstance(data.angle, int):
         raise ValueError(f"Invalid angle specified: {data.angle}.")
 
-    if not isinstance(data.rotationDirection, str) or data.rotationDirection not in ["Clockwise", "Anticlockwise"]:
+    if not isinstance(data.rotationDirection, str) or data.rotationDirection not in [
+        "Clockwise",
+        "Anticlockwise",
+    ]:
         raise ValueError(
             f"Invalid rotationDirection specified: {data.rotationDirection}. Must be either Clockwise or Anticlockwise."
         )
 
-    print(f"Rotating the image by {data.angle} degree in {data.rotationDirection} direction")
+    print(
+        f"Rotating the image by {data.angle} degree in {data.rotationDirection} direction"
+    )
 
     (h, w) = image_in.shape[:2]
     (cX, cY) = (w // 2, h // 2)
-    
-    rotationAngle = data.angle * (-1 if data.rotationDirection == "Anticlockwise" else 1)
+
+    rotationAngle = data.angle * (
+        -1 if data.rotationDirection == "Anticlockwise" else 1
+    )
 
     M = cv.getRotationMatrix2D((cX, cY), rotationAngle, 1.0)
     rotated_img = cv.warpAffine(image_in, M, (w, h))
