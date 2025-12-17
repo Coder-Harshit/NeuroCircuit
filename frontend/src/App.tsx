@@ -102,9 +102,11 @@ function App() {
   const flow = useReactFlow();
 
   const [searchSettings, setSearchSettings] = useState<SearchSettings>(() => {
+    const saved = localStorage.getItem(settingsKey);
+    if (!saved) return defaultSearchSettings;
+    
     try {
-      const saved = localStorage.getItem(settingsKey);
-      return saved ? JSON.parse(saved) : defaultSearchSettings;
+      return JSON.parse(saved);
     } catch (error) {
       console.error('Failed to parse search settings from localStorage:', error);
       return defaultSearchSettings;
