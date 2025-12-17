@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { HandleMissingNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -84,13 +85,13 @@ function HandleMissingNode({ id, data }: HandleMissingNodeProps) {
       <div className="p-4 space-y-3">
         <div>
           <label
-            htmlFor="strategy"
+            htmlFor={`strategy-${id}`}
             className="block text-sm font-medium text-[var(--color-text-2)] mb-1"
           >
             Strategy
           </label>
           <select
-            id="strategy"
+            id={`strategy-${id}`}
             name="strategy"
             value={data.strategy}
             onChange={handleChange}
@@ -104,15 +105,17 @@ function HandleMissingNode({ id, data }: HandleMissingNodeProps) {
           </select>
         </div>
       </div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!bg-[var(--color-accent)]"
-      />
-      <Handle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        id="df_in"
+        dataType="DATAFRAME"
+      />
+      <TypedHandle
+        type="source"
+        position={Position.Right}
+        id="df_out"
+        dataType="DATAFRAME"
       />
     </div>
   );

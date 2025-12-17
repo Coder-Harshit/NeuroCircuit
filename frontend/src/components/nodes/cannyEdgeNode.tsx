@@ -1,7 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { CannyEdgeNodeProps } from "../../nodeTypes";
-
+import { TypedHandle } from "../ui/TypedHandle";
 // Shared class for form elements
 const formElementClasses =
   "nodrag w-full p-2 border rounded-md bg-[var(--color-surface-3)] border-[var(--color-border-2)] text-[var(--color-text-1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
@@ -124,16 +124,18 @@ function CannyEdgeNode({ id, data }: CannyEdgeNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        id="canny_in"
+        dataType="IMAGE"
         aria-label="Image input"
       />
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
+        id="canny_out"
+        dataType="IMAGE"
         aria-label="Edge mask output"
       />
     </div>

@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import { useState, useRef, useEffect, type ChangeEvent } from "react";
 import type { LoadImageNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // --- Helper Components for UI states ---
 const UploadIcon = () => (
@@ -264,10 +265,11 @@ function LoadImageNode({ id, data }: LoadImageNodeProps) {
           )}
         </div>
       </div>
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
+        dataType="IMAGE"
+        id="img_out"
       />
     </div>
   );

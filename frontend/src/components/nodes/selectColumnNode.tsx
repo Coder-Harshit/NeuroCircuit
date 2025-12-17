@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import { useMemo } from "react";
 import type { SelectColumnProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // Simple Columns Icon
 const ColumnsIcon = () => (
@@ -119,15 +120,17 @@ function SelectColumnNode({ id, data }: SelectColumnProps) {
         </div>
       </div>
 
-      <Handle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        id="df_in"
+        dataType="DATAFRAME"
       />
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
+        id="df_out"
+        dataType="DATAFRAME"
       />
     </div>
   );

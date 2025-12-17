@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { CvtColorImageNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -134,16 +135,18 @@ function CvtColorImageNode({ id, data }: CvtColorImageNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        id="image_in"
+        dataType="IMAGE"
         aria-label="Image input"
       />
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
+        id="image_out"
+        dataType="IMAGE"
         aria-label="Converted image output"
       />
     </div>

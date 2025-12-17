@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { ResizeImageNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -127,16 +128,18 @@ function ResizeImageNode({ id, data }: ResizeImageNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        dataType="IMAGE"
+        id="img_in"
         aria-label="Image input"
       />
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
+        dataType="IMAGE"
+        id="img_out"
         aria-label="Resized image output"
       />
     </div>

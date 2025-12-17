@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { BlurImageNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -134,17 +135,17 @@ function BlurImageNode({ id, data }: BlurImageNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
-        aria-label="Image input"
+        id="image_input"
+        dataType="IMAGE"
       />
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
-        aria-label="Blurred image output"
+        id="image_output"
+        dataType="IMAGE"
       />
     </div>
   );

@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import { useState, useRef, useEffect, type ChangeEvent } from "react";
 import type { InputNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // --- Helper Components for UI states ---
 const UploadIcon = () => (
@@ -266,10 +267,11 @@ function InputNode({ id, data }: InputNodeProps) {
           )}
         </div>
       </div>
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
+        id="csv_out"
+        dataType="DATAFRAME"
       />
     </div>
   );

@@ -1,6 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { FlipImageNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // --- Icons ---
 const FlipIcon = () => (
@@ -115,16 +116,18 @@ function FlipImageNode({ id, data }: FlipImageNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        id="flip_in"
+        dataType="IMAGE"
         aria-label="Image input"
       />
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
+        id="flip_out"
+        dataType="IMAGE"
         aria-label="Flipped image output"
       />
     </div>

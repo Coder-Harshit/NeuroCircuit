@@ -1,5 +1,6 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { DisplayNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // --- Icons ---
 const TableIcon = () => (
@@ -110,10 +111,11 @@ function DisplayNode({ data }: DisplayNodeProps) {
           </div>
         )}
       </div>
-      <Handle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        id="disp_in"
+        dataType="DATAFRAME"
       />
     </div>
   );

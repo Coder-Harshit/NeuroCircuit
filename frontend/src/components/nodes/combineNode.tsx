@@ -1,5 +1,6 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { CombineNodeProps } from "../../nodeTypes";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // Shared class for form elements
 const formElementClasses =
@@ -83,13 +84,13 @@ function CombineNode({ id, data }: CombineNodeProps) {
       <div className="p-4 space-y-3">
         <div>
           <label
-            htmlFor="axis"
+            htmlFor={`axis-${id}`}
             className="block text-sm font-medium text-[var(--color-text-2)] mb-1"
           >
             Concatenate along:
           </label>
           <select
-            id="axis"
+            id={`axis-${id}`}
             value={data.axis}
             onChange={handleAxisChange}
             aria-label="Concatenate axis"
@@ -102,24 +103,25 @@ function CombineNode({ id, data }: CombineNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
+      <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
+        id="comb_out"
+        dataType="DATAFRAME"
       />
-      <Handle
-        id="a"
+      <TypedHandle
         type="target"
         position={Position.Left}
+        id="comb_in_a"
+        dataType="DATAFRAME"
         style={{ top: "33%" }}
-        className="!bg-[var(--color-accent)]"
       />
-      <Handle
-        id="b"
+      <TypedHandle
         type="target"
         position={Position.Left}
+        id="comb_in_b"
+        dataType="DATAFRAME"
         style={{ top: "66%" }}
-        className="!bg-[var(--color-accent)]"
       />
     </div>
   );

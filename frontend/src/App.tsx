@@ -52,6 +52,14 @@ const HelpIcon = () => (
   </svg>
 );
 
+// Extract type from ID ("output__IMAGE" -> "IMAGE")
+const getHandleType = (handleId: string | null | undefined): string | null => {
+  if (!handleId) return null;
+  const parts = handleId.split("__");
+  if (parts.length < 2) return "ANY";
+  return parts[1];
+};
+
 function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -209,6 +217,17 @@ function App() {
     return () =>
       window.removeEventListener("xyflow-zoom", onZoomEvent as EventListener);
   }, [flow]);
+
+  const isValidConnection = useCallback((connection: Connection | Edge) => {
+    const sourceType = getHandleType(connection.sourceHandle);
+    const targetType = getHandleType(connection.targetHandle);
+
+    // 1. If either is ANY, allow it
+    if (sourceType === "ANY" || targetType === "ANY") return true;
+
+    // 2. Strict matching
+    return sourceType === targetType;
+  }, []);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -561,6 +580,7 @@ function App() {
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           onPaneContextMenu={paneContextMenu}
+          isValidConnection={isValidConnection}
           // defaultEdgeOptions={defaultEdgeOptions}
           onPaneClick={paneClick}
           colorMode={colorMode}
