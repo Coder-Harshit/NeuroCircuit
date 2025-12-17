@@ -111,9 +111,9 @@ function SettingsModal({ onClose, settings, setSettings }: SettingsModalProps) {
             <input
               type="range"
               min="0"
-              max="2000"
+              max="10000"
               step="50"
-              value={settings.delay > 2000 ? 2000 : settings.delay} // Visual cap for slider, but input allows more
+              value={settings.delay}
               onChange={handleDelayChange}
               className="w-full h-2 bg-[var(--color-surface-3)] rounded-lg appearance-none cursor-pointer accent-[var(--color-accent)]"
             />
