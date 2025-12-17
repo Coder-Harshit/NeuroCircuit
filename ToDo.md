@@ -10,3 +10,5 @@
 5. Implement Debug LOGGER
 6. Integrate Debug Node (`Debug:Display :: head:print`)
 7. Optimize ContextMenu.tsx: Combine the two useMemo hooks (filteredActions and grpdActions) into a single useMemo that filters and groups in one pass to improve performance when dealing with large numbers of actions
+8. Convert handle color names in `frontend/src/themeConfig.ts` from uppercase color names (BLUE, CYAN, GREEN, PINK, GREY) to CSS variables (var(--handle-color-dataframe), etc.)
+9. Add handle color customization to the settings modal to allow users to configure handle colors per data type
