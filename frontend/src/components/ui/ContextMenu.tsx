@@ -31,46 +31,20 @@ export default function ContextMenu({
     searchInputRef.current?.focus();
   }, []);
 
-  // const filteredAndGroupedActions = useMemo(() => {
-  //   const filtered = actions.filter(action =>
-  //     action.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     action.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  //   );
-
-  //   // Group by category
-  //   return filtered.reduce(
-  //     (acc, action) => {
-  //       const category = action.category || "General";
-  //       if (!acc[category]) {
-  //         acc[category] = [];
-  //       }
-  //       acc[category].push(action);
-  //       return acc;
-  //     },
-  //     {} as Record<string, MenuAction[]>,
-  //   );
-  // }, [actions, searchTerm]);
-  // const categories = Object.keys(filteredAndGroupedActions).sort();
-
-  const filteredActions = useMemo(() => {
-    return actions.filter((action) => {
-      if (!searchSettings.fuzzy) {
-        return (
-          action.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (action.category &&
-            action.category.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-      }
-      return (
-        fuzzysearch(action.label, searchTerm) ||
-        (action.category && fuzzysearch(action.category, searchTerm))
-      );
-    });
-  }, [actions, searchSettings.fuzzy, searchTerm]);
-
   const grpdActions = useMemo(() => {
-    return filteredActions.reduce(
+    return actions.reduce(
       (acc, action) => {
+        // Filter logic
+        const matchesSearch = searchSettings.fuzzy
+          ? fuzzysearch(action.label, searchTerm) ||
+            (action.category && fuzzysearch(action.category, searchTerm))
+          : action.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (action.category &&
+              action.category.toLowerCase().includes(searchTerm.toLowerCase()));
+
+        if (!matchesSearch) return acc;
+
+        // Group logic
         const category = action.category || "General";
         if (!acc[category]) {
           acc[category] = [];
@@ -80,7 +54,10 @@ export default function ContextMenu({
       },
       {} as Record<string, MenuAction[]>,
     );
-  }, [filteredActions]);
+  }, [actions, searchSettings.fuzzy, searchTerm]);
+
+  const categories = Object.keys(grpdActions).sort();
+  const filteredActions = Object.values(grpdActions).flat();
 
   useEffect(() => {
     if (searchSettings.delay <= 0) return; // disabled
@@ -100,8 +77,6 @@ export default function ContextMenu({
       if (timer) clearTimeout(timer);
     };
   }, [filteredActions, searchSettings.delay, searchTerm]);
-
-  const categories = Object.keys(grpdActions).sort();
 
   return (
     <div
