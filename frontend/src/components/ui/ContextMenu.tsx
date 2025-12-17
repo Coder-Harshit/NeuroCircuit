@@ -31,27 +31,6 @@ export default function ContextMenu({
     searchInputRef.current?.focus();
   }, []);
 
-  // const filteredAndGroupedActions = useMemo(() => {
-  //   const filtered = actions.filter(action =>
-  //     action.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     action.category?.toLowerCase().includes(searchTerm.toLowerCase())
-  //   );
-
-  //   // Group by category
-  //   return filtered.reduce(
-  //     (acc, action) => {
-  //       const category = action.category || "General";
-  //       if (!acc[category]) {
-  //         acc[category] = [];
-  //       }
-  //       acc[category].push(action);
-  //       return acc;
-  //     },
-  //     {} as Record<string, MenuAction[]>,
-  //   );
-  // }, [actions, searchTerm]);
-  // const categories = Object.keys(filteredAndGroupedActions).sort();
-
   const filteredActions = useMemo(() => {
     return actions.filter((action) => {
       if (!searchSettings.fuzzy) {
