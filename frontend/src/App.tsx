@@ -101,8 +101,13 @@ function App() {
   const flow = useReactFlow();
 
   const [searchSettings, setSearchSettings] = useState<SearchSettings>(() => {
-    const saved = localStorage.getItem(settingsKey);
-    return saved ? JSON.parse(saved) : { fuzzy: true, delay: 50 };
+    try {
+      const saved = localStorage.getItem(settingsKey);
+      return saved ? JSON.parse(saved) : { fuzzy: true, delay: 50 };
+    } catch (error) {
+      console.error('Failed to parse search settings from localStorage:', error);
+      return { fuzzy: true, delay: 50 };
+    }
   });
 
   // Save settings when changed
