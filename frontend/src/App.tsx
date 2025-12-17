@@ -106,7 +106,18 @@ function App() {
     if (!saved) return defaultSearchSettings;
     
     try {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      // Validate parsed object has the expected structure
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        typeof parsed.fuzzy === 'boolean' &&
+        typeof parsed.delay === 'number'
+      ) {
+        return parsed;
+      }
+      console.warn('Invalid search settings structure in localStorage, using defaults');
+      return defaultSearchSettings;
     } catch (error) {
       console.error('Failed to parse search settings from localStorage:', error);
       return defaultSearchSettings;
