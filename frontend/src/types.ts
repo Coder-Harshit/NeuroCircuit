@@ -6,11 +6,17 @@ export type MenuAction = {
   category?: string;
 };
 
+export type SearchSettings = {
+  fuzzy: boolean;
+  delay: number;
+};
+
 export type ContextMenuProps = {
   top: number;
   left: number;
   actions: MenuAction[];
   onClose: () => void;
+  searchSettings: SearchSettings;
 };
 
 export type NodeStatus = {

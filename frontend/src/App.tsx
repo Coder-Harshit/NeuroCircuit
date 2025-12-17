@@ -18,7 +18,7 @@ import ContextMenu from "./components/ui/ContextMenu";
 import PackageManager from "./components/ui/PackageManager";
 
 import type { AppNode, AppNodeData } from "./nodeTypes";
-import type { NodeStatus } from "./types";
+import type { NodeStatus, SearchSettings } from "./types";
 
 import "./App.css";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
@@ -28,9 +28,11 @@ import {
 } from "./utils/trigDownload";
 import TutorialModal from "./components/ui/TutorialModal";
 import { useAppHotkeys } from "./hooks/useAppHotkeys";
+import SettingsModal from "./components/ui/SettingsModal";
 
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
+const settingsKey = "neurocircuit-settings";
 
 const nodeTypes = nodeRegistry;
 
@@ -49,6 +51,23 @@ const HelpIcon = () => (
     <circle cx="12" cy="12" r="10"></circle>
     <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
     <line x1="12" y1="17" x2="12.01" y2="17"></line>
+  </svg>
+);
+
+const GearIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="12" r="3"></circle>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
   </svg>
 );
 
@@ -75,10 +94,22 @@ function App() {
 
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
   const [isTutorialOpen, setTutorialOpen] = useState(false);
+  const [isSettingsOpen, setSettingsOpen] = useState(false); // Settings modal state
   const [availableNodes, setAvailableNodes] = useState<NodeStatus[]>([]);
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
   const [isPanning, setIsPanning] = useState(false);
   const flow = useReactFlow();
+
+  const [searchSettings, setSearchSettings] = useState<SearchSettings>(() => {
+    const saved = localStorage.getItem(settingsKey);
+    return saved ? JSON.parse(saved) : { fuzzy: true, delay: 50 };
+  });
+
+  // Save settings when changed
+  useEffect(() => {
+    localStorage.setItem(settingsKey, JSON.stringify(searchSettings));
+  }, [searchSettings]);
+
   // Get preferred theme from local storage or system preference
   const getInitialColorMode = (): ColorMode => {
     const savedTheme = localStorage.getItem(themeKey) as ColorMode;
@@ -630,6 +661,14 @@ function App() {
               Run Pipeline
             </button>
             <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
+            {/* Settings Button */}
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="p-2 rounded-md text-[var(--color-text-2)] bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)]"
+              aria-label="Open settings"
+            >
+              <GearIcon />
+            </button>
             <button
               onClick={() => setTutorialOpen(true)}
               className="p-2 rounded-md text-[var(--color-text-2)] bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)]"
@@ -647,6 +686,7 @@ function App() {
           top={menu.top}
           left={menu.left}
           onClose={() => setMenu(null)}
+          searchSettings={searchSettings}
           actions={availableNodes.map((node) => ({
             label: node.label,
             category: node.category,
@@ -665,6 +705,14 @@ function App() {
 
       {isTutorialOpen && (
         <TutorialModal onClose={() => setTutorialOpen(false)} />
+      )}
+
+      {isSettingsOpen && (
+        <SettingsModal
+          onClose={() => setSettingsOpen(false)}
+          settings={searchSettings}
+          setSettings={setSearchSettings}
+        />
       )}
 
       <input

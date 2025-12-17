@@ -17,7 +17,12 @@ function fuzzysearch(text: string, search: string) {
   return false;
 }
 
-export default function ContextMenu({ top, left, actions }: ContextMenuProps) {
+export default function ContextMenu({
+  top,
+  left,
+  actions,
+  searchSettings,
+}: ContextMenuProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -48,12 +53,20 @@ export default function ContextMenu({ top, left, actions }: ContextMenuProps) {
   // const categories = Object.keys(filteredAndGroupedActions).sort();
 
   const filteredActions = useMemo(() => {
-    return actions.filter(
-      (action) =>
+    return actions.filter((action) => {
+      if (!searchSettings.fuzzy) {
+        return (
+          action.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (action.category &&
+            action.category.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+      }
+      return (
         fuzzysearch(action.label, searchTerm) ||
-        (action.category && fuzzysearch(action.category, searchTerm)),
-    );
-  }, [actions, searchTerm]);
+        (action.category && fuzzysearch(action.category, searchTerm))
+      );
+    });
+  }, [actions, searchSettings.fuzzy, searchTerm]);
 
   const grpdActions = useMemo(() => {
     return filteredActions.reduce(
@@ -70,6 +83,8 @@ export default function ContextMenu({ top, left, actions }: ContextMenuProps) {
   }, [filteredActions]);
 
   useEffect(() => {
+    if (searchSettings.delay <= 0) return; // disabled
+
     let timer: number | undefined;
     if (filteredActions.length === 1) {
       timer = setTimeout(() => {
@@ -78,13 +93,13 @@ export default function ContextMenu({ top, left, actions }: ContextMenuProps) {
         targetAction.onSelect();
         // The menu will be closed by the parent's onSelect handler,
         // but we can ensure cleanup or explicit close if needed.
-      }, 500);
+      }, searchSettings.delay);
     }
 
     return () => {
       if (timer) clearTimeout(timer);
     };
-  }, [filteredActions, searchTerm]);
+  }, [filteredActions, searchSettings.delay, searchTerm]);
 
   const categories = Object.keys(grpdActions).sort();
 
