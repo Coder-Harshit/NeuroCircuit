@@ -33,6 +33,7 @@ import SettingsModal from "./components/ui/SettingsModal";
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
 const settingsKey = "neurocircuit-settings";
+const defaultSearchSettings: SearchSettings = { fuzzy: true, delay: 50 };
 
 const nodeTypes = nodeRegistry;
 
@@ -102,7 +103,25 @@ function App() {
 
   const [searchSettings, setSearchSettings] = useState<SearchSettings>(() => {
     const saved = localStorage.getItem(settingsKey);
-    return saved ? JSON.parse(saved) : { fuzzy: true, delay: 50 };
+    if (!saved) return defaultSearchSettings;
+    
+    try {
+      const parsed = JSON.parse(saved);
+      // Validate parsed object has the expected structure
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        typeof parsed.fuzzy === 'boolean' &&
+        typeof parsed.delay === 'number'
+      ) {
+        return parsed as SearchSettings;
+      }
+      console.warn('Invalid search settings structure in localStorage, using defaults');
+      return defaultSearchSettings;
+    } catch (error) {
+      console.error('Failed to parse search settings from localStorage:', error);
+      return defaultSearchSettings;
+    }
   });
 
   // Save settings when changed
