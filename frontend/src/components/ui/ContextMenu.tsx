@@ -31,33 +31,36 @@ export default function ContextMenu({
     searchInputRef.current?.focus();
   }, []);
 
-  const grpdActions = useMemo(() => {
-    return actions.reduce(
-      (acc, action) => {
-        // Filter logic
-        const matchesSearch = searchSettings.fuzzy
-          ? fuzzysearch(action.label, searchTerm) ||
-            (action.category && fuzzysearch(action.category, searchTerm))
-          : action.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (action.category &&
-              action.category.toLowerCase().includes(searchTerm.toLowerCase()));
+  const { grpdActions, filteredActions } = useMemo(() => {
+    const grouped: Record<string, MenuAction[]> = {};
+    const filtered: MenuAction[] = [];
 
-        if (!matchesSearch) return acc;
+    actions.forEach((action) => {
+      // Filter logic
+      const matchesSearch = searchSettings.fuzzy
+        ? fuzzysearch(action.label, searchTerm) ||
+          (action.category && fuzzysearch(action.category, searchTerm))
+        : action.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (action.category &&
+            action.category.toLowerCase().includes(searchTerm.toLowerCase()));
 
-        // Group logic
-        const category = action.category || "General";
-        if (!acc[category]) {
-          acc[category] = [];
-        }
-        acc[category].push(action);
-        return acc;
-      },
-      {} as Record<string, MenuAction[]>,
-    );
+      if (!matchesSearch) return;
+
+      // Add to filtered list
+      filtered.push(action);
+
+      // Group logic
+      const category = action.category || "General";
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(action);
+    });
+
+    return { grpdActions: grouped, filteredActions: filtered };
   }, [actions, searchSettings.fuzzy, searchTerm]);
 
   const categories = Object.keys(grpdActions).sort();
-  const filteredActions = Object.values(grpdActions).flat();
 
   useEffect(() => {
     if (searchSettings.delay <= 0) return; // disabled
