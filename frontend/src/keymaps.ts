@@ -6,6 +6,8 @@ export const KEYMAPS = {
   DUPLICATE: "ctrl+d, meta+d",
   DELETE: "Delete, Backspace",
   FIT_VIEW: "f",
+  ZOOM_IN: "+",
+  ZOOM_OUT: "-",
 };
 
 /**
