@@ -150,4 +150,35 @@ export function useAppHotkeys({
     },
     [nodes, fitView],
   );
+
+  // ZoomIn View Hotkey
+  useHotkeys(
+    KEYMAPS.ZOOM_IN,
+    (e) => {
+      e.preventDefault();
+      const selectedNodes = nodes.filter((n) => n.selected);
+
+      if (selectedNodes.length > 0) {
+        fitView({
+          nodes: selectedNodes,
+          duration: 200,
+          padding: 0.2,
+        });
+      } else {
+        fitView({ duration: 200, padding: 0.1 });
+      }
+    },
+    [nodes, fitView],
+  );
+
+  // ZoomOut View Hotkey
+  useHotkeys(
+    KEYMAPS.ZOOM_OUT,
+    (e) => {
+      e.preventDefault();
+      // Zoom out by fitting the view with a larger padding.
+      fitView({ duration: 200, padding: 0.3 });
+    },
+    [fitView],
+  );
 }

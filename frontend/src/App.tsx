@@ -18,7 +18,7 @@ import ContextMenu from "./components/ui/ContextMenu";
 import PackageManager from "./components/ui/PackageManager";
 
 import type { AppNode, AppNodeData } from "./nodeTypes";
-import type { NodeStatus } from "./types";
+import type { NodeStatus, SearchSettings } from "./types";
 
 import "./App.css";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
@@ -28,29 +28,23 @@ import {
 } from "./utils/trigDownload";
 import TutorialModal from "./components/ui/TutorialModal";
 import { useAppHotkeys } from "./hooks/useAppHotkeys";
+import SettingsModal from "./components/ui/SettingsModal";
+import { HelpIcon, GearIcon } from "./components/ui/icons";
 
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
+const settingsKey = "neurocircuit-settings";
+const defaultSearchSettings: SearchSettings = { fuzzy: true, delay: 50 };
 
 const nodeTypes = nodeRegistry;
 
-const HelpIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-  </svg>
-);
+// Extract type from ID ("output__IMAGE" -> "IMAGE")
+const getHandleType = (handleId: string | null | undefined): string | null => {
+  if (!handleId) return null;
+  const parts = handleId.split("__");
+  if (parts.length < 2) return "ANY";
+  return parts[1];
+};
 
 function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState<AppNode>([]);
@@ -67,10 +61,40 @@ function App() {
 
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
   const [isTutorialOpen, setTutorialOpen] = useState(false);
+  const [isSettingsOpen, setSettingsOpen] = useState(false); // Settings modal state
   const [availableNodes, setAvailableNodes] = useState<NodeStatus[]>([]);
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
   const [isPanning, setIsPanning] = useState(false);
   const flow = useReactFlow();
+
+  const [searchSettings, setSearchSettings] = useState<SearchSettings>(() => {
+    const saved = localStorage.getItem(settingsKey);
+    if (!saved) return defaultSearchSettings;
+    
+    try {
+      const parsed = JSON.parse(saved);
+      // Validate parsed object has the expected structure
+      if (
+        typeof parsed === 'object' &&
+        parsed !== null &&
+        typeof parsed.fuzzy === 'boolean' &&
+        typeof parsed.delay === 'number'
+      ) {
+        return parsed as SearchSettings;
+      }
+      console.warn('Invalid search settings structure in localStorage, using defaults');
+      return defaultSearchSettings;
+    } catch (error) {
+      console.error('Failed to parse search settings from localStorage:', error);
+      return defaultSearchSettings;
+    }
+  });
+
+  // Save settings when changed
+  useEffect(() => {
+    localStorage.setItem(settingsKey, JSON.stringify(searchSettings));
+  }, [searchSettings]);
+
   // Get preferred theme from local storage or system preference
   const getInitialColorMode = (): ColorMode => {
     const savedTheme = localStorage.getItem(themeKey) as ColorMode;
@@ -209,6 +233,17 @@ function App() {
     return () =>
       window.removeEventListener("xyflow-zoom", onZoomEvent as EventListener);
   }, [flow]);
+
+  const isValidConnection = useCallback((connection: Connection | Edge) => {
+    const sourceType = getHandleType(connection.sourceHandle);
+    const targetType = getHandleType(connection.targetHandle);
+
+    // 1. If either is ANY, allow it
+    if (sourceType === "ANY" || targetType === "ANY") return true;
+
+    // 2. Strict matching
+    return sourceType === targetType;
+  }, []);
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -561,6 +596,7 @@ function App() {
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           onPaneContextMenu={paneContextMenu}
+          isValidConnection={isValidConnection}
           // defaultEdgeOptions={defaultEdgeOptions}
           onPaneClick={paneClick}
           colorMode={colorMode}
@@ -610,6 +646,14 @@ function App() {
               Run Pipeline
             </button>
             <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
+            {/* Settings Button */}
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="p-2 rounded-md text-[var(--color-text-2)] bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)]"
+              aria-label="Open settings"
+            >
+              <GearIcon />
+            </button>
             <button
               onClick={() => setTutorialOpen(true)}
               className="p-2 rounded-md text-[var(--color-text-2)] bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)]"
@@ -627,6 +671,7 @@ function App() {
           top={menu.top}
           left={menu.left}
           onClose={() => setMenu(null)}
+          searchSettings={searchSettings}
           actions={availableNodes.map((node) => ({
             label: node.label,
             category: node.category,
@@ -645,6 +690,14 @@ function App() {
 
       {isTutorialOpen && (
         <TutorialModal onClose={() => setTutorialOpen(false)} />
+      )}
+
+      {isSettingsOpen && (
+        <SettingsModal
+          onClose={() => setSettingsOpen(false)}
+          settings={searchSettings}
+          setSettings={setSearchSettings}
+        />
       )}
 
       <input

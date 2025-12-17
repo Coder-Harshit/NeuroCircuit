@@ -1,7 +1,7 @@
-import { Handle, Position } from "@xyflow/react";
+import { Position } from "@xyflow/react";
 import type { ChangeEvent } from "react";
 import type { TransformNodeProps } from "../../nodeTypes";
-import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
+import { TypedHandle } from "../ui/TypedHandle";
 
 const formElementClasses =
   "nodrag w-full p-2 border rounded-md bg-[var(--color-surface-3)] border-[var(--color-border-2)] text-[var(--color-text-1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]";
@@ -87,13 +87,13 @@ function TransformNode({ id, data }: TransformNodeProps) {
       <div className="p-4 space-y-3">
         <div>
           <label
-            htmlFor="method"
+            htmlFor={`method-${id}`}
             className="block text-sm font-medium text-[var(--color-text-2)] mb-1"
           >
             Method
           </label>
           <select
-            id="method"
+            id={`method-${id}`}
             name="method"
             value={data.method}
             onChange={handleChange}
@@ -107,17 +107,17 @@ function TransformNode({ id, data }: TransformNodeProps) {
       </div>
 
       {/* Handles */}
-      <Handle
-        id="a"
-        type="source"
-        position={Position.Right}
-        className="!bg-[var(--color-accent)]"
-      />
-      <LimitedConnectionHandle
-        id="b"
+      <TypedHandle
+        id="df_in"
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        dataType="DATAFRAME"
+      />
+      <TypedHandle
+        id="df_out"
+        type="source"
+        position={Position.Right}
+        dataType="DATAFRAME"
       />
     </div>
   );

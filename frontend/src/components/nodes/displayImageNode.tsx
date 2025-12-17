@@ -1,6 +1,6 @@
 import { Position } from "@xyflow/react";
 import type { DisplayImageNodeProps } from "../../nodeTypes";
-import LimitedConnectionHandle from "../handle/LimitedConnectionHandle";
+import { TypedHandle } from "../ui/TypedHandle";
 
 // --- Icons ---
 const ImageIcon = () => (
@@ -87,10 +87,11 @@ function DisplayImageNode({ id, data }: DisplayImageNodeProps) {
       </div>
 
       {/* Input Handle Only */}
-      <LimitedConnectionHandle
+      <TypedHandle
         type="target"
         position={Position.Left}
-        className="!bg-[var(--color-accent)]"
+        id="img_disp_in"
+        dataType="IMAGE"
         aria-label="Image data input"
       />
     </div>
