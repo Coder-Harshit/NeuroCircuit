@@ -114,7 +114,7 @@ function App() {
         typeof parsed.fuzzy === 'boolean' &&
         typeof parsed.delay === 'number'
       ) {
-        return parsed;
+        return parsed as SearchSettings;
       }
       console.warn('Invalid search settings structure in localStorage, using defaults');
       return defaultSearchSettings;
