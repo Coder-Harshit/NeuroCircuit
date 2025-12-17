@@ -9,3 +9,4 @@
 4. Implement Local storage functionality (to save the `nodes` & **NOT** `nodesWithData` into local/cache storage)
 5. Implement Debug LOGGER
 6. Integrate Debug Node (`Debug:Display :: head:print`)
+7. Optimize ContextMenu.tsx: Combine the two useMemo hooks (filteredActions and grpdActions) into a single useMemo that filters and groups in one pass to improve performance when dealing with large numbers of actions
