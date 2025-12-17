@@ -140,12 +140,14 @@ function BlurImageNode({ id, data }: BlurImageNodeProps) {
         position={Position.Left}
         id="image_input"
         dataType="IMAGE"
+        aria-label="Image input"
       />
       <TypedHandle
         type="source"
         position={Position.Right}
         id="image_output"
         dataType="IMAGE"
+        aria-label="Blurred image output"
       />
     </div>
   );
