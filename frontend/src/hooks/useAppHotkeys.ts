@@ -170,4 +170,15 @@ export function useAppHotkeys({
     },
     [nodes, fitView],
   );
+
+  // ZoomOut View Hotkey
+  useHotkeys(
+    KEYMAPS.ZOOM_OUT,
+    (e) => {
+      e.preventDefault();
+      // Zoom out by fitting the view with a larger padding.
+      fitView({ duration: 200, padding: 0.3 });
+    },
+    [fitView],
+  );
 }
