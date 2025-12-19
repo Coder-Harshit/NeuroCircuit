@@ -116,12 +116,16 @@ export default function ContextMenu({
     switch (e.key) {
       case "ArrowDown":
       case "Tab":
-        setSelectedIndex((prev) => (prev + 1) % filteredActions.length);
+        if (filteredActions.length > 0) {
+          setSelectedIndex((prev) => (prev + 1) % filteredActions.length);
+        }
         break;
       case "ArrowUp":
-        setSelectedIndex((prev) =>
-          prev === 0 ? filteredActions.length - 1 : prev - 1,
-        );
+        if (filteredActions.length > 0) {
+          setSelectedIndex((prev) =>
+            prev === 0 ? filteredActions.length - 1 : prev - 1,
+          );
+        }
         break;
       case "Enter":
         if (filteredActions[selectedIndex]) {
