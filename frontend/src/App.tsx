@@ -12,14 +12,11 @@ import {
   Controls,
 } from "@xyflow/react";
 import { v4 as uuidv4 } from "uuid";
-
 import { nodeRegistry } from "./components/nodes/nodeRegistry";
 import ContextMenu from "./components/ui/ContextMenu";
 import PackageManager from "./components/ui/PackageManager";
-
 import type { AppNode, AppNodeData } from "./nodeTypes";
 import type { NodeStatus, SearchSettings } from "./types";
-
 import "./App.css";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
 import {
@@ -34,6 +31,7 @@ import { HelpIcon, GearIcon } from "./components/ui/icons";
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
 const settingsKey = "neurocircuit-settings";
+
 const defaultSearchSettings: SearchSettings = { fuzzy: true, delay: 50 };
 
 const nodeTypes = nodeRegistry;
@@ -688,6 +686,7 @@ function App() {
           actions={availableNodes.map((node) => ({
             label: node.label,
             category: node.category,
+            description: node.description,
             onSelect: () => {
               addNode(node.nodeType);
               setMenu(null);

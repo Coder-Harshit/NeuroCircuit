@@ -4,6 +4,7 @@ export type MenuAction = {
   label: string;
   onSelect: () => void;
   category?: string;
+  description?: string;
 };
 
 export type SearchSettings = {
