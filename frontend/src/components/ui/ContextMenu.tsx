@@ -174,6 +174,7 @@ export default function ContextMenu({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
             >
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -206,6 +207,7 @@ export default function ContextMenu({
                   <button
                     data-index={index}
                     onClick={() => action.onSelect()}
+                    role="menuitem"
                     onMouseEnter={() => setSelectedIndex(index)}
                     className={`
                       w-full flex items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-all duration-75
