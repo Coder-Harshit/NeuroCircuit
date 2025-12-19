@@ -65,8 +65,8 @@ export default function ContextMenu({
         (action.category && fuzzysearch(action.category, searchTerm)) ||
         (action.description &&
           fuzzysearch(
-            action.description.toLowerCase(),
-            searchTerm.toLowerCase(),
+            action.description,
+            searchTerm,
           ))
       );
     });
