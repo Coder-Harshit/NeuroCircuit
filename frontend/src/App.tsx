@@ -12,14 +12,11 @@ import {
   Controls,
 } from "@xyflow/react";
 import { v4 as uuidv4 } from "uuid";
-
 import { nodeRegistry } from "./components/nodes/nodeRegistry";
 import ContextMenu from "./components/ui/ContextMenu";
 import PackageManager from "./components/ui/PackageManager";
-
 import type { AppNode, AppNodeData } from "./nodeTypes";
 import type { NodeStatus, SearchSettings } from "./types";
-
 import "./App.css";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
 import {
@@ -34,6 +31,7 @@ import { HelpIcon, GearIcon } from "./components/ui/icons";
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
 const settingsKey = "neurocircuit-settings";
+
 const defaultSearchSettings: SearchSettings = { fuzzy: true, delay: 50 };
 
 const nodeTypes = nodeRegistry;
@@ -70,22 +68,27 @@ function App() {
   const [searchSettings, setSearchSettings] = useState<SearchSettings>(() => {
     const saved = localStorage.getItem(settingsKey);
     if (!saved) return defaultSearchSettings;
-    
+
     try {
       const parsed = JSON.parse(saved);
       // Validate parsed object has the expected structure
       if (
-        typeof parsed === 'object' &&
+        typeof parsed === "object" &&
         parsed !== null &&
-        typeof parsed.fuzzy === 'boolean' &&
-        typeof parsed.delay === 'number'
+        typeof parsed.fuzzy === "boolean" &&
+        typeof parsed.delay === "number"
       ) {
         return parsed as SearchSettings;
       }
-      console.warn('Invalid search settings structure in localStorage, using defaults');
+      console.warn(
+        "Invalid search settings structure in localStorage, using defaults",
+      );
       return defaultSearchSettings;
     } catch (error) {
-      console.error('Failed to parse search settings from localStorage:', error);
+      console.error(
+        "Failed to parse search settings from localStorage:",
+        error,
+      );
       return defaultSearchSettings;
     }
   });
@@ -248,6 +251,7 @@ function App() {
   const onConnect = useCallback(
     (connection: Connection) => {
       // Use functional update so we always work with the latest edges
+
       const newEdge = {
         ...connection,
         // style: {
@@ -256,8 +260,15 @@ function App() {
         //   strokeWidth: 2
         // },
       };
+
       setEdges((eds) => {
-        const newEdges = addEdge(newEdge, eds);
+        // since target handles are built for accepting only a single input therefore we need to check and remove the prev. connections so that only one connection (edge) is made (at max)
+        const targetHandleId = connection.targetHandle;
+        const oldEdges = eds.filter(
+          (edge) => edge.targetHandle !== targetHandleId,
+        );
+
+        const newEdges = addEdge(newEdge, oldEdges);
 
         if (connection.target) {
           // fire-and-forget async inspect using the up-to-date edge list
@@ -675,6 +686,7 @@ function App() {
           actions={availableNodes.map((node) => ({
             label: node.label,
             category: node.category,
+            description: node.description,
             onSelect: () => {
               addNode(node.nodeType);
               setMenu(null);
