@@ -151,7 +151,6 @@ function RotateImageNode({ id, data }: RotateImageNodeProps) {
       <TypedHandle
         type="source"
         position={Position.Right}
-        className="!bg-[var(--color-accent)]"
         aria-label="Converted image output"
         id="image_out"
         dataType="IMAGE"
