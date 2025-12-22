@@ -39,9 +39,11 @@ def rotate_image_node(
     (cX, cY) = (w // 2, h // 2)
 
     rotationAngle = data.angle * (
-        -1 if data.rotationDirection == "Clockwise" else 1 # By default, getRotationMatrix2D rotates Anticlockwise
+        -1
+        if data.rotationDirection == "Clockwise"
+        else 1  # By default, getRotationMatrix2D rotates Anticlockwise
     )
-    
+
     print("rotate by", rotationAngle)
 
     M = cv.getRotationMatrix2D((cX, cY), rotationAngle, 1.0)
