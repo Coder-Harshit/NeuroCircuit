@@ -18,6 +18,7 @@ from app.processors.node_map import (
 from app.classes import GraphPayload, InspectRequest
 import graphlib
 
+from app.routers import forge
 from app.package_manager import get_node_status, MANIFEST_MAP
 
 APP_DIR = Path(__file__).parent.parent
@@ -30,8 +31,10 @@ TEMP_UPLOAD_DIR.mkdir(exist_ok=True)
 
 app = FastAPI()
 
-origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+app.include_router(forge.router, prefix="/api/forge", tags=["Forge"])
 
+
+origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
