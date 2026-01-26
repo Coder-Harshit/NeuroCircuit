@@ -27,6 +27,7 @@ import TutorialModal from "./components/ui/TutorialModal";
 import { useAppHotkeys } from "./hooks/useAppHotkeys";
 import SettingsModal from "./components/ui/SettingsModal";
 import { HelpIcon, GearIcon } from "./components/ui/icons";
+import ForgeLayout from "./components/forge/ForgeLayout";
 
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
@@ -60,6 +61,7 @@ function App() {
   const [isPackageManagerOpen, setPackageManagerOpen] = useState(false);
   const [isTutorialOpen, setTutorialOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false); // Settings modal state
+  const [isForgeOpen, setForgeOpen] = useState(false);
   const [availableNodes, setAvailableNodes] = useState<NodeStatus[]>([]);
   const [displayData, setDisplayData] = useState<Record<string, string>>({});
   const [isPanning, setIsPanning] = useState(false);
@@ -551,12 +553,12 @@ function App() {
   };
 
   return (
-    <div className="h-screen w-screen bg-[var(--color-surface-1)] text-[var(--color-text-1)]">
+    <div className="h-screen w-screen bg-(--color-surface-1) text-(--color-text-1)">
       {/* === ERROR BANNER === */}
       {error && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-full max-w-2xl p-4 rounded-lg shadow-xl bg-[var(--color-danger-surface)] border border-[var(--color-danger-border)] text-[var(--color-danger-text)]">
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-full max-w-2xl p-4 rounded-lg shadow-xl bg-(--color-danger-surface) border border-(--color-danger-border) text-(--color-danger-text)">
           <div className="flex items-start">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               {/* Simple Error Icon */}
               <svg
                 className="h-5 w-5"
@@ -571,13 +573,13 @@ function App() {
                 />
               </svg>
             </div>
-            <div className="ml-3 flex-grow">
+            <div className="ml-3 grow">
               <h3 className="text-sm font-bold">Execution Failed</h3>
               <p className="mt-1 text-sm">{error.message}</p>
             </div>
             <button
               onClick={() => setError(null)}
-              className="ml-4 p-1 rounded-md hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-danger-surface)] focus-visible:ring-white"
+              className="ml-4 p-1 rounded-md hover:bg-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-(--color-danger-surface) focus-visible:ring-white"
             >
               <span className="sr-only">Dismiss</span>
               {/* Close Icon */}
@@ -595,7 +597,7 @@ function App() {
       )}
       {/* ==================== */}
 
-      <div className="flex flex-grow h-full w-full relative">
+      <div className="flex grow h-full w-full relative">
         <ReactFlow
           nodes={nodesWithData}
           edges={edges}
@@ -622,7 +624,7 @@ function App() {
           <Controls />
         </ReactFlow>
         {/* === UI CONTROLS PANEL === */}
-        <div className="absolute top-4 right-4 z-10 flex justify-between items-center gap-2 rounded-lg bg-[var(--color-surface-2)]/80 p-2 shadow-lg backdrop-blur-sm border border-[var(--color-border-1)]">
+        <div className="absolute top-4 right-4 z-10 flex justify-between items-center gap-2 rounded-lg bg-(--color-surface-2)/80 p-2 shadow-lg backdrop-blur-sm border border-(--color-border-1)">
           {/* ... (Left-aligned group) ... */}
           <div className="flex items-center gap-2">
             <button
@@ -643,9 +645,17 @@ function App() {
           </div>
 
           <div className="flex items-center gap-2">
+
+            <button
+              onClick={() => setForgeOpen(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 shadow-lg shadow-purple-900/20"
+            >
+              Forge
+            </button>
+
             <button
               onClick={() => setPackageManagerOpen(true)}
-              className="bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)] text-[var(--color-text-2)] font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+              className="bg-(--color-surface-3) hover:bg-(--color-border-1) text-(--color-text-2) font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)"
             >
               Manage Nodes
             </button>
@@ -660,14 +670,14 @@ function App() {
             {/* Settings Button */}
             <button
               onClick={() => setSettingsOpen(true)}
-              className="p-2 rounded-md text-[var(--color-text-2)] bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)]"
+              className="p-2 rounded-md text-(--color-text-2) bg-(--color-surface-3) hover:bg-(--color-border-1)"
               aria-label="Open settings"
             >
               <GearIcon />
             </button>
             <button
               onClick={() => setTutorialOpen(true)}
-              className="p-2 rounded-md text-[var(--color-text-2)] bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)]"
+              className="p-2 rounded-md text-(--color-text-2) bg-(--color-surface-3) hover:bg-(--color-border-1)"
               aria-label="Open tutorial"
             >
               <HelpIcon />
@@ -695,9 +705,15 @@ function App() {
         />
       )}
 
+
       {/* MODAL */}
       {isPackageManagerOpen && (
         <PackageManager onClose={() => setPackageManagerOpen(false)} />
+      )}
+
+      {/* {FORGE} */}
+      {isForgeOpen &&(
+        <ForgeLayout onExit={() => setForgeOpen(false)} />
       )}
 
       {isTutorialOpen && (
