@@ -15,14 +15,26 @@ export interface NodeParam {
   name: string;
   type: ParamType;
   default: string | number | boolean;
+  options?: string[];
 }
 
-export interface NodeManifest {
+export interface ForgeState {
   nodeType: string;
   label: string;
   category: string;
   description: string;
+  dependencies: string[];
   inputs: NodeInput[];
-  outputs: NodeOutput[];
+  // outputs: NodeOutput[];
   params: NodeParam[];
+}
+
+export interface SavedManifest {
+  nodeType: string;
+  label: string;
+  category: string;
+  description: string;
+  dependencies: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  defaultData: Record<string, any>;
 }
