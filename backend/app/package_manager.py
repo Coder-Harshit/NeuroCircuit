@@ -98,6 +98,7 @@ def get_node_status() -> list[dict[str, Any]]:
                     "missingDependencies": missing_deps,
                     "defaultData": manifest_data.get("defaultData", {}),
                     "category": manifest_data.get("category", "General"),
+                    "isCommunity": manifest_data.get("isCommunity", False),
                 }
             )
         except Exception as e:

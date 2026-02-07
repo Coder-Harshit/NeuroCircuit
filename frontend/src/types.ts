@@ -31,6 +31,7 @@ export type NodeStatus = {
   dependencies: string[];
   missingDependencies: string[];
   defaultData: AppNodeData;
+  isCommunity?: boolean;
 };
 
 export type PackageManagerProps = {

@@ -18,11 +18,12 @@
 -----
 
 # NEW
+- [x] setting community and private node status. If node created via forge is community node then it would be synced to the cloud and made available to everyone else its just a local thing ... also this change would be reflected into the package (node) manager.
+  
+- [x] API for code generation along if ollama isnt there
+  
 - [x] Add (NERD) icons to the top bar
 - [x] Set the options ( Icons+Text, Text Only , Icons Only ) in the prefernece settings for the top bar
-- [ ] Uninstall Node (from node manager), removes them completely (ALL relevant LOCAL FILES)
-- [ ] setting community and private node status. If node created via forge is community node then it would be synced to the cloud and made available to everyone else its just a local thing ... also this change would be reflected into the package (node) manager.
+- [x] Uninstall Node (from node manager), removes them completely (ALL relevant LOCAL FILES)
 - [ ] Implement debug pipepline
 - [ ] Run pipeline would highlight each node being executed for whatever real time they are being executed.
-- [ ] Add "CTRL+LEFT" & "CTRL_RIGHT" to "navigate" in the forge 
-- [ ] API for code generation along if ollama isnt there

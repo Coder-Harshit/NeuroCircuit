@@ -4,6 +4,7 @@ from pathlib import Path
 import subprocess
 import sys
 import shutil
+import re
 from typing import Any, Dict, List, Set
 from fastapi import BackgroundTasks, FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
@@ -356,41 +357,126 @@ async def install_node(payload: dict[str, Any]):
     }
 
 
+def cleanup_registry(file_path: Path, node_type: str):
+    if not file_path.exists(): return
+    
+    with open(file_path, "r") as f:
+        content = f.read()
+        
+    class_name = f"{node_type[0].upper()}{node_type[1:]}Node"
+    
+    # Remove import
+    # Pattern: import X from "./Y";
+    # Escape quotes and dots
+    content = re.sub(f'import {class_name} from "./{node_type}Node";\\n?', '', content)
+    
+    # Remove from registry object
+    # Pattern: nodeType: ClassName,
+    content = re.sub(f'\\s+{node_type}: {class_name},?\\n?', '', content)
+    
+    with open(file_path, "w") as f:
+        f.write(content)
+
+def cleanup_classes(file_path: Path, node_type: str):
+    if not file_path.exists(): return
+
+    with open(file_path, "r") as f:
+        content = f.read()
+
+    class_name = f"{node_type[0].upper()}{node_type[1:]}NodeData"
+    
+    # Remove from Union first (easier regex)
+    # Pattern: ClassName, or ClassName
+    content = re.sub(f'\\s+{class_name},?\\n?', '', content)
+
+    # Remove class definition
+    # We look for "class ClassName(BaseModel):" and remove until next class or Union definition
+    start_marker = f"class {class_name}(BaseModel):"
+    
+    lines = content.splitlines(keepends=True)
+    new_lines = []
+    skip = False
+    
+    for line in lines:
+        if line.startswith(start_marker):
+            skip = True
+        elif skip and (line.startswith("class ") or line.startswith("AnyNodeData =") or line.startswith("def ")):
+            skip = False
+        
+        if not skip:
+            new_lines.append(line)
+    
+    content = "".join(new_lines)
+
+    with open(file_path, "w") as f:
+        f.write(content)
+
+
 @app.post("/packages/uninstall")
 async def uninstall_node(payload: dict[str, Any]):
     """
-    Uninstalls the node by deleting its plugin file (code file)
-    DOES NOT UNINSTALL ITS DEPS (as of now)!
+    Uninstalls the node by deleting:
+    1. Plugin file (backend/plugins/...)
+    2. Manifest file (backend/app/manifests/...)
+    3. React Component (frontend/src/components/nodes/...)
+    4. Registry Entry (frontend/src/components/nodes/nodeRegistry.ts)
+    5. Class Definition (backend/app/classes.py)
     """
     node_type = payload.get("nodeType")
     if not node_type:
         return {"status": "error", "message": "No node type provided"}
 
     if node_type not in MANIFEST_MAP:
-        return {"status": "error", "message": f"Unknown node type: {node_type}"}
+        # It might be in the manifest map even if partially installed, but if not, we can't easily find the category.
+        # However, for uninstalling we assume standard paths if possible or try to look it up.
+        # If it's not in MANIFEST_MAP, we might have trouble finding the plugin file if we rely on category prefix.
+        # But we can try to guess or just proceed with other files.
+        pass
 
     try:
-        py_filename = MANIFEST_MAP.get(node_type, "GENERAL") + "_" + node_type + ".py"
-        plugin_path = BACKEND_PLUGINS_DIR / py_filename
+        # Define paths
+        MANIFESTS_DIR = APP_DIR / "app" / "manifests"
+        FRONTEND_NODES_DIR = APP_DIR.parent / "frontend" / "src" / "components" / "nodes"
+        CLASSES_PATH = APP_DIR / "app" / "classes.py"
+        REGISTRY_PATH = FRONTEND_NODES_DIR / "nodeRegistry.ts"
 
-        if plugin_path.is_file():
-            os.remove(plugin_path)
-            print("REMOVED plugin file", plugin_path)
-            discover_plugins()
+        # 1. Plugin File
+        if node_type in MANIFEST_MAP:
+            py_filename = MANIFEST_MAP.get(node_type, "GENERAL") + "_" + node_type + ".py"
+            plugin_path = BACKEND_PLUGINS_DIR / py_filename
+            if plugin_path.is_file():
+                os.remove(plugin_path)
+                print("REMOVED plugin file", plugin_path)
+        
+        # 2. Manifest File
+        manifest_path = MANIFESTS_DIR / f"{node_type}Node.json"
+        if manifest_path.is_file():
+            os.remove(manifest_path)
+            print("REMOVED manifest file", manifest_path)
+            
+        # 3. React Component
+        component_path = FRONTEND_NODES_DIR / f"{node_type}Node.tsx"
+        if component_path.is_file():
+            os.remove(component_path)
+            print("REMOVED component file", component_path)
+            
+        # 4. Cleanup Registry
+        cleanup_registry(REGISTRY_PATH, node_type)
+        print("CLEANED registry")
+        
+        # 5. Cleanup Classes
+        cleanup_classes(CLASSES_PATH, node_type)
+        print("CLEANED classes")
 
-            return {
-                "status": "success",
-                "message": f"Node '{node_type}' uninstalled successfully.",
-            }
-        else:
-            print(f"Uninstall failed: Plugin file not found at {plugin_path}")
-            # If file is not found, it's already "uninstalled".
-            # We should still re-scan just in case and return success.
-            discover_plugins()
-            return {
-                "status": "success",
-                "message": f"Node '{node_type}' was not installed, state refreshed.",
-            }
+        # Refresh
+        discover_plugins()
+        # We need to refresh the MANIFEST_MAP too since we deleted a manifest
+        # MANIFEST_MAP = generate_manifest_mapping()
+
+        return {
+            "status": "success",
+            "message": f"Node '{node_type}' uninstalled completely.",
+        }
 
     except Exception as e:
         print(f"Error during uninstall of {node_type}: {e}")

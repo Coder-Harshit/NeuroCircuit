@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 import httpx
 from pydantic import BaseModel
 import ast
+import os
 
 CAUTIOUS_IMPORTS = ('subprocess', 'os', 'shutil', 'sys')
 CAUTIOUS_FUNCS = ('eval', 'exec', 'globals', 'locals', '__import__')
@@ -175,7 +176,40 @@ async def generate_frontend(req: GenerateRequest):
                 return {"code": clean_code, "source": "AI"}
             
     except Exception as e:
-        print(f"Ollama connection failed: {e}. Using fallback template.")
+        print(f"Ollama connection failed: {e}. Checking for OpenAI API key...")
+        
+        # 2.5 Fallback to OpenAI API
+        api_key = os.getenv("OPENAI_API_KEY")
+        if api_key:
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        "https://api.openai.com/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": os.getenv("OPENAI_MODEL", "gpt-4o"),
+                            "messages": [
+                                {"role": "system", "content": "You are an expert React developer. Return ONLY the code. No markdown."},
+                                {"role": "user", "content": prompt}
+                            ],
+                            "temperature": 0.2
+                        },
+                        timeout=30.0
+                    )
+                    if response.status_code == 200:
+                        data = response.json()
+                        generated_text = data["choices"][0]["message"]["content"]
+                        clean_code = generated_text.replace("```tsx", "").replace("```typescript", "").replace("```", "")
+                        return {"code": clean_code, "source": "OpenAI"}
+                    else:
+                        print(f"OpenAI API error: {response.status_code} - {response.text}")
+            except Exception as e_openai:
+                 print(f"OpenAI connection failed: {e_openai}")
+
+        print("Using fallback template.")
 
     # 3. Fallback Template (If AI fails)
     # This ensures the user isn't stuck if they don't have Ollama running.

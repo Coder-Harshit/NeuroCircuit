@@ -197,9 +197,20 @@ export default function PackageManager({ onClose }: PackageManagerProps) {
         {/* Header */}
         <div className="flex justify-between items-start gap-4">
           <div>
-            <p className="font-bold text-lg text-[var(--color-text-1)]">
-              {node.label}
-            </p>
+            <div className="flex items-center gap-2">
+                <p className="font-bold text-lg text-[var(--color-text-1)]">
+                {node.label}
+                </p>
+                {node.isCommunity ? (
+                    <span className="text-[10px] uppercase font-bold bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/30">
+                        Community
+                    </span>
+                ) : (
+                    <span className="text-[10px] uppercase font-bold bg-gray-500/20 text-gray-400 px-2 py-0.5 rounded-full border border-gray-500/30">
+                        Private
+                    </span>
+                )}
+            </div>
             <p className="text-sm text-[var(--color-text-3)] font-mono">
               {node.nodeType}
             </p>

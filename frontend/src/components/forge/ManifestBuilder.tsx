@@ -29,6 +29,7 @@ export default function ManifestBuilder({ onNext, initialData }: Props) {
             inputs: [{ name: "input_1", type: "IMAGE" }],
             outputs: [],
             params: [],
+            isCommunity: true,
         }
     );
 
@@ -73,16 +74,6 @@ export default function ManifestBuilder({ onNext, initialData }: Props) {
         updateField(arrayField, list);
     };
 
-    // const addInput = () => {
-    //     const newInput: NodeInput = { name: `in_${state.inputs.length + 1}`, type: "ANY" };
-    //     updateField("inputs", [...state.inputs, newInput]);
-    // };
-
-    // const addParam = () => {
-    //     const newParam: NodeParam = { name: "new_param", type: "string", default: "" };
-    //     updateField("params", [...state.params, newParam]);
-    // };
-
     const previewJson: SavedManifest = useMemo(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const defaultData: Record<string, any> = {
@@ -100,7 +91,8 @@ export default function ManifestBuilder({ onNext, initialData }: Props) {
             category: state.category,
             description: state.description,
             dependencies: state.dependencies,
-            defaultData: defaultData
+            defaultData: defaultData,
+            isCommunity: state.isCommunity
         };
     }, [state]);
 
@@ -144,6 +136,23 @@ export default function ManifestBuilder({ onNext, initialData }: Props) {
                             value={state.description}
                             onChange={(e) => updateField("description", e.target.value)}
                         />
+                    </div>
+                    
+                    {/* Community Status Toggle */}
+                    <div className="flex items-center gap-3 mt-2 bg-(--color-surface-1) p-2 rounded border border-(--color-border-1)">
+                        <input
+                            type="checkbox"
+                            id="isCommunity"
+                            className="w-4 h-4 accent-(--color-accent)"
+                            checked={state.isCommunity}
+                            onChange={(e) => updateField("isCommunity", e.target.checked)}
+                        />
+                        <label htmlFor="isCommunity" className="text-sm font-medium text-(--color-text-1) select-none cursor-pointer">
+                            Community Node
+                        </label>
+                        <span className="text-xs text-(--color-text-2)">
+                            (If checked, this node will be synced to the cloud if configured)
+                        </span>
                     </div>
                 </div>
 

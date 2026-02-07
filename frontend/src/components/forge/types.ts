@@ -27,6 +27,7 @@ export interface ForgeState {
   inputs: NodeInput[];
   outputs: NodeOutput[];
   params: NodeParam[];
+  isCommunity: boolean; 
 }
 
 export interface SavedManifest {
