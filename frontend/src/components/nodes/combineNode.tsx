@@ -58,22 +58,22 @@ function CombineNode({ id, data }: CombineNodeProps) {
   return (
     <div
       className={`
-        w-[250px] rounded-lg shadow-md bg-[var(--color-surface-2)] text-[var(--color-text-1)]
+        w-[250px] rounded-lg shadow-md bg-(--color-surface-2) text-(--color-text-1)
         border ${borderClass}
     `}
     >
       {/* Header */}
-      <div className="p-2 border-b border-[var(--color-border-1)] bg-[var(--color-node-header)] rounded-t-lg flex items-center justify-between gap-2">
+      <div className="p-2 border-b border-(--color-border-1) bg-(--color-node-header) rounded-t-lg flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <CombineIcon />
-          <p className="font-bold text-[var(--color-node-header-text)]">
+          <p className="font-bold text-(--color-node-header-text)">
             {data.label}
           </p>
         </div>
         {data.description && (
           <div
             title={data.description}
-            className="w-5 h-5 flex items-center justify-center rounded-full bg-[var(--color-surface-3)] text-[var(--color-text-2)] cursor-help"
+            className="w-5 h-5 flex items-center justify-center rounded-full bg-(--color-surface-3) text-(--color-text-2) cursor-help"
           >
             <InfoIcon />
           </div>
@@ -85,7 +85,7 @@ function CombineNode({ id, data }: CombineNodeProps) {
         <div>
           <label
             htmlFor={`axis-${id}`}
-            className="block text-sm font-medium text-[var(--color-text-2)] mb-1"
+            className="block text-sm font-medium text-(--color-text-2) mb-1"
           >
             Concatenate along:
           </label>

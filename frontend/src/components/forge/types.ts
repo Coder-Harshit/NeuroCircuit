@@ -25,7 +25,7 @@ export interface ForgeState {
   description: string;
   dependencies: string[];
   inputs: NodeInput[];
-  // outputs: NodeOutput[];
+  outputs: NodeOutput[];
   params: NodeParam[];
 }
 

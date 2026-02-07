@@ -666,7 +666,18 @@ function App() {
             >
               Run Pipeline
             </button>
+
+            {/* Theme Button */}
             <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
+            
+            {/* Help Button */}
+            <button
+              onClick={() => setTutorialOpen(true)}
+              className="p-2 rounded-md text-(--color-text-2) bg-(--color-surface-3) hover:bg-(--color-border-1)"
+              aria-label="Open tutorial"
+            >
+              <HelpIcon />
+            </button>
             {/* Settings Button */}
             <button
               onClick={() => setSettingsOpen(true)}
@@ -674,13 +685,6 @@ function App() {
               aria-label="Open settings"
             >
               <GearIcon />
-            </button>
-            <button
-              onClick={() => setTutorialOpen(true)}
-              className="p-2 rounded-md text-(--color-text-2) bg-(--color-surface-3) hover:bg-(--color-border-1)"
-              aria-label="Open tutorial"
-            >
-              <HelpIcon />
             </button>
           </div>
         </div>
@@ -712,7 +716,7 @@ function App() {
       )}
 
       {/* {FORGE} */}
-      {isForgeOpen &&(
+      {isForgeOpen && (
         <ForgeLayout onExit={() => setForgeOpen(false)} />
       )}
 
@@ -732,7 +736,7 @@ function App() {
         type="file"
         ref={loadWorkflowInputRef}
         onChange={handleLoadWorkflow}
-        accept=".json, .neuro.json, application/json"
+        accept=".neuro.json"
         style={{ display: "none" }}
       ></input>
     </div>

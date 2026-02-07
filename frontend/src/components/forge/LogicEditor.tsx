@@ -74,6 +74,7 @@ export default function LogicEditor({ manifest, onNext, onBack }: Props) {
   const [code, setCode] = useState<string>("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isWarning, setIsWarning] = useState<boolean>(false);
 
   // Load template on first mount
   useEffect(() => {
@@ -82,23 +83,56 @@ export default function LogicEditor({ manifest, onNext, onBack }: Props) {
     }
   }, [manifest, code]);
 
+
   const handleAnalyse = async () => {
     setIsAnalyzing(true);
     setError(null);
+    setIsWarning(false);
 
-    // TODO: Connect to backend /api/forge/analyze endpoint
-    // For now, we simulate a check
-    setTimeout(() => {
-      if (code.includes("os.system") || code.includes("subprocess")) {
-        setError("Security Risk: 'os.system' or 'subprocess' calls are forbidden.");
-        setIsAnalyzing(false);
+    try {
+      const resp = await fetch("http://127.0.0.1:8000/api/forge/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+      });
+      const result = await resp.json();
+      if (!resp.ok) {
+        throw new Error(result.detail || "Analysis failed");
+      }
+
+      if (result.status === "error" || result.status === "fail") {
+        setError(`❌ ${result.message}`);
+      } else if (result.status === "warning") {
+        // Show warnings but allow proceeding if user insists (optional logic)
+        // For now, let's treat warnings as non-blocking but visible
+        const uniqueIssues = [...new Set(result.issues as string[])];
+        const maxIssuesToShow = 3;
+        const issueCount = uniqueIssues.length;
+        const visibleIssues = uniqueIssues.slice(0, maxIssuesToShow);
+        const issueText = visibleIssues.map((issue: string) => `• ${issue}`).join("\n");
+
+        setError(`⚠️ Found ${issueCount} issue(s):\n${issueText}${issueCount > maxIssuesToShow ? `\n... and ${issueCount - maxIssuesToShow} more` : ""}`);
+        setIsWarning(true);
       } else {
         // Success
-        setIsAnalyzing(false);
+        console.log(`Complexity Score: ${result.complexity}`);
         onNext(code);
       }
-    }, 800);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to connect to backend analysis service.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
+
+  const handleDismissWarning = () => {
+    setIsWarning(false);
+    onNext(code);
+  }
+
 
   return (
     <div className="flex flex-col h-full bg-[#1e1e1e] text-[#d4d4d4]">
@@ -150,8 +184,14 @@ export default function LogicEditor({ manifest, onNext, onBack }: Props) {
         {/* Error Toast */}
         {error && (
           <div className="absolute bottom-4 left-4 right-4 bg-red-900/90 text-red-100 p-3 rounded border border-red-700 shadow-xl flex justify-between items-center backdrop-blur-sm animate-in slide-in-from-bottom-2">
-            <span>🚫 {error}</span>
-            <button onClick={() => setError(null)} className="hover:text-white">Dismiss</button>
+            <pre className="m-0 p-0">
+              <span>🚫 {error}</span>
+            </pre>
+            {isWarning ? (
+              <button onClick={handleDismissWarning} className="hover:text-white">Proceed Anyway</button>
+            ) : (
+              <></>
+            )}
           </div>
         )}
       </div>

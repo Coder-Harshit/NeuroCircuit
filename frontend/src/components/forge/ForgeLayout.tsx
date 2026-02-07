@@ -2,11 +2,12 @@ import { useState } from "react";
 import ManifestBuilder from "./ManifestBuilder";
 import type { ForgeState } from "./types";
 import LogicEditor from "./LogicEditor";
+import ComponentReview from "./ComponentReview";
 
 export default function ForgeLayout({ onExit }: { onExit: () => void }) {
     const [step, setStep] = useState<number>(1);
     const [manifest, setManifest] = useState<ForgeState | null>(null);
-    const [, setPythonCode] = useState<string>("");
+    const [pythonCode, setPythonCode] = useState<string>("");
 
     // --- Handlers ---
     const handleManifestComplete = (data: ForgeState) => {
@@ -69,12 +70,22 @@ export default function ForgeLayout({ onExit }: { onExit: () => void }) {
                     />
                 )}
 
-                {step === 3 && (
+                {/* {step === 3 && (
                     <div className="flex flex-col items-center justify-center h-full text-(--color-text-2)">
                         <p className="mb-4">AI Component Generation & Review Coming Next...</p>
                         <button onClick={() => setStep(2)} className="text-blue-500 underline">Back to Editor</button>
                     </div>
+                )} */}
+
+                {step === 3 && manifest && (
+                    <ComponentReview
+                        manifest={manifest}
+                        pythonCode={pythonCode}
+                        onBack={() => setStep(2)}
+                        // onInstall={() => {}}
+                    />
                 )}
+
             </div>
         </div>
     );

@@ -16,7 +16,7 @@ export const triggerBrowserDownload = (filename: string) => {
 
 export const triggerJSONDownload = (data: object, filename: string) => {
   const jsonString = JSON.stringify(data, null, 2);
-  const blob = new Blob([jsonString], { type: "application/json" });
+  const blob = new Blob([jsonString], { type: "application/octet-stream" });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement("a");
