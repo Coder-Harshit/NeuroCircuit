@@ -12,3 +12,17 @@
 7. Optimize ContextMenu.tsx: Combine the two useMemo hooks (filteredActions and grpdActions) into a single useMemo that filters and groups in one pass to improve performance when dealing with large numbers of actions
 8. Convert handle color names in `frontend/src/themeConfig.ts` from uppercase color names (BLUE, CYAN, GREEN, PINK, GREY) to CSS variables (var(--handle-color-dataframe), etc.)
 9. Add handle color customization to the settings modal to allow users to configure handle colors per data type
+
+
+
+-----
+
+# NEW
+- [ ] Add (NERD) icons to the top bar
+- [ ] Set the options ( Icons+Text, Text Only , Icons Only ) in the prefernece settings for the top bar
+- [ ]  Uninstall Node (from node manager), removes them completely (ALL relevant LOCAL FILES)
+- [ ]  setting community and private node status. If node created via forge is community node then it would be synced to the cloud and made available to everyone else its just a local thing ... also this change would be reflected into the package (node) manager.
+- [ ]  Implement debug pipepline
+- [ ]  Run pipeline would highlight each node being executed for whatever real time they are being executed.
+- [ ]  Add "CTRL+LEFT" & "CTRL_RIGHT" to "navigate" in the forge 
+- [ ]  API for code generation along if ollama isnt there
