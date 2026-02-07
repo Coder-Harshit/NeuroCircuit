@@ -10,6 +10,8 @@ export type MenuAction = {
 export type SearchSettings = {
   fuzzy: boolean;
   delay: number;
+  textDisplay: boolean;
+  iconDisplay: boolean;
 };
 
 export type ContextMenuProps = {

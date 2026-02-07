@@ -26,14 +26,14 @@ import {
 import TutorialModal from "./components/ui/TutorialModal";
 import { useAppHotkeys } from "./hooks/useAppHotkeys";
 import SettingsModal from "./components/ui/SettingsModal";
-import { HelpIcon, GearIcon } from "./components/ui/icons";
+import { HelpIcon, GearIcon, RunIcon, SaveIcon, LoadIcon, ForgeIcon, ManagerIcon } from "./components/ui/icons";
 import ForgeLayout from "./components/forge/ForgeLayout";
 
 const localKey = "neurocircuit-flow";
 const themeKey = "neurocircuit-theme";
 const settingsKey = "neurocircuit-settings";
 
-const defaultSearchSettings: SearchSettings = { fuzzy: true, delay: 50 };
+const defaultSearchSettings: SearchSettings = { fuzzy: true, delay: 50, textDisplay: true, iconDisplay: true };
 
 const nodeTypes = nodeRegistry;
 
@@ -78,7 +78,9 @@ function App() {
         typeof parsed === "object" &&
         parsed !== null &&
         typeof parsed.fuzzy === "boolean" &&
-        typeof parsed.delay === "number"
+        typeof parsed.delay === "number" &&
+        typeof parsed.textDisplay === "boolean" &&
+        typeof parsed.iconDisplay === "boolean"
       ) {
         return parsed as SearchSettings;
       }
@@ -94,6 +96,15 @@ function App() {
       return defaultSearchSettings;
     }
   });
+
+  const [topbarText, setTopbarText] = useState<boolean>(searchSettings.textDisplay);
+  const [topbarIcon, setTopbarIcon] = useState<boolean>(searchSettings.iconDisplay);
+
+  // Update topbar states when settings change
+  useEffect(() => {
+    setTopbarText(searchSettings.textDisplay);
+    setTopbarIcon(searchSettings.iconDisplay);
+  }, [searchSettings.textDisplay, searchSettings.iconDisplay]);
 
   // Save settings when changed
   useEffect(() => {
@@ -629,18 +640,20 @@ function App() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => loadWorkflowInputRef.current?.click()}
-              className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
+              className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 flex items-center gap-2"
               title="Load workflow from a file"
             >
-              Load Workflow
+              {topbarIcon && <LoadIcon />}
+              {topbarText && <span>Load Workflow</span>}
             </button>
 
             <button
               onClick={handleSaveWorkflow}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 flex items-center gap-2"
               title="Save workflow to a file"
             >
-              Save Workflow
+              {topbarIcon && <SaveIcon />}
+              {topbarText && <span>Save Workflow</span>}
             </button>
           </div>
 
@@ -648,33 +661,37 @@ function App() {
 
             <button
               onClick={() => setForgeOpen(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 shadow-lg shadow-purple-900/20"
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 shadow-lg shadow-purple-900/20 flex items-center gap-2"
             >
-              Forge
+              {topbarIcon && <ForgeIcon />}
+              {topbarText && <span>Forge</span>}
             </button>
 
             <button
               onClick={() => setPackageManagerOpen(true)}
-              className="bg-(--color-surface-3) hover:bg-(--color-border-1) text-(--color-text-2) font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)"
+              className="bg-(--color-surface-3) hover:bg-(--color-border-1) text-(--color-text-2) font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent) flex items-center gap-2"
             >
-              Manage Nodes
+              {topbarIcon && <ManagerIcon />}
+              {topbarText && <span>Manage Nodes</span>}
             </button>
 
             <button
               onClick={handleRunClick}
-              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 flex items-center gap-2"
             >
-              Run Pipeline
+              {topbarIcon && <RunIcon />}
+              {topbarText && <span>Run Pipeline</span>}
             </button>
 
             {/* Theme Button */}
             <ThemeToggle colorMode={colorMode} setColorMode={setColorMode} />
-            
+
             {/* Help Button */}
             <button
               onClick={() => setTutorialOpen(true)}
               className="p-2 rounded-md text-(--color-text-2) bg-(--color-surface-3) hover:bg-(--color-border-1)"
               aria-label="Open tutorial"
+              title="Help"
             >
               <HelpIcon />
             </button>
@@ -683,6 +700,7 @@ function App() {
               onClick={() => setSettingsOpen(true)}
               className="p-2 rounded-md text-(--color-text-2) bg-(--color-surface-3) hover:bg-(--color-border-1)"
               aria-label="Open settings"
+              title="Settings"
             >
               <GearIcon />
             </button>
@@ -729,6 +747,7 @@ function App() {
           onClose={() => setSettingsOpen(false)}
           settings={searchSettings}
           setSettings={setSearchSettings}
+
         />
       )}
 

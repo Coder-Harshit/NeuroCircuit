@@ -27,7 +27,7 @@ export default function ManifestBuilder({ onNext, initialData }: Props) {
             description: "",
             dependencies: [],
             inputs: [{ name: "input_1", type: "IMAGE" }],
-            // outputs: [{ name: "output_1", type: "IMAGE" }],
+            outputs: [],
             params: [],
         }
     );

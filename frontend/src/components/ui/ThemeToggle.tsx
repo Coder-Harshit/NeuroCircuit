@@ -24,7 +24,7 @@ export function ThemeToggle({ colorMode, setColorMode }: ThemeToggleProps) {
             onClick={toggleTheme}
             aria-label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
             title={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`}
-            className="bg-[var(--color-surface-3)] hover:bg-[var(--color-border-1)] text-[var(--color-text-2)] font-bold p-2.5 rounded-md inline-flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)]"
+            className="bg-(--color-surface-3) hover:bg-(--color-border-1) text-(--color-text-2) font-bold p-2.5 rounded-md inline-flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-accent)"
         >
             <span className="sr-only">Toggle theme</span>
             {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
