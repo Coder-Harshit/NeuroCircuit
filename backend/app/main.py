@@ -20,7 +20,7 @@ from app.classes import GraphPayload, InspectRequest
 import graphlib
 
 from app.routers import forge
-from app.package_manager import get_node_status, MANIFEST_MAP
+from app.package_manager import get_node_status, MANIFEST_MAP, generate_manifest_mapping
 
 APP_DIR = Path(__file__).parent.parent
 BACKEND_PLUGINS_DIR = APP_DIR / "plugins"
@@ -356,6 +356,46 @@ async def install_node(payload: dict[str, Any]):
         # "frontend_needs_restart": True
     }
 
+def cleanup_node_types(file_path: Path, node_type: str):
+    if not file_path.exists(): return
+    
+    with open(file_path, "r") as f:
+        content = f.read()
+
+    capitalized_name = node_type[0].upper() + node_type[1:]
+    type_name = f"{capitalized_name}NodeData"
+    
+    # 1. Remove from AppNodeData Union
+    # Pattern: | TypeName
+    content = re.sub(f'\\s+\\| {type_name}', '', content)
+    
+    # 2. Remove Type Definitions
+    # We look for "// NAME NODE" comment and remove until the Props definition end
+    start_marker = f"// {capitalized_name.upper()} NODE"
+    start_idx = content.find(start_marker)
+    
+    if start_idx != -1:
+        lines = content.splitlines(keepends=True)
+        new_lines = []
+        skip = False
+        
+        for line in lines:
+            if line.strip().startswith(start_marker):
+                skip = True
+            
+            # Condition to stop skipping:
+            if skip and (line.startswith("// ") and not line.strip().startswith(start_marker)):
+                 skip = False
+            if skip and line.startswith("export type AppNodeData"):
+                 skip = False
+                 
+            if not skip:
+                new_lines.append(line)
+        
+        content = "".join(new_lines)
+
+    with open(file_path, "w") as f:
+        f.write(content)
 
 def cleanup_registry(file_path: Path, node_type: str):
     if not file_path.exists(): return
@@ -421,22 +461,20 @@ async def uninstall_node(payload: dict[str, Any]):
     3. React Component (frontend/src/components/nodes/...)
     4. Registry Entry (frontend/src/components/nodes/nodeRegistry.ts)
     5. Class Definition (backend/app/classes.py)
+    6. TypeScript Definitions (frontend/src/nodeTypes.ts)
     """
     node_type = payload.get("nodeType")
     if not node_type:
         return {"status": "error", "message": "No node type provided"}
 
     if node_type not in MANIFEST_MAP:
-        # It might be in the manifest map even if partially installed, but if not, we can't easily find the category.
-        # However, for uninstalling we assume standard paths if possible or try to look it up.
-        # If it's not in MANIFEST_MAP, we might have trouble finding the plugin file if we rely on category prefix.
-        # But we can try to guess or just proceed with other files.
         pass
 
     try:
         # Define paths
         MANIFESTS_DIR = APP_DIR / "app" / "manifests"
         FRONTEND_NODES_DIR = APP_DIR.parent / "frontend" / "src" / "components" / "nodes"
+        NODE_TYPES_PATH = APP_DIR.parent / "frontend" / "src" / "nodeTypes.ts"
         CLASSES_PATH = APP_DIR / "app" / "classes.py"
         REGISTRY_PATH = FRONTEND_NODES_DIR / "nodeRegistry.ts"
 
@@ -468,10 +506,16 @@ async def uninstall_node(payload: dict[str, Any]):
         cleanup_classes(CLASSES_PATH, node_type)
         print("CLEANED classes")
 
+        # 6. Cleanup Node Types
+        cleanup_node_types(NODE_TYPES_PATH, node_type)
+        print("CLEANED node types")
+
         # Refresh
         discover_plugins()
         # We need to refresh the MANIFEST_MAP too since we deleted a manifest
-        # MANIFEST_MAP = generate_manifest_mapping()
+        global MANIFEST_MAP
+        # from app.package_manager import generate_manifest_mapping
+        MANIFEST_MAP = generate_manifest_mapping()
 
         return {
             "status": "success",
@@ -484,30 +528,6 @@ async def uninstall_node(payload: dict[str, Any]):
             "status": "error",
             "message": f"An unexpected error occurred: {e}",
         }
-
-
-# def install_pkg(payload: Dict[str, Any]):
-# #     """
-# #     Receives a package name and attempts to install it using uv pip
-# #     """
-# #     pkg_name = payload.get("packageName")
-# #     if not pkg_name:
-# #         return {
-# #             "status": "error",
-# #             "message": "No package name provided",
-# #         }
-
-# #     # else Try to install that pkg
-# #     try:
-# #         subprocess.check_call([sys.executable, "-m", "pip", "install", pkg_name])
-# #         discover_plugins()
-# #         return {
-# #             "status": "success",
-# #             "message": f"Package {pkg_name} installed successfully",
-# #         }
-
-# #     except subprocess.CalledProcessError as err:
-# #         return {"status": "error", "message": f"Failed to install package: {err}"}
 
 
 @app.post("/inspect")

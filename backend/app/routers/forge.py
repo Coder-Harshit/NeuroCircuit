@@ -290,12 +290,72 @@ async def install_node(req: InstallRequest):
 
         # 5. Patch Backend Classes (NEW STEP)
         update_classes_file(CLASSES_PATH, class_name, req.manifest.get("params", []))
+        
+        # 6. Patch Frontend Types (NEW STEP)
+        NODE_TYPES_PATH = BASE_DIR / "frontend/src/nodeTypes.ts"
+        update_node_types_file(NODE_TYPES_PATH, node_type, req.manifest.get("params", []))
 
         return {"status": "success", "message": f"Node {node_type} installed successfully!"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+def update_node_types_file(file_path: Path, node_type: str, params: list[dict]):
+    """
+    Injects the TypeScript interface for the node into nodeTypes.ts
+    """
+    with open(file_path, "r") as f:
+        content = f.read()
+
+    capitalized_name = node_type[0].upper() + node_type[1:]
+    type_name = f"{capitalized_name}NodeData"
+    props_name = f"{capitalized_name}NodeProps"
+    
+    # Check if already exists
+    if f"export type {type_name} =" in content:
+        return
+
+    # Map Python/JSON types to TS types
+    ts_type_map = {
+        "string": "string",
+        "number": "number",
+        "boolean": "boolean",
+        "select": "string" 
+    }
+
+    # Generate the Interface
+    interface_code = f"\n// {capitalized_name.upper()} NODE\n"
+    interface_code += f"export type {type_name} = {{\n"
+    interface_code += f"  label: string;\n"
+    
+    for p in params:
+        ts_type = ts_type_map.get(p["type"], "any")
+        interface_code += f"  {p['name']}: {ts_type};\n"
+        
+    interface_code += "} & CommonNodeData;\n\n"
+    
+    interface_code += f"export type {props_name} = {{\n"
+    interface_code += f"  data: {type_name};\n"
+    interface_code += f"  id: string;\n"
+    interface_code += "};\n"
+
+    # Insert before "export type AppNodeData"
+    insertion_point = content.find("export type AppNodeData =")
+    if insertion_point != -1:
+        content = content[:insertion_point] + interface_code + content[insertion_point:]
+        
+    # Add to AppNodeData union
+    # Look for the last element in the union and append
+    app_node_data_start = content.find("export type AppNodeData =")
+    if app_node_data_start != -1:
+        union_end = content.find(";", app_node_data_start)
+        # We assume it ends with a semicolon
+        # We need to insert "| TypeName" before the semicolon
+        content = content[:union_end] + f"\n  | {type_name}" + content[union_end:]
+
+    with open(file_path, "w") as f:
+        f.write(content)
 
 def update_registry_file(file_path: Path, node_type: str):
     """
